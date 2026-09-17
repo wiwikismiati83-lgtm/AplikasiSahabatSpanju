@@ -435,11 +435,11 @@ export default function App() {
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-black tracking-wider text-slate-800 uppercase flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    SMPN 7 PASURUAN
+                    APLIKASI SAHABAT SPANJU
                   </span>
                   <span className="text-slate-300 hidden sm:inline">&bull;</span>
                   <span className="text-xs text-emerald-700 font-bold hidden sm:inline">
-                    SAHABAT SPANJU
+                    (Sekolah Aman, Harmonis, Anti Bullying dan Tindak Kekerasan SMP Negeri 7 Pasuruan)
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 hidden sm:block">

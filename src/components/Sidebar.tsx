@@ -157,11 +157,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-extrabold tracking-wider uppercase bg-emerald-100 text-emerald-800 border border-emerald-300">
-                SPANJU PASS TEMENAN
+                APLIKASI SAHABAT SPANJU
               </span>
             </div>
-            <h1 className="text-base font-extrabold text-slate-800 tracking-tight truncate mt-0.5">
-              SMPN 7 PASURUAN
+            <h1 className="text-xs font-extrabold text-slate-800 tracking-tight mt-0.5 leading-snug">
+              Sekolah Aman, Harmonis, Anti Bullying dan Tindak Kekerasan SMP Negeri 7 Pasuruan
             </h1>
             <p className="text-xs text-slate-500 truncate flex items-center gap-1 font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -275,9 +275,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Bottom Action Footer: Backup & Upload / Restore */}
       <div id="sidebar-footer" className="p-3 border-t border-slate-200/90 bg-slate-50/80 space-y-2">
-        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1 flex items-center gap-1.5">
-          <FolderSync className="w-3 h-3 text-emerald-600" />
-          Backup & Sinkronisasi
+        <div className="flex items-center justify-between">
+          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1 flex items-center gap-1.5">
+            <FolderSync className="w-3 h-3 text-emerald-600" />
+            Backup & Sinkronisasi
+          </div>
+          {onLogout && (
+            <button
+              id="btn-sidebar-footer-logout"
+              onClick={onLogout}
+              className="px-2 py-0.5 text-[10px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded flex items-center gap-1 transition"
+              title="Keluar / Ganti Akun"
+            >
+              <LogOut className="w-2.5 h-2.5" />
+              Keluar
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-2">
           <button

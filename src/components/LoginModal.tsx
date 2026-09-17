@@ -129,16 +129,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           </button>
         )}
 
-        {/* Header Branding */}
-        <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 p-6 text-white text-center relative overflow-hidden">
-          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-          <div className="absolute -left-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-
-          <div className="inline-flex p-1.5 bg-white/20 backdrop-blur-md rounded-2xl border border-white/30 shadow-inner mb-3">
+        {/* Header Branding - Clean Elegant Light Theme */}
+        <div className="bg-white px-6 pt-8 pb-6 text-slate-900 text-center relative border-b border-slate-100">
+          <div className="inline-flex p-1.5 bg-white rounded-full shadow-md border border-emerald-100 mb-3 ring-4 ring-emerald-50">
             <img
               src="https://i.ibb.co.com/pBbfS44d/LOGO-PASS-TEMENAN.jpg"
               alt="Logo Pass Temenan"
-              className="w-16 h-16 rounded-xl object-cover shadow-sm bg-white"
+              className="w-16 h-16 rounded-full object-cover bg-white"
               referrerPolicy="no-referrer"
               onError={(e) => {
                 (e.target as HTMLImageElement).src =
@@ -147,14 +144,20 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             />
           </div>
 
-          <span className="block text-[11px] font-bold tracking-widest uppercase text-emerald-100 mb-0.5">
-            SISTEM E-GOVERNANCE SEKOLAH RAMAH ANAK
-          </span>
-          <h2 className="text-xl font-extrabold tracking-tight text-white">
-            SMPN 7 PASURUAN
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold tracking-wide uppercase mb-2 shadow-xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span>APLIKASI SAHABAT SPANJU</span>
+          </div>
+
+          <p className="text-[11px] text-slate-600 font-medium leading-relaxed max-w-sm mx-auto mb-4">
+            (Sekolah Aman, Harmonis, Anti Bullying dan Tindak Kekerasan SMP Negeri 7 Pasuruan)
+          </p>
+
+          <h2 className="text-xl font-extrabold tracking-tight text-slate-900 uppercase">
+            AKSES MASUK APLIKASI
           </h2>
-          <p className="text-xs text-emerald-100/90 mt-1 max-w-sm mx-auto">
-            Portal Masuk Sahabat SPANJU &ndash; Aman, Inklusif & Berkeadilan
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            UPT SMP Negeri 7 Pasuruan
           </p>
         </div>
 
