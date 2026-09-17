@@ -14,6 +14,7 @@ import {
   Lightbulb,
   FileSignature,
   FileText,
+  Layers,
 } from 'lucide-react';
 import { SabtuBeliTehCeriRecord } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
@@ -26,6 +27,7 @@ interface Props {
   onDeleteRecord: (id: string) => void;
   onUpdateRecord?: (record: SabtuBeliTehCeriRecord) => void;
   canDelete?: boolean;
+  onOpenMenu?: () => void;
 }
 
 export const SabtuBeliTehCeriView: React.FC<Props> = ({
@@ -34,6 +36,7 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
   onDeleteRecord,
   onUpdateRecord,
   canDelete = true,
+  onOpenMenu,
 }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -111,6 +114,15 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {onOpenMenu && (
+            <button
+              onClick={onOpenMenu}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
+            >
+              <Layers className="w-3.5 h-3.5 text-rose-600" />
+              Pilihan Menu Aplikasi
+            </button>
+          )}
           <button
             onClick={() => {
               setSelectedForPrint(null);

@@ -546,6 +546,7 @@ export default function App() {
               <PiketHarianView
                 records={piketRecords}
                 canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={(rec) => {
                   setPiketRecords([rec, ...piketRecords]);
                   showToast('Laporan piket harian tersimpan!');
@@ -566,6 +567,7 @@ export default function App() {
               <SabtuBeliTehCeriView
                 records={ceriRecords}
                 canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={(rec) => {
                   setCeriRecords([rec, ...ceriRecords]);
                   showToast('Sesi Sabtu Beli Teh Ceri tersimpan!');
@@ -586,6 +588,7 @@ export default function App() {
               <KebunLuasBerseriView
                 records={kebunRecords}
                 canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={(rec) => {
                   setKebunRecords([rec, ...kebunRecords]);
                   showToast('Rapat Kebun Luas Berseri tersimpan!');
@@ -606,6 +609,7 @@ export default function App() {
               <SenandungSerasiView
                 records={serasiRecords}
                 canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={(rec) => {
                   setSerasiRecords([rec, ...serasiRecords]);
                   showToast('Pesan Senandung Serasi berhasil ditambahkan!');
@@ -654,6 +658,7 @@ export default function App() {
               <SPDamaiView
                 records={spDamaiRecords}
                 canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={(rec) => {
                   setSpDamaiRecords([rec, ...spDamaiRecords]);
                   showToast('Surat kesepakatan damai berhasil diterbitkan!');
@@ -674,6 +679,7 @@ export default function App() {
               <ArsipKegiatanView
                 records={arsipKegiatanRecords}
                 canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={(rec) => {
                   setArsipKegiatanRecords([rec, ...arsipKegiatanRecords]);
                   showToast('Arsip kegiatan berhasil didokumentasikan!');

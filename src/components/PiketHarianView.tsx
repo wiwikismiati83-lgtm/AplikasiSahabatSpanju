@@ -15,6 +15,7 @@ import {
   X,
   FileSignature,
   Download,
+  Layers,
 } from 'lucide-react';
 import { PiketHarianRecord } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
@@ -27,6 +28,7 @@ interface PiketHarianViewProps {
   onDeleteRecord: (id: string) => void;
   onUpdateRecord?: (record: PiketHarianRecord) => void;
   canDelete?: boolean;
+  onOpenMenu?: () => void;
 }
 
 export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
@@ -35,6 +37,7 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
   onDeleteRecord,
   onUpdateRecord,
   canDelete = true,
+  onOpenMenu,
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -124,6 +127,15 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {onOpenMenu && (
+            <button
+              onClick={onOpenMenu}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
+            >
+              <Layers className="w-3.5 h-3.5 text-rose-600" />
+              Pilihan Menu Aplikasi
+            </button>
+          )}
           <button
             onClick={() => {
               setSelectedRecordForPrint(null);
