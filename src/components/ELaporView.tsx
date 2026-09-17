@@ -1,0 +1,900 @@
+import React, { useState } from 'react';
+import {
+  ShieldAlert,
+  Plus,
+  Clock,
+  User,
+  School,
+  AlertTriangle,
+  CheckCircle2,
+  Trash2,
+  Printer,
+  X,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  FileCheck,
+  Eye,
+  FileSignature,
+  FileText,
+  Lock,
+  ShieldCheck,
+} from 'lucide-react';
+import { ELaporRecord, UserRole } from '../types';
+import { TouchSignaturePad } from './TouchSignaturePad';
+import { TouchSignatureModal } from './TouchSignatureModal';
+import { OfficialReportModal } from './OfficialReportModal';
+
+interface Props {
+  records: ELaporRecord[];
+  onAddRecord: (record: ELaporRecord) => void;
+  onDeleteRecord: (id: string) => void;
+  onUpdateStatus: (id: string, status: ELaporRecord['status']) => void;
+  onUpdateRecord?: (record: ELaporRecord) => void;
+  userRole?: UserRole;
+  canDelete?: boolean;
+}
+
+export const ELaporView: React.FC<Props> = ({
+  records,
+  onAddRecord,
+  onDeleteRecord,
+  onUpdateStatus,
+  onUpdateRecord,
+  userRole = 'admin',
+  canDelete = true,
+}) => {
+  const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('semua');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [recentlySubmittedCode, setRecentlySubmittedCode] = useState<string | null>(null);
+
+  const isRestrictedFromViewingReports = userRole === 'siswa' || userRole === 'orang_tua';
+
+  // Printing & Signature
+  const [showPrintModal, setShowPrintModal] = useState(false);
+  const [selectedForPrint, setSelectedForPrint] = useState<ELaporRecord | null>(null);
+  const [signingRecord, setSigningRecord] = useState<ELaporRecord | null>(null);
+
+  // Form states
+  const [hariTanggal, setHariTanggal] = useState('');
+  const [waktuKejadian, setWaktuKejadian] = useState('10:00 WIB (Jam Istirahat)');
+  const [namaSiswa, setNamaSiswa] = useState('');
+  const [kelas, setKelas] = useState('');
+  const [kronologiKejadian, setKronologiKejadian] = useState('');
+  const [kegiatanPenyadaran, setKegiatanPenyadaran] = useState('');
+  const [kegiatanPencegahan, setKegiatanPencegahan] = useState('');
+  const [kegiatanPenangananRespon, setKegiatanPenangananRespon] = useState('');
+  const [kegiatanPelaporan, setKegiatanPelaporan] = useState('');
+  const [tindakLanjut, setTindakLanjut] = useState('');
+  const [keterangan, setKeterangan] = useState('');
+  const [status, setStatus] = useState<ELaporRecord['status']>('Mediasi');
+  const [kategoriKasus, setKategoriKasus] = useState<ELaporRecord['kategoriKasus']>('Verbal');
+  const [formSignature, setFormSignature] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!hariTanggal.trim() || !namaSiswa.trim() || !kronologiKejadian.trim()) return;
+
+    const count = records.length + 1;
+    const kodeLaporan = `SPJ-${new Date().getFullYear()}-${String(count).padStart(3, '0')}`;
+
+    const newRecord: ELaporRecord = {
+      id: `lapor-${Date.now()}`,
+      kodeLaporan,
+      hariTanggal: hariTanggal.trim(),
+      waktuKejadian: waktuKejadian.trim(),
+      namaSiswa: namaSiswa.trim(),
+      kelas: kelas.trim() || 'Siswa SPANJU',
+      kronologiKejadian: kronologiKejadian.trim(),
+      kegiatanPenyadaran: kegiatanPenyadaran.trim() || 'Pemberian pemahaman dampak psikologis dan empati kawan.',
+      kegiatanPencegahan: kegiatanPencegahan.trim() || 'Penguatan norma kelas ramah anak & komitmen anti-bullying.',
+      kegiatanPenangananRespon: kegiatanPenangananRespon.trim() || 'Mediasi tatap muka damai didampingi konselor BK.',
+      kegiatanPelaporan: kegiatanPelaporan.trim() || 'Pencatatan berita acara resmi di sistem register sekolah.',
+      tindakLanjut: tindakLanjut.trim() || 'Pemantauan berkala oleh Duta Sahabat SPANJU.',
+      keterangan: keterangan.trim(),
+      status,
+      kategoriKasus,
+      tandaTanganUrl: formSignature || undefined,
+      namaPenandatangan: 'Petugas Mediasi & Penanganan BK',
+      jabatanPenandatangan: 'Konselor Tim Pencegahan & Penanganan Kekerasan (TPPK)',
+      createdAt: new Date().toISOString(),
+    };
+
+    onAddRecord(newRecord);
+    setRecentlySubmittedCode(newRecord.kodeLaporan);
+    setShowModal(false);
+    // Reset
+    setHariTanggal('');
+    setNamaSiswa('');
+    setKelas('');
+    setKronologiKejadian('');
+    setKegiatanPenyadaran('');
+    setKegiatanPencegahan('');
+    setKegiatanPenangananRespon('');
+    setKegiatanPelaporan('');
+    setTindakLanjut('');
+    setKeterangan('');
+    setFormSignature('');
+  };
+
+  const handleCardSignatureSave = (signatureUrl: string, name?: string, title?: string) => {
+    if (!signingRecord || !onUpdateRecord) return;
+    const updated: ELaporRecord = {
+      ...signingRecord,
+      tandaTanganUrl: signatureUrl,
+      namaPenandatangan: name || signingRecord.namaPenandatangan || 'Petugas Penanganan Kasus',
+      jabatanPenandatangan: title || signingRecord.jabatanPenandatangan || 'Konselor TPPK SPANJU',
+    };
+    onUpdateRecord(updated);
+    setSigningRecord(null);
+  };
+
+  const filtered = records.filter((r) => {
+    const matchesSearch =
+      r.namaSiswa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.kelas.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.kodeLaporan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.kronologiKejadian.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === 'semua' || r.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  const getStatusBadge = (st: ELaporRecord['status']) => {
+    switch (st) {
+      case 'Selesai':
+        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+      case 'Terpantau Aman':
+        return 'bg-sky-100 text-sky-800 border-sky-300';
+      case 'Mediasi':
+        return 'bg-amber-100 text-amber-800 border-amber-300';
+      default:
+        return 'bg-rose-100 text-rose-800 border-rose-300';
+    }
+  };
+
+  return (
+    <div id="view-e-lapor" className="space-y-6 pb-12">
+      {/* Top Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-rose-100/80 via-red-50/70 to-white border border-rose-200/90 shadow-xs">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-900 border border-rose-300 mb-2 shadow-2xs">
+            <ShieldAlert className="w-4 h-4 text-rose-700" />
+            SISTEM ADUAN & MEKANISME PENANGANAN SPANJU
+          </div>
+          <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+            E-Lapor Perundungan dan Kekerasan SPANJU
+          </h1>
+          <p className="text-xs text-slate-600 mt-1">
+            Kanal resmi penanganan kekerasan dan perundungan: Penyadaran, Pencegahan, Penanganan Respon, Pelaporan & Tindak Lanjut
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {!isRestrictedFromViewingReports && (
+            <button
+              onClick={() => {
+                setSelectedForPrint(null);
+                setShowPrintModal(true);
+              }}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition active:scale-95 shadow-xs"
+            >
+              <Printer className="w-3.5 h-3.5 text-rose-600" />
+              Cetak Berita Acara Resmi
+            </button>
+          )}
+          <button
+            id="btn-tambah-lapor"
+            onClick={() => setShowModal(true)}
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-md shadow-rose-500/20 hover:from-rose-500 hover:to-red-500 transition active:scale-95 flex items-center gap-1.5 btn-3d"
+          >
+            <Plus className="w-4 h-4" />
+            Buat Laporan Baru
+          </button>
+        </div>
+      </div>
+
+      {/* Confirmation of submission */}
+      {recentlySubmittedCode && (
+        <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex items-center justify-between gap-3 text-xs text-emerald-900 shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <div>
+              <span className="font-bold">Laporan Aduan Berhasil Terkirim!</span> Kode Aduan Anda:{' '}
+              <strong className="font-mono bg-white px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">
+                {recentlySubmittedCode}
+              </strong>
+              . Tim TPPK SMPN 7 Pasuruan akan segera menindaklanjuti secara damai dan terjaga kerahasiaannya.
+            </div>
+          </div>
+          <button
+            onClick={() => setRecentlySubmittedCode(null)}
+            className="text-emerald-700 hover:text-emerald-900 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-emerald-100/60 transition shrink-0"
+          >
+            Tutup
+          </button>
+        </div>
+      )}
+
+      {/* Add Report Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="w-full max-w-3xl bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden card-3d max-h-[92vh] flex flex-col">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-rose-50/70 to-white shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-rose-100 text-rose-800 border border-rose-200">
+                  <ShieldAlert className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-800">Form E-Lapor & Mekanisme Penanganan</h2>
+                  <p className="text-xs text-slate-500">Pencatatan insiden perundungan & tahapan penanganan terpadu</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 text-xs">
+              {/* Row 1 */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    HARI / TANGGAL <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={hariTanggal}
+                    onChange={(e) => setHariTanggal(e.target.value)}
+                    placeholder="Contoh: Senin, 14 September 2026"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    WAKTU KEJADIAN
+                  </label>
+                  <input
+                    type="text"
+                    value={waktuKejadian}
+                    onChange={(e) => setWaktuKejadian(e.target.value)}
+                    placeholder="10:15 WIB (Istirahat)"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    KATEGORI KASUS
+                  </label>
+                  <select
+                    value={kategoriKasus}
+                    onChange={(e) => setKategoriKasus(e.target.value as ELaporRecord['kategoriKasus'])}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                  >
+                    <option value="Verbal">Verbal (Ejekan/Hinaan)</option>
+                    <option value="Fisik">Fisik (Gesekan/Dorongan)</option>
+                    <option value="Siber">Siber (Medsos/Grup Chat)</option>
+                    <option value="Sosial/Relasional">Sosial / Pengucilan</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 2 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    NAMA SISWA (Bisa Inisial/Lengkap) <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={namaSiswa}
+                    onChange={(e) => setNamaSiswa(e.target.value)}
+                    placeholder="Contoh: Siswa AN (Korban) & BD (Pelaku)"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    KELAS
+                  </label>
+                  <input
+                    type="text"
+                    value={kelas}
+                    onChange={(e) => setKelas(e.target.value)}
+                    placeholder="Contoh: 7B / 8E"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Kronologi */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  KRONOLOGI KEJADIAN / URAIAN PERISTIWA <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={kronologiKejadian}
+                  onChange={(e) => setKronologiKejadian(e.target.value)}
+                  placeholder="Jelaskan secara objektif apa yang terjadi, tempat kejadian, saksi yang melihat, dan dampak yang dialami siswa..."
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                />
+              </div>
+
+              {/* 4 Mekanisme Section */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                <span className="font-bold text-slate-800 block text-xs">
+                  4 PILAR MEKANISME KEGIATAN PENANGANAN SAHABAT SPANJU:
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-sky-800 mb-1">
+                      1. KEGIATAN PENYADARAN
+                    </label>
+                    <input
+                      type="text"
+                      value={kegiatanPenyadaran}
+                      onChange={(e) => setKegiatanPenyadaran(e.target.value)}
+                      placeholder="Edukasi bahaya verbal / bimbingan empati..."
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 text-xs focus:border-rose-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-amber-800 mb-1">
+                      2. KEGIATAN PENCEGAHAN
+                    </label>
+                    <input
+                      type="text"
+                      value={kegiatanPencegahan}
+                      onChange={(e) => setKegiatanPencegahan(e.target.value)}
+                      placeholder="Penguatan ikrar damai kelas / pemantauan titik rawan..."
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 text-xs focus:border-rose-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-emerald-800 mb-1">
+                      3. KEGIATAN PENANGANAN RESPON
+                    </label>
+                    <input
+                      type="text"
+                      value={kegiatanPenangananRespon}
+                      onChange={(e) => setKegiatanPenangananRespon(e.target.value)}
+                      placeholder="Mediasi kedua belah pihak dengan konselor BK..."
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 text-xs focus:border-rose-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-indigo-800 mb-1">
+                      4. KEGIATAN PELAPORAN
+                    </label>
+                    <input
+                      type="text"
+                      value={kegiatanPelaporan}
+                      onChange={(e) => setKegiatanPelaporan(e.target.value)}
+                      placeholder="Pencatatan register resmi BK dan laporan berkala tim SPANJU..."
+                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 text-xs focus:border-rose-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* TINDAK LANJUT & STATUS */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    TINDAK LANJUT
+                  </label>
+                  <input
+                    type="text"
+                    value={tindakLanjut}
+                    onChange={(e) => setTindakLanjut(e.target.value)}
+                    placeholder="Contoh: Pemantauan konselor sebaya selama 2 pekan"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    STATUS PENANGANAN
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as ELaporRecord['status'])}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                  >
+                    <option value="Investigasi">Investigasi</option>
+                    <option value="Mediasi">Mediasi</option>
+                    <option value="Selesai">Selesai</option>
+                    <option value="Terpantau Aman">Terpantau Aman</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  KETERANGAN
+                </label>
+                <textarea
+                  rows={2}
+                  value={keterangan}
+                  onChange={(e) => setKeterangan(e.target.value)}
+                  placeholder="Catatan tambahan hasil kesepakatan damai..."
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                />
+              </div>
+
+              {/* Touchscreen Signature Pad */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  TANDA TANGAN PETUGAS PENANGANAN KASUS (LAYAR SENTUH / LAPTOP)
+                </label>
+                <TouchSignaturePad
+                  initialSignature={formSignature}
+                  signerName="Konselor Penanganan Kasus"
+                  signerTitle="Tim TPPK UPTD SMPN 7 Pasuruan"
+                  compact={true}
+                  onSave={(dataUrl) => {
+                    setFormSignature(dataUrl);
+                    alert('Tanda tangan berhasil direkam!');
+                  }}
+                  title="Tanda Tangan Berita Acara Kasus"
+                  promptText="Goreskan jari di layar sentuh HP atau gunakan mouse laptop:"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md btn-3d"
+                >
+                  Simpan Laporan E-Lapor
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Signature Modal for Existing Card */}
+      {signingRecord && (
+        <TouchSignatureModal
+          isOpen={true}
+          onClose={() => setSigningRecord(null)}
+          title={`Tanda Tangan Berita Acara - ${signingRecord.kodeLaporan}`}
+          subtitle="Goreskan jari di HP atau gerakkan mouse laptop"
+          initialSignature={signingRecord.tandaTanganUrl}
+          signerName={signingRecord.namaPenandatangan || 'Konselor Kasus'}
+          signerTitle={signingRecord.jabatanPenandatangan || 'Tim TPPK SPANJU'}
+          onSave={handleCardSignatureSave}
+        />
+      )}
+
+      {/* Official Report Modal with Kop Surat */}
+      {showPrintModal && (
+        <OfficialReportModal
+          isOpen={true}
+          onClose={() => setShowPrintModal(false)}
+          title={
+            selectedForPrint
+              ? `BERITA ACARA RESMI PENANGANAN ADUAN - ${selectedForPrint.kodeLaporan}`
+              : 'REKAPITULASI RESMI PENANGANAN ADUAN & PERUNDUNGAN SISWA'
+          }
+          nomorSurat={
+            selectedForPrint
+              ? `421.3 / LAPOR-${selectedForPrint.kodeLaporan} / 101.4.7 / 2026`
+              : `421.3 / LAPOR-REKAP / 101.4.7 / 2026`
+          }
+          firstSignerRole="Petugas Konselor / TPPK SPANJU"
+          firstSignerName={selectedForPrint?.namaPenandatangan || 'Tim Konseling & Penanganan Ramah'}
+          firstSignerSignature={selectedForPrint?.tandaTanganUrl || records[0]?.tandaTanganUrl}
+          onFirstSignerUpdate={(sig) => {
+            if (selectedForPrint && onUpdateRecord) {
+              onUpdateRecord({ ...selectedForPrint, tandaTanganUrl: sig });
+            }
+          }}
+          secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
+          secondSignerName="Drs. Akhmad Fauzi, M.Pd."
+        >
+          {selectedForPrint ? (
+            <div className="space-y-4">
+              <div className="p-3 bg-rose-50/60 border border-rose-200 rounded-lg flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-bold text-rose-900 block">KODE LAPORAN: {selectedForPrint.kodeLaporan}</span>
+                  <span className="text-slate-600">Kategori Kasus: <strong>{selectedForPrint.kategoriKasus}</strong></span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white border border-rose-300 text-rose-800">
+                    Status: {selectedForPrint.status}
+                  </span>
+                </div>
+              </div>
+
+              <table className="w-full text-xs border border-slate-300">
+                <tbody>
+                  <tr className="border-b border-slate-200">
+                    <td className="p-2.5 font-bold bg-rose-50/40 w-1/3">Hari / Tanggal Kejadian</td>
+                    <td className="p-2.5 text-slate-800">{selectedForPrint.hariTanggal} ({selectedForPrint.waktuKejadian})</td>
+                  </tr>
+                  <tr className="border-b border-slate-200">
+                    <td className="p-2.5 font-bold bg-rose-50/40">Pihak Terkait (Siswa & Kelas)</td>
+                    <td className="p-2.5 font-bold text-slate-900">{selectedForPrint.namaSiswa} &bull; Kelas {selectedForPrint.kelas}</td>
+                  </tr>
+                  <tr className="border-b border-slate-200">
+                    <td className="p-2.5 font-bold bg-rose-50/40 align-top">Kronologi Kejadian</td>
+                    <td className="p-2.5 text-slate-800 leading-relaxed">{selectedForPrint.kronologiKejadian}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  Empat Pilar Mekanisme Penanganan yang Diterapkan:
+                </h4>
+                <table className="w-full text-xs border border-slate-300 border-collapse">
+                  <tbody>
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2 font-bold bg-sky-50 text-sky-900 w-1/3">1. Kegiatan Penyadaran</td>
+                      <td className="p-2 text-slate-800">{selectedForPrint.kegiatanPenyadaran || '-'}</td>
+                    </tr>
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2 font-bold bg-amber-50 text-amber-900">2. Kegiatan Pencegahan</td>
+                      <td className="p-2 text-slate-800">{selectedForPrint.kegiatanPencegahan || '-'}</td>
+                    </tr>
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2 font-bold bg-emerald-50 text-emerald-900">3. Kegiatan Penanganan Respon</td>
+                      <td className="p-2 text-slate-800">{selectedForPrint.kegiatanPenangananRespon || '-'}</td>
+                    </tr>
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2 font-bold bg-indigo-50 text-indigo-900">4. Kegiatan Pelaporan</td>
+                      <td className="p-2 text-slate-800">{selectedForPrint.kegiatanPelaporan || '-'}</td>
+                    </tr>
+                    <tr>
+                      <td className="p-2 font-bold bg-slate-100 text-slate-800">Tindak Lanjut & Kesepakatan</td>
+                      <td className="p-2 text-slate-800 font-medium">{selectedForPrint.tindakLanjut || '-'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-xs text-slate-700">
+                Rekapitulasi berkas aduan dan penanganan perundungan / kekerasan siswa di UPTD SMP Negeri 7 Pasuruan:
+              </p>
+              <table className="w-full text-[11px] border border-slate-300 border-collapse">
+                <thead>
+                  <tr className="bg-rose-100/70 border-b border-slate-300 text-slate-900 font-bold">
+                    <th className="p-2 border-r border-slate-300 text-center w-8">No</th>
+                    <th className="p-2 border-r border-slate-300 text-left">Kode & Tanggal</th>
+                    <th className="p-2 border-r border-slate-300 text-left">Nama Siswa / Kelas</th>
+                    <th className="p-2 border-r border-slate-300 text-left">Kronologi Singkat</th>
+                    <th className="p-2 border-r border-slate-300 text-center">Status</th>
+                    <th className="p-2 text-center w-20">TTD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map((item, idx) => (
+                    <tr key={item.id} className="border-b border-slate-200 hover:bg-slate-50">
+                      <td className="p-2 border-r border-slate-200 text-center font-bold">{idx + 1}</td>
+                      <td className="p-2 border-r border-slate-200 font-mono text-[10px]">
+                        <span className="font-bold block text-rose-800">{item.kodeLaporan}</span>
+                        <span>{item.hariTanggal}</span>
+                      </td>
+                      <td className="p-2 border-r border-slate-200">
+                        <span className="font-semibold block">{item.namaSiswa}</span>
+                        <span className="text-[10px] text-slate-500">Kelas {item.kelas}</span>
+                      </td>
+                      <td className="p-2 border-r border-slate-200 text-slate-700 max-w-xs truncate">
+                        {item.kronologiKejadian}
+                      </td>
+                      <td className="p-2 border-r border-slate-200 text-center">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 border border-slate-300">
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="p-2 text-center">
+                        {item.tandaTanganUrl ? (
+                          <img
+                            src={item.tandaTanganUrl}
+                            alt="TTD"
+                            className="h-7 mx-auto object-contain"
+                          />
+                        ) : (
+                          <span className="text-[10px] text-emerald-700 font-bold">Resmi</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </OfficialReportModal>
+      )}
+
+      {/* Confidential Notice for Siswa and Orang Tua */}
+      {isRestrictedFromViewingReports ? (
+        <div
+          id="confidential-e-lapor-notice"
+          className="p-8 sm:p-10 rounded-2xl bg-white border border-rose-200 shadow-xs text-center space-y-5 animate-in fade-in"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto shadow-inner">
+            <Lock className="w-8 h-8" />
+          </div>
+
+          <div className="max-w-lg mx-auto space-y-2">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-rose-100 text-rose-900 border border-rose-200 inline-block shadow-2xs">
+              PRIVASI & KERAHASIAAN DILINDUNGI TPPK
+            </span>
+            <h3 className="text-lg sm:text-xl font-black text-slate-800 tracking-tight">
+              Daftar Laporan Kasus Bersifat Konfidensial (Rahasia)
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Sesuai dengan regulasi perlindungan anak dan kode etik penanganan kekerasan sekolah, data riwayat serta berkas aduan siswa lain <strong>tidak dapat dilihat oleh akun Siswa maupun Orang Tua</strong> demi melindungi integritas psikologis, nama baik, dan privasi keluarga.
+            </p>
+            <p className="text-xs text-slate-500 font-medium">
+              Seluruh rekaman aduan hanya dapat ditinjau, diverifikasi, dan ditindaklanjuti secara resmi oleh <strong>Admin / Operator TPPK SMPN 7 Pasuruan</strong>.
+            </p>
+          </div>
+
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              id="btn-lapor-confidential-view"
+              onClick={() => setShowModal(true)}
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 text-white text-xs font-bold shadow-md hover:from-rose-500 hover:to-red-500 transition active:scale-95 flex items-center justify-center gap-2 btn-3d"
+            >
+              <Plus className="w-4 h-4" />
+              Kirim Aduan / Lapor Sekarang
+            </button>
+          </div>
+
+          <div className="pt-5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px] text-slate-600 max-w-xl mx-auto">
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Identitas Pelapor Aman</span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
+              <span>Didampingi Guru BK</span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-center gap-2">
+              <Lock className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>Kerahasiaan Terjamin</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Filter and Search Bar + Admin Reports List */
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Cari kode laporan, nama siswa, kronologi..."
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-rose-500"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-600 font-semibold">Filter Status:</span>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:border-rose-500 font-medium"
+            >
+              <option value="semua">Semua Status ({records.length})</option>
+              <option value="Selesai">Selesai</option>
+              <option value="Terpantau Aman">Terpantau Aman</option>
+              <option value="Mediasi">Mediasi</option>
+              <option value="Investigasi">Investigasi</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Reports List */}
+        <div className="space-y-4">
+          {filtered.map((item) => {
+            const isExpanded = expandedId === item.id;
+            return (
+              <div
+                key={item.id}
+                id={`card-lapor-${item.id}`}
+                className="p-5 rounded-2xl bg-gradient-to-b from-slate-50/60 to-white border border-slate-200 hover:border-rose-300 shadow-xs card-3d space-y-4"
+              >
+                <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                        {item.kodeLaporan}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${getStatusBadge(
+                          item.status
+                        )}`}
+                      >
+                        {item.status}
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 font-medium">
+                        Kategori: {item.kategoriKasus}
+                      </span>
+                    </div>
+
+                    <h3 className="text-base font-extrabold text-slate-800 mt-1.5 flex items-center gap-2">
+                      <User className="w-4 h-4 text-slate-500" />
+                      {item.namaSiswa} &bull; <span className="text-teal-700 font-bold">Kelas {item.kelas}</span>
+                    </h3>
+
+                    <p className="text-xs text-slate-500 flex items-center gap-2 mt-0.5 font-medium">
+                      <span>{item.hariTanggal}</span>
+                      <span>&bull;</span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-rose-500" /> {item.waktuKejadian}
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <select
+                      value={item.status}
+                      onChange={(e) => onUpdateStatus(item.id, e.target.value as ELaporRecord['status'])}
+                      className="px-2 py-1 text-[11px] bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-semibold focus:border-rose-500"
+                      title="Ubah status penanganan"
+                    >
+                      <option value="Investigasi">Investigasi</option>
+                      <option value="Mediasi">Mediasi</option>
+                      <option value="Selesai">Selesai</option>
+                      <option value="Terpantau Aman">Terpantau Aman</option>
+                    </select>
+
+                    <button
+                      onClick={() => {
+                        setSelectedForPrint(item);
+                        setShowPrintModal(true);
+                      }}
+                      className="p-1.5 rounded-lg text-slate-500 hover:text-rose-700 hover:bg-rose-50 transition"
+                      title="Cetak Berita Acara Kop Surat Kasus Ini"
+                    >
+                      <Printer className="w-4 h-4" />
+                    </button>
+
+                    {canDelete && (
+                      <button
+                        onClick={() => onDeleteRecord(item.id)}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                        title="Hapus laporan"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Kronologi */}
+                <div className="p-3.5 rounded-xl bg-rose-50/50 border border-rose-200/60 text-xs">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-rose-800 block mb-1">
+                    KRONOLOGI KEJADIAN / KONFLIK:
+                  </span>
+                  <p className="text-slate-700 leading-relaxed font-medium">{item.kronologiKejadian}</p>
+                </div>
+
+                {/* 4 Mekanisme Toggle */}
+                <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                  <button
+                    onClick={() => setExpandedId(isExpanded ? null : item.id)}
+                    className="w-full px-4 py-2.5 flex items-center justify-between text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100/70 transition"
+                  >
+                    <span className="flex items-center gap-1.5 text-teal-800">
+                      <FileCheck className="w-4 h-4 text-teal-600" />
+                      4 Mekanisme Kegiatan Penanganan Sahabat SPANJU
+                    </span>
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-600" /> : <ChevronDown className="w-4 h-4 text-slate-600" />}
+                  </button>
+
+                  {isExpanded && (
+                    <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs border-t border-slate-100 bg-slate-50/50">
+                      <div className="p-2.5 rounded-lg bg-sky-50 border border-sky-200/60">
+                        <span className="text-[10px] font-bold text-sky-800 block mb-0.5">
+                          1. Kegiatan Penyadaran
+                        </span>
+                        <p className="text-slate-700">{item.kegiatanPenyadaran || '-'}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200/60">
+                        <span className="text-[10px] font-bold text-amber-800 block mb-0.5">
+                          2. Kegiatan Pencegahan
+                        </span>
+                        <p className="text-slate-700">{item.kegiatanPencegahan || '-'}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200/60">
+                        <span className="text-[10px] font-bold text-emerald-800 block mb-0.5">
+                          3. Kegiatan Penanganan Respon
+                        </span>
+                        <p className="text-slate-700">{item.kegiatanPenangananRespon || '-'}</p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-indigo-50 border border-indigo-200/60">
+                        <span className="text-[10px] font-bold text-indigo-800 block mb-0.5">
+                          4. Kegiatan Pelaporan
+                        </span>
+                        <p className="text-slate-700">{item.kegiatanPelaporan || '-'}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Tindak Lanjut & Keterangan */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="font-bold text-slate-600 block text-[11px]">TINDAK LANJUT:</span>
+                    <span className="text-teal-700 font-semibold">{item.tindakLanjut || '-'}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="font-bold text-slate-600 block text-[11px]">KETERANGAN:</span>
+                    <span className="text-slate-700 font-medium">{item.keterangan || '-'}</span>
+                  </div>
+                </div>
+
+                {/* Touchscreen Signature Bar */}
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    {item.tandaTanganUrl ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-9 px-2 bg-white rounded-lg border border-slate-200 flex items-center shadow-2xs">
+                          <img
+                            src={item.tandaTanganUrl}
+                            alt="TTD"
+                            className="h-7 max-w-[90px] object-contain"
+                          />
+                        </div>
+                        <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-0.5">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> TTD Berita Acara Sah
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-slate-400 italic">
+                        Belum ada tanda tangan berita acara
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSigningRecord(item)}
+                    className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 flex items-center gap-1 transition active:scale-95 shadow-2xs"
+                  >
+                    <FileSignature className="w-3.5 h-3.5 text-rose-700" />
+                    {item.tandaTanganUrl ? 'Ubah TTD' : 'TTD Touchscreen'}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      )}
+    </div>
+  );
+};
