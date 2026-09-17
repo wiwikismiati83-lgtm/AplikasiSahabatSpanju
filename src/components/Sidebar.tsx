@@ -18,6 +18,8 @@ import {
   UserCheck,
   LogOut,
   Shield,
+  BookOpen,
+  PhoneCall,
 } from 'lucide-react';
 import { ActiveAppId, AuthUser } from '../types';
 
@@ -43,6 +45,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const mainApps = [
+    {
+      id: 'pilihan_menu',
+      title: 'Pilihan Menu Aplikasi',
+      subtitle: 'Akses 1-Klik Seluruh Modul',
+      icon: Layers,
+      accentColor: 'from-emerald-600 to-teal-700',
+      badge: 'Semua',
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    },
+    {
+      id: 'hotline_bantuan',
+      title: 'Hotline & Layanan',
+      subtitle: '(0343) 426845 / 085168700953',
+      icon: PhoneCall,
+      accentColor: 'from-amber-500 to-orange-600',
+      badge: 'Hotline',
+      badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
+    },
     {
       id: 'zona_analitik',
       title: 'Zona Hijau & Analitik',
@@ -120,6 +140,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       subtitle: 'Dokumentasi Materi & Pesan Edukatif',
       icon: Tv,
       accentColor: 'from-violet-500 to-fuchsia-600',
+    },
+    {
+      id: 'tutorial_flipbook',
+      title: 'Tutorial / Manual Book',
+      subtitle: 'Buku Panduan Flipbook Heyzine',
+      icon: BookOpen,
+      accentColor: 'from-rose-500 to-pink-600',
+      badge: 'Panduan',
+      badgeColor: 'bg-rose-100 text-rose-800 border-rose-300',
     },
   ];
 

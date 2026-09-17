@@ -28,6 +28,10 @@ import {
   Printer,
   ChevronUp,
   ChevronDown,
+  Layers,
+  Edit3,
+  Save,
+  X,
 } from 'lucide-react';
 import { KelasZonaStatus } from '../types';
 import { MONTHLY_TREND_DATA, CATEGORY_BREAKDOWN_DATA } from '../data/initialData';
@@ -35,16 +39,19 @@ import { MONTHLY_TREND_DATA, CATEGORY_BREAKDOWN_DATA } from '../data/initialData
 interface ZonaHijauProps {
   kelasList: KelasZonaStatus[];
   onUpdateKelas: (updated: KelasZonaStatus[]) => void;
+  onOpenMenu?: () => void;
 }
 
 export const ZonaHijauAnalyticsView: React.FC<ZonaHijauProps> = ({
   kelasList,
   onUpdateKelas,
+  onOpenMenu,
 }) => {
   const [filterTingkat, setFilterTingkat] = useState<'semua' | '7' | '8' | '9'>('semua');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<'kelas' | 'skorKeramahan' | 'totalKasusTahunIni'>('kelas');
   const [sortAsc, setSortAsc] = useState(true);
+  const [editingKelas, setEditingKelas] = useState<KelasZonaStatus | null>(null);
 
   // Filtered and sorted class list
   const filteredKelas = useMemo(() => {
@@ -112,6 +119,15 @@ export const ZonaHijauAnalyticsView: React.FC<ZonaHijauProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {onOpenMenu && (
+              <button
+                onClick={onOpenMenu}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
+              >
+                <Layers className="w-3.5 h-3.5 text-rose-600" />
+                Pilihan Menu Aplikasi
+              </button>
+            )}
             <button
               onClick={handlePrintReport}
               className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition active:scale-95 shadow-xs"
@@ -354,71 +370,178 @@ export const ZonaHijauAnalyticsView: React.FC<ZonaHijauProps> = ({
         </div>
 
         {/* 24 Cards Grid with 3D Aesthetics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredKelas.map((k) => (
             <div
               key={k.kelas}
               id={`card-kelas-${k.kelas}`}
-              className="p-4 rounded-xl bg-gradient-to-b from-slate-50/60 to-white border border-slate-200/90 hover:border-emerald-300 shadow-xs card-3d relative overflow-hidden group"
+              className="p-4 rounded-2xl bg-gradient-to-b from-slate-50/80 to-white border border-slate-200/90 hover:border-emerald-300 shadow-xs card-3d relative overflow-hidden flex flex-col justify-between group"
             >
-              {/* Corner Glow based on status */}
-              <div
-                className={`absolute top-0 right-0 w-16 h-16 rounded-bl-3xl flex items-start justify-end p-2 ${
-                  k.statusZona === 'Hijau'
-                    ? 'bg-emerald-100/80 text-emerald-700'
-                    : k.statusZona === 'Kuning'
-                    ? 'bg-amber-100/80 text-amber-700'
-                    : 'bg-rose-100/80 text-rose-700'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4" />
+              <div>
+                {/* Header: Class Badge & Zona Hijau Pill */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white font-black text-sm flex items-center justify-center shadow-sm">
+                    {k.kelas}
+                  </div>
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 tracking-wide flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                    ZONA HIJAU
+                  </span>
+                </div>
+
+                {/* Wali Kelas */}
+                <p className="text-xs text-slate-500 font-medium truncate mb-2.5">
+                  {k.waliKelas}
+                </p>
+
+                {/* Duta Anti-Bullying Box */}
+                <div className="bg-emerald-50/70 border border-emerald-100/80 p-2.5 rounded-xl mb-3">
+                  <p className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-wider mb-0.5">
+                    Duta Anti-Bullying:
+                  </p>
+                  <p className="text-xs font-bold text-slate-800 line-clamp-1">
+                    {k.dutaAntiBullying}
+                  </p>
+                </div>
+
+                {/* Motto / Catatan Quote */}
+                <p className="text-[11px] italic text-slate-600 line-clamp-2 leading-relaxed mb-3">
+                  "{k.catatan || `Kelas ${k.kelas} rukun, saling menghargai & tolak perundungan`}"
+                </p>
               </div>
 
-              <div className="flex items-baseline gap-2">
-                <span className="text-xl font-black text-slate-800 tracking-wide">{k.kelas}</span>
-                <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                    k.statusZona === 'Hijau'
-                      ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                      : 'bg-amber-100 text-amber-800 border-amber-200'
-                  }`}
+              {/* Card Footer: Zero Bullying & Edit Button */}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  Zero Bullying
+                </span>
+                <button
+                  onClick={() => setEditingKelas(k)}
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1 shadow-2xs active:scale-95"
                 >
-                  Zona {k.statusZona}
-                </span>
-              </div>
-
-              <div className="mt-3 space-y-1.5 text-xs text-slate-600">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Skor Keramahan</span>
-                  <span className="font-extrabold text-emerald-700">{k.skorKeramahan}/100</span>
-                </div>
-                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${k.skorKeramahan}%` }}
-                  ></div>
-                </div>
-
-                <div className="pt-1 text-[11px] space-y-0.5">
-                  <p className="text-slate-600 truncate">
-                    <span className="text-slate-400">Wali:</span> {k.waliKelas}
-                  </p>
-                  <p className="text-emerald-700 truncate font-semibold">
-                    <span className="text-slate-400 font-normal">Duta:</span> {k.dutaAntiBullying}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-medium">
-                <span>{k.jumlahSiswa} Siswa</span>
-                <span className="text-emerald-700 flex items-center gap-1 font-bold">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> 0 Kasus Aktif
-                </span>
+                  <Edit3 className="w-3 h-3 text-emerald-600" />
+                  Edit & Simpan
+                </button>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {editingKelas && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider">
+                  EDIT ZONA KELAS {editingKelas.kelas}
+                </span>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight mt-1">
+                  Perbarui Informasi Rombel
+                </h3>
+              </div>
+              <button
+                onClick={() => setEditingKelas(null)}
+                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Wali Kelas
+                </label>
+                <input
+                  type="text"
+                  value={editingKelas.waliKelas}
+                  onChange={(e) => setEditingKelas({ ...editingKelas, waliKelas: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Duta Anti-Bullying (Nama Siswa)
+                </label>
+                <input
+                  type="text"
+                  value={editingKelas.dutaAntiBullying}
+                  onChange={(e) => setEditingKelas({ ...editingKelas, dutaAntiBullying: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Motto / Catatan / Slogan Kelas
+                </label>
+                <textarea
+                  rows={3}
+                  value={editingKelas.catatan}
+                  onChange={(e) => setEditingKelas({ ...editingKelas, catatan: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Skor Keramahan (0-100)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={editingKelas.skorKeramahan}
+                    onChange={(e) => setEditingKelas({ ...editingKelas, skorKeramahan: Number(e.target.value) })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Status Zona
+                  </label>
+                  <select
+                    value={editingKelas.statusZona}
+                    onChange={(e) => setEditingKelas({ ...editingKelas, statusZona: e.target.value as any })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="Hijau">Hijau (Aman)</option>
+                    <option value="Kuning">Kuning (Waspada)</option>
+                    <option value="Merah">Merah (Perhatian)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+              <button
+                onClick={() => setEditingKelas(null)}
+                className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  const updatedList = kelasList.map((item) =>
+                    item.kelas === editingKelas.kelas ? editingKelas : item
+                  );
+                  onUpdateKelas(updatedList);
+                  setEditingKelas(null);
+                }}
+                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center gap-2 shadow-md shadow-emerald-600/20"
+              >
+                <Save className="w-4 h-4" />
+                Simpan Perubahan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pivot Table Per Kelas */}
       <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4">

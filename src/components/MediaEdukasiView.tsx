@@ -12,6 +12,7 @@ import {
   X,
   Printer,
   Share2,
+  Layers,
 } from 'lucide-react';
 import { MediaEdukasiItem } from '../types';
 
@@ -20,6 +21,7 @@ interface Props {
   onAddItem: (item: MediaEdukasiItem) => void;
   onDeleteItem: (id: string) => void;
   canDelete?: boolean;
+  onOpenMenu?: () => void;
 }
 
 export const MediaEdukasiView: React.FC<Props> = ({
@@ -27,6 +29,7 @@ export const MediaEdukasiView: React.FC<Props> = ({
   onAddItem,
   onDeleteItem,
   canDelete = true,
+  onOpenMenu,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [filterType, setFilterType] = useState<string>('semua');
@@ -93,6 +96,15 @@ export const MediaEdukasiView: React.FC<Props> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {onOpenMenu && (
+            <button
+              onClick={onOpenMenu}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
+            >
+              <Layers className="w-3.5 h-3.5 text-violet-600" />
+              Pilihan Menu Aplikasi
+            </button>
+          )}
           <button
             id="btn-tambah-media"
             onClick={() => setShowModal(true)}

@@ -216,6 +216,8 @@ export type ActiveAppId =
   | 'arsip_kegiatan'
   | 'buku_tamu'
   | 'media_edukasi'
+  | 'tutorial_flipbook'
+  | 'hotline_bantuan'
   | string; // for custom link IDs
 
 export type UserRole = 'admin' | 'siswa' | 'orang_tua' | 'guru';

@@ -19,6 +19,7 @@ import {
   FileText,
   Lock,
   ShieldCheck,
+  Layers,
 } from 'lucide-react';
 import { ELaporRecord, UserRole } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
@@ -33,6 +34,7 @@ interface Props {
   onUpdateRecord?: (record: ELaporRecord) => void;
   userRole?: UserRole;
   canDelete?: boolean;
+  onOpenMenu?: () => void;
 }
 
 export const ELaporView: React.FC<Props> = ({
@@ -43,6 +45,7 @@ export const ELaporView: React.FC<Props> = ({
   onUpdateRecord,
   userRole = 'admin',
   canDelete = true,
+  onOpenMenu,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -172,6 +175,15 @@ export const ELaporView: React.FC<Props> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {onOpenMenu && (
+            <button
+              onClick={onOpenMenu}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
+            >
+              <Layers className="w-3.5 h-3.5 text-rose-600" />
+              Pilihan Menu Aplikasi
+            </button>
+          )}
           {!isRestrictedFromViewingReports && (
             <button
               onClick={() => {

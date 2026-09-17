@@ -56,6 +56,9 @@ import { SPDamaiView } from './components/SPDamaiView';
 import { ArsipKegiatanView } from './components/ArsipKegiatanView';
 import { BukuTamuView } from './components/BukuTamuView';
 import { MediaEdukasiView } from './components/MediaEdukasiView';
+import { PilihanMenuAppView } from './components/PilihanMenuAppView';
+import { TutorialFlipbookView } from './components/TutorialFlipbookView';
+import { HotlineView } from './components/HotlineView';
 import { WebFrameViewer } from './components/WebFrameViewer';
 
 export default function App() {
@@ -461,6 +464,15 @@ export default function App() {
               <span>Zona Hijau Aman</span>
             </div>
 
+            <button
+              onClick={() => setActiveApp('pilihan_menu')}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md hover:from-rose-500 hover:to-pink-500 transition cursor-pointer"
+              title="Buka Pilihan Menu Aplikasi"
+            >
+              <Layers className="w-4 h-4" />
+              <span className="hidden xl:inline">Pilihan Menu Aplikasi</span>
+            </button>
+
             {/* Active User Info & Logout Button */}
             {currentUser && (
               <div className="flex items-center gap-1.5 pl-2 border-l border-slate-200">
@@ -498,11 +510,34 @@ export default function App() {
         {/* Dynamic Main Body (Scrollable Right View) */}
         <div className="flex-1 overflow-y-auto p-4 lg:p-8">
           <div className="max-w-7xl mx-auto h-full">
+            {/* Pilihan Menu Aplikasi */}
+            {activeApp === 'pilihan_menu' && (
+              <PilihanMenuAppView
+                setActiveApp={setActiveApp}
+                totalLaporan={eLaporRecords.length}
+              />
+            )}
+
+            {/* Tutorial Flipbook */}
+            {activeApp === 'tutorial_flipbook' && (
+              <TutorialFlipbookView
+                setActiveApp={setActiveApp}
+              />
+            )}
+
+            {/* Hotline & Layanan */}
+            {activeApp === 'hotline_bantuan' && (
+              <HotlineView
+                setActiveApp={setActiveApp}
+              />
+            )}
+
             {/* 1. Zona Hijau & Analitik */}
             {activeApp === 'zona_analitik' && (
               <ZonaHijauAnalyticsView
                 kelasList={kelasList}
                 onUpdateKelas={(updated) => setKelasList(updated)}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
               />
             )}
 
@@ -592,6 +627,7 @@ export default function App() {
                 records={eLaporRecords}
                 userRole={userRole}
                 canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={(rec) => {
                   setELaporRecords([rec, ...eLaporRecords]);
                   showToast('Laporan aduan perundungan berhasil didaftarkan!');
@@ -660,6 +696,7 @@ export default function App() {
               <BukuTamuView
                 records={bukuTamuRecords}
                 canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={(rec) => {
                   setBukuTamuRecords([rec, ...bukuTamuRecords]);
                   showToast('Buku tamu digital tersimpan dengan tanda tangan!');
@@ -680,6 +717,7 @@ export default function App() {
               <MediaEdukasiView
                 items={mediaEdukasiItems}
                 canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddItem={(item) => {
                   setMediaEdukasiItems([item, ...mediaEdukasiItems]);
                   showToast('Media edukasi digital berhasil ditambahkan!');
