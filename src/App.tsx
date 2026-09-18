@@ -45,6 +45,8 @@ import {
   INITIAL_KELAS_ZONA,
   INITIAL_SP_DAMAI,
   INITIAL_ARSIP_KEGIATAN,
+  INITIAL_SISWA,
+  INITIAL_GURU,
 } from './data/initialData';
 import { Sidebar } from './components/Sidebar';
 import { CustomLinkModal } from './components/CustomLinkModal';
@@ -111,20 +113,20 @@ export default function App() {
   const userRole: UserRole = currentUser?.role || 'siswa';
   const canDelete = currentUser?.role === 'admin' || currentUser?.role === 'operator';
 
-  // Persistent Module Records
+  // Persistent Module Records with Initial Data
   const [customLinks, setCustomLinks] = useState<CustomLink[]>(INITIAL_CUSTOM_LINKS);
-  const [piketRecords, setPiketRecords] = useState<PiketHarianRecord[]>([]);
-  const [ceriRecords, setCeriRecords] = useState<SabtuBeliTehCeriRecord[]>([]);
-  const [kebunRecords, setKebunRecords] = useState<KebunLuasBerseriRecord[]>([]);
-  const [serasiRecords, setSerasiRecords] = useState<SenandungSerasiRecord[]>([]);
-  const [eLaporRecords, setELaporRecords] = useState<ELaporRecord[]>([]);
-  const [bukuTamuRecords, setBukuTamuRecords] = useState<BukuTamuRecord[]>([]);
-  const [mediaEdukasiItems, setMediaEdukasiItems] = useState<MediaEdukasiItem[]>([]);
+  const [piketRecords, setPiketRecords] = useState<PiketHarianRecord[]>(INITIAL_PIKET_HARIAN);
+  const [ceriRecords, setCeriRecords] = useState<SabtuBeliTehCeriRecord[]>(INITIAL_SABTU_BELI_TEH_CERI);
+  const [kebunRecords, setKebunRecords] = useState<KebunLuasBerseriRecord[]>(INITIAL_KEBUN_LUAS_BERSERI);
+  const [serasiRecords, setSerasiRecords] = useState<SenandungSerasiRecord[]>(INITIAL_SENANDUNG_SERASI);
+  const [eLaporRecords, setELaporRecords] = useState<ELaporRecord[]>(INITIAL_E_LAPOR);
+  const [bukuTamuRecords, setBukuTamuRecords] = useState<BukuTamuRecord[]>(INITIAL_BUKU_TAMU);
+  const [mediaEdukasiItems, setMediaEdukasiItems] = useState<MediaEdukasiItem[]>(INITIAL_MEDIA_EDUKASI);
   const [kelasList, setKelasList] = useState<KelasZonaStatus[]>(INITIAL_KELAS_ZONA);
-  const [spDamaiRecords, setSpDamaiRecords] = useState<SPDamaiRecord[]>([]);
-  const [arsipKegiatanRecords, setArsipKegiatanRecords] = useState<ArsipKegiatanRecord[]>([]);
-  const [siswaList, setSiswaList] = useState<Siswa[]>([]);
-  const [guruList, setGuruList] = useState<Guru[]>([]);
+  const [spDamaiRecords, setSpDamaiRecords] = useState<SPDamaiRecord[]>(INITIAL_SP_DAMAI);
+  const [arsipKegiatanRecords, setArsipKegiatanRecords] = useState<ArsipKegiatanRecord[]>(INITIAL_ARSIP_KEGIATAN);
+  const [siswaList, setSiswaList] = useState<Siswa[]>(INITIAL_SISWA);
+  const [guruList, setGuruList] = useState<Guru[]>(INITIAL_GURU);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -174,20 +176,24 @@ export default function App() {
         // Try to load from localStorage first for immediate results
         const savedData = localStorage.getItem('spanju_backup_data');
         if (savedData) {
-          const parsed = JSON.parse(savedData);
-          if (parsed.customLinks) setCustomLinks(parsed.customLinks);
-          if (parsed.piketRecords) setPiketRecords(parsed.piketRecords);
-          if (parsed.ceriRecords) setCeriRecords(parsed.ceriRecords);
-          if (parsed.kebunRecords) setKebunRecords(parsed.kebunRecords);
-          if (parsed.serasiRecords) setSerasiRecords(parsed.serasiRecords);
-          if (parsed.eLaporRecords) setELaporRecords(parsed.eLaporRecords);
-          if (parsed.bukuTamuRecords) setBukuTamuRecords(parsed.bukuTamuRecords);
-          if (parsed.mediaEdukasiItems) setMediaEdukasiItems(parsed.mediaEdukasiItems);
-          if (parsed.kelasList) setKelasList(parsed.kelasList);
-          if (parsed.spDamaiRecords) setSpDamaiRecords(parsed.spDamaiRecords);
-          if (parsed.arsipKegiatanRecords) setArsipKegiatanRecords(parsed.arsipKegiatanRecords);
-          if (parsed.siswaList) setSiswaList(parsed.siswaList);
-          if (parsed.guruList) setGuruList(parsed.guruList);
+          try {
+            const parsed = JSON.parse(savedData);
+            if (Array.isArray(parsed.customLinks) && parsed.customLinks.length > 0) setCustomLinks(parsed.customLinks);
+            if (Array.isArray(parsed.piketRecords) && parsed.piketRecords.length > 0) setPiketRecords(parsed.piketRecords);
+            if (Array.isArray(parsed.ceriRecords) && parsed.ceriRecords.length > 0) setCeriRecords(parsed.ceriRecords);
+            if (Array.isArray(parsed.kebunRecords) && parsed.kebunRecords.length > 0) setKebunRecords(parsed.kebunRecords);
+            if (Array.isArray(parsed.serasiRecords) && parsed.serasiRecords.length > 0) setSerasiRecords(parsed.serasiRecords);
+            if (Array.isArray(parsed.eLaporRecords) && parsed.eLaporRecords.length > 0) setELaporRecords(parsed.eLaporRecords);
+            if (Array.isArray(parsed.bukuTamuRecords) && parsed.bukuTamuRecords.length > 0) setBukuTamuRecords(parsed.bukuTamuRecords);
+            if (Array.isArray(parsed.mediaEdukasiItems) && parsed.mediaEdukasiItems.length > 0) setMediaEdukasiItems(parsed.mediaEdukasiItems);
+            if (Array.isArray(parsed.kelasList) && parsed.kelasList.length > 0) setKelasList(parsed.kelasList);
+            if (Array.isArray(parsed.spDamaiRecords) && parsed.spDamaiRecords.length > 0) setSpDamaiRecords(parsed.spDamaiRecords);
+            if (Array.isArray(parsed.arsipKegiatanRecords) && parsed.arsipKegiatanRecords.length > 0) setArsipKegiatanRecords(parsed.arsipKegiatanRecords);
+            if (Array.isArray(parsed.siswaList) && parsed.siswaList.length > 0) setSiswaList(parsed.siswaList);
+            if (Array.isArray(parsed.guruList) && parsed.guruList.length > 0) setGuruList(parsed.guruList);
+          } catch (err) {
+            console.warn('Error reading saved local backup:', err);
+          }
         }
 
         const [
@@ -207,18 +213,18 @@ export default function App() {
           api.get('guru_master').catch(() => []),
         ]);
 
-        if (piket?.length) setPiketRecords(piket);
-        if (ceri?.length) setCeriRecords(ceri);
-        if (kebun?.length) setKebunRecords(kebun);
-        if (serasi?.length) setSerasiRecords(serasi);
-        if (elapor?.length) setELaporRecords(elapor);
-        if (tamu?.length) setBukuTamuRecords(tamu);
-        if (media?.length) setMediaEdukasiItems(media);
-        if (zona?.length) setKelasList(zona);
-        if (damai?.length) setSpDamaiRecords(damai);
-        if (arsip?.length) setArsipKegiatanRecords(arsip);
-        if (siswa?.length) setSiswaList(siswa);
-        if (guru?.length) setGuruList(guru);
+        if (Array.isArray(piket) && piket.length > 0) setPiketRecords(piket);
+        if (Array.isArray(ceri) && ceri.length > 0) setCeriRecords(ceri);
+        if (Array.isArray(kebun) && kebun.length > 0) setKebunRecords(kebun);
+        if (Array.isArray(serasi) && serasi.length > 0) setSerasiRecords(serasi);
+        if (Array.isArray(elapor) && elapor.length > 0) setELaporRecords(elapor);
+        if (Array.isArray(tamu) && tamu.length > 0) setBukuTamuRecords(tamu);
+        if (Array.isArray(media) && media.length > 0) setMediaEdukasiItems(media);
+        if (Array.isArray(zona) && zona.length > 0) setKelasList(zona);
+        if (Array.isArray(damai) && damai.length > 0) setSpDamaiRecords(damai);
+        if (Array.isArray(arsip) && arsip.length > 0) setArsipKegiatanRecords(arsip);
+        if (Array.isArray(siswa) && siswa.length > 0) setSiswaList(siswa);
+        if (Array.isArray(guru) && guru.length > 0) setGuruList(guru);
       } catch (err) {
         console.error('Error fetching Supabase data:', err);
       } finally {
@@ -684,6 +690,13 @@ export default function App() {
                   setELaporRecords(eLaporRecords.map((r) => (r.id === updated.id ? updated : r)));
                   await api.upsert('e_lapor_records', updated);
                   showToast('Laporan aduan berhasil diperbarui.');
+                }}
+                onResetDefault={async () => {
+                  setELaporRecords(INITIAL_E_LAPOR);
+                  for (const rec of INITIAL_E_LAPOR) {
+                    await api.upsert('e_lapor_records', rec).catch(() => {});
+                  }
+                  showToast('Data standar E-Lapor berhasil dimuat kembali.');
                 }}
               />
             )}

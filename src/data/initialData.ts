@@ -10,6 +10,8 @@ import {
   KelasZonaStatus,
   SPDamaiRecord,
   ArsipKegiatanRecord,
+  Siswa,
+  Guru,
 } from '../types';
 
 export const INITIAL_CUSTOM_LINKS: CustomLink[] = [
@@ -415,5 +417,22 @@ export const INITIAL_ARSIP_KEGIATAN: ArsipKegiatanRecord[] = [
     jabatanKoordinator: 'Guru PJOK & Koordinator Giat Siswa',
     createdAt: '2026-09-12T08:30:00.000Z',
   }
+];
+
+export const INITIAL_SISWA: Siswa[] = [
+  { id: 'sw-1', nisn: '0012345678', nama: 'Ahmad Fauzi', kelas: '7A', jenisKelamin: 'L', createdAt: '2026-01-10T08:00:00.000Z' },
+  { id: 'sw-2', nisn: '0023456789', nama: 'Siti Aminah', kelas: '8B', jenisKelamin: 'P', createdAt: '2026-01-10T08:00:00.000Z' },
+  { id: 'sw-3', nisn: '0034567890', nama: 'Rizky Ramadhan', kelas: '7D', jenisKelamin: 'L', createdAt: '2026-01-10T08:00:00.000Z' },
+  { id: 'sw-4', nisn: '0045678901', nama: 'Nadhira Putri', kelas: '7A', jenisKelamin: 'P', createdAt: '2026-01-10T08:00:00.000Z' },
+  { id: 'sw-5', nisn: '0056789012', nama: 'Ilyas Firdaus', kelas: '8A', jenisKelamin: 'L', createdAt: '2026-01-10T08:00:00.000Z' },
+  { id: 'sw-6', nisn: '0067890123', nama: 'Zaki Mubarak', kelas: '9A', jenisKelamin: 'L', createdAt: '2026-01-10T08:00:00.000Z' },
+  { id: 'sw-7', nisn: '0078901234', nama: 'Mukhammad Nauval Firdaus', kelas: '8D', jenisKelamin: 'L', createdAt: '2026-01-10T08:00:00.000Z' },
+];
+
+export const INITIAL_GURU: Guru[] = [
+  { id: 'gr-1', nip: '198311162009042003', nama: 'Wiwik Ismiati, S.Pd', jabatan: 'Guru BK & Pembina Sahabat SPANJU', status: 'PNS', createdAt: '2026-01-10T08:00:00.000Z' },
+  { id: 'gr-2', nip: '197508122005011006', nama: 'Drs. Supriyadi', jabatan: 'Wali Kelas 8A', status: 'PNS', createdAt: '2026-01-10T08:00:00.000Z' },
+  { id: 'gr-3', nip: '198003152008012015', nama: 'Nurul Hidayati, M.Pd', jabatan: 'Wali Kelas 7C & Satgas Anti Kekerasan', status: 'PNS', createdAt: '2026-01-10T08:00:00.000Z' },
+  { id: 'gr-4', nip: '199402142022212014', nama: 'Eki Febriani, S.Pd', jabatan: 'Duta Literasi Karakter', status: 'PPPK', createdAt: '2026-01-10T08:00:00.000Z' },
 ];
 

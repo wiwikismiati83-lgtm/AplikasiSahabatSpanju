@@ -22,6 +22,7 @@ import {
   ShieldCheck,
   Layers,
   Pencil,
+  RefreshCw,
 } from 'lucide-react';
 import { ELaporRecord, UserRole, Siswa } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
@@ -37,6 +38,7 @@ interface Props {
   onDeleteRecord: (id: string) => void;
   onUpdateStatus: (id: string, status: ELaporRecord['status']) => void;
   onUpdateRecord?: (record: ELaporRecord) => void;
+  onResetDefault?: () => void;
   userRole?: UserRole;
   canDelete?: boolean;
   onOpenMenu?: () => void;
@@ -49,6 +51,7 @@ export const ELaporView: React.FC<Props> = ({
   onDeleteRecord,
   onUpdateStatus,
   onUpdateRecord,
+  onResetDefault,
   userRole = 'admin',
   canDelete = true,
   onOpenMenu,
@@ -231,11 +234,17 @@ export const ELaporView: React.FC<Props> = ({
   };
 
   const filtered = records.filter((r) => {
+    const sTerm = searchTerm.toLowerCase().trim();
+    const nama = (r.namaSiswa || '').toLowerCase();
+    const kls = (r.kelas || '').toLowerCase();
+    const kode = (r.kodeLaporan || '').toLowerCase();
+    const kronologi = (r.kronologiKejadian || '').toLowerCase();
     const matchesSearch =
-      r.namaSiswa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.kelas.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.kodeLaporan.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.kronologiKejadian.toLowerCase().includes(searchTerm.toLowerCase());
+      !sTerm ||
+      nama.includes(sTerm) ||
+      kls.includes(sTerm) ||
+      kode.includes(sTerm) ||
+      kronologi.includes(sTerm);
     const matchesStatus = filterStatus === 'semua' || r.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -945,7 +954,47 @@ export const ELaporView: React.FC<Props> = ({
 
         {/* Reports List */}
         <div className="space-y-4">
-          {filtered.map((item) => {
+          {filtered.length === 0 ? (
+            <div className="p-8 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-3 shadow-2xs">
+              <div className="w-12 h-12 mx-auto rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+              <h4 className="text-sm font-bold text-slate-800">
+                {records.length === 0
+                  ? 'Belum Ada Laporan Aduan Terdaftar'
+                  : 'Tidak Ada Laporan yang Sesuai'}
+              </h4>
+              <p className="text-xs text-slate-500 max-w-md mx-auto">
+                {records.length === 0
+                  ? 'Data laporan penanganan perundungan belum ada. Anda dapat membuat laporan baru atau memuat data standar Sahabat SPANJU.'
+                  : 'Coba ubah kata kunci pencarian atau sesuaikan pilihan filter status di atas.'}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingRecord(null);
+                    setShowModal(true);
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-xs flex items-center gap-1.5 transition active:scale-95"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Buat Laporan Baru
+                </button>
+                {onResetDefault && (
+                  <button
+                    type="button"
+                    onClick={onResetDefault}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 shadow-2xs flex items-center gap-1.5 transition active:scale-95"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
+                    Muat Data Standar E-Lapor
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            filtered.map((item) => {
             const isExpanded = expandedId === item.id;
             return (
               <div
@@ -1128,7 +1177,7 @@ export const ELaporView: React.FC<Props> = ({
                 </div>
               </div>
             );
-          })}
+          }))}
         </div>
       </div>
       )}
