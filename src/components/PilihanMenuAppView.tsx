@@ -43,6 +43,17 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
       action: () => setActiveApp('tutorial_flipbook')
     },
     {
+      id: 'bagan_alur',
+      title: 'BAGAN & ALUR SOP',
+      subtitle: 'DOKUMENTASI ALUR SAHABAT SPANJU',
+      icon: Layers,
+      category: 'prioritas',
+      color: 'from-indigo-500 to-purple-600',
+      textColor: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
+      action: () => setActiveApp('bagan_alur')
+    },
+    {
       id: 'hotline_bantuan',
       title: 'HOTLINE',
       subtitle: 'LAYANAN BANTUAN & PENGADUAN',

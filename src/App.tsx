@@ -65,6 +65,7 @@ import { PilihanMenuAppView } from './components/PilihanMenuAppView';
 import { TutorialFlipbookView } from './components/TutorialFlipbookView';
 import { HotlineView } from './components/HotlineView';
 import { WebFrameViewer } from './components/WebFrameViewer';
+import { BaganAlurView } from './components/BaganAlurView';
 import { PWAInstallButton } from './components/PWAInstallButton';
 
 export default function App() {
@@ -530,6 +531,13 @@ export default function App() {
             {activeApp === 'hotline_bantuan' && (
               <HotlineView
                 setActiveApp={setActiveApp}
+              />
+            )}
+
+            {/* Bagan & Alur */}
+            {activeApp === 'bagan_alur' && (
+              <BaganAlurView
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
               />
             )}
 

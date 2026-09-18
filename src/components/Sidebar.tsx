@@ -168,6 +168,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: 'Panduan',
       badgeColor: 'bg-rose-100 text-rose-800 border-rose-300',
     },
+    {
+      id: 'bagan_alur',
+      title: 'Bagan & Alur SOP',
+      subtitle: 'Dokumentasi Alur Sahabat SPANJU',
+      icon: Layers,
+      accentColor: 'from-indigo-500 to-purple-600',
+      badge: 'Baru',
+      badgeColor: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+    },
   ];
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
