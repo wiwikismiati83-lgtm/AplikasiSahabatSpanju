@@ -519,7 +519,7 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
           onClose={() => setShowPrintModal(false)}
           title={
             selectedForPrint
-              ? `NOTULEN & EVALUASI KEBUN LUAS BERSERI - ${selectedForPrint.hariTanggal.toUpperCase()}`
+              ? 'NOTULEN & EVALUASI KEBUN LUAS BERSERI'
               : 'REKAPITULASI PROGRAM EVALUASI & INOVASI KEBUN LUAS BERSERI'
           }
           nomorSurat={`421.3 / KBN-${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}
