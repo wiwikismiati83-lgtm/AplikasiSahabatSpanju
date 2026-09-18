@@ -683,7 +683,7 @@ export default function App() {
                 onUpdateRecord={async (updated) => {
                   setELaporRecords(eLaporRecords.map((r) => (r.id === updated.id ? updated : r)));
                   await api.upsert('e_lapor_records', updated);
-                  showToast('Tanda tangan berita acara diperbarui.');
+                  showToast('Laporan aduan berhasil diperbarui.');
                 }}
               />
             )}

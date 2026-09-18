@@ -21,6 +21,7 @@ import {
   Lock,
   ShieldCheck,
   Layers,
+  Pencil,
 } from 'lucide-react';
 import { ELaporRecord, UserRole, Siswa } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
@@ -53,6 +54,7 @@ export const ELaporView: React.FC<Props> = ({
   onOpenMenu,
 }) => {
   const [showModal, setShowModal] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<ELaporRecord | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('semua');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -88,9 +90,96 @@ export const ELaporView: React.FC<Props> = ({
   const [formSignature, setFormSignature] = useState('');
   const [activePicker, setActivePicker] = useState<'siswa1' | 'siswa2' | null>(null);
 
+  const resetForm = () => {
+    setEditingRecord(null);
+    setHariTanggal('');
+    setWaktuKejadian('');
+    setNamaSiswa('');
+    setKelas('');
+    setNisnSiswa('');
+    setNamaSiswa2('');
+    setKelas2('');
+    setNisnSiswa2('');
+    setNamaPenandatangan('Wiwik Ismiati, S.Pd');
+    setNipPenandatangan('198311162009042003');
+    setKronologiKejadian('');
+    setKegiatanPenyadaran('');
+    setKegiatanPencegahan('');
+    setKegiatanPenangananRespon('');
+    setKegiatanPelaporan('');
+    setTindakLanjut('');
+    setKeterangan('');
+    setStatus('Mediasi');
+    setKategoriKasus('Verbal');
+    setFormSignature('');
+  };
+
+  const handleOpenAdd = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (rec: ELaporRecord) => {
+    setEditingRecord(rec);
+    setHariTanggal(rec.hariTanggal);
+    setWaktuKejadian(rec.waktuKejadian || '');
+    setNamaSiswa(rec.namaSiswa);
+    setKelas(rec.kelas);
+    setNisnSiswa(rec.nisnSiswa || '');
+    setNamaSiswa2(rec.namaSiswa2 || '');
+    setKelas2(rec.kelas2 || '');
+    setNisnSiswa2(rec.nisnSiswa2 || '');
+    setNamaPenandatangan(rec.namaPenandatangan || 'Wiwik Ismiati, S.Pd');
+    setNipPenandatangan(rec.nipPenandatangan || '198311162009042003');
+    setKronologiKejadian(rec.kronologiKejadian);
+    setKegiatanPenyadaran(rec.kegiatanPenyadaran || '');
+    setKegiatanPencegahan(rec.kegiatanPencegahan || '');
+    setKegiatanPenangananRespon(rec.kegiatanPenangananRespon || '');
+    setKegiatanPelaporan(rec.kegiatanPelaporan || '');
+    setTindakLanjut(rec.tindakLanjut || '');
+    setKeterangan(rec.keterangan || '');
+    setStatus(rec.status);
+    setKategoriKasus(rec.kategoriKasus);
+    setFormSignature(rec.tandaTanganUrl || '');
+    setShowModal(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!hariTanggal.trim() || !namaSiswa.trim() || !kronologiKejadian.trim()) return;
+
+    if (editingRecord) {
+      const updatedRecord: ELaporRecord = {
+        ...editingRecord,
+        hariTanggal: hariTanggal.trim(),
+        waktuKejadian: waktuKejadian.trim(),
+        namaSiswa: namaSiswa.trim(),
+        kelas: kelas.trim() || 'Siswa SPANJU',
+        nisnSiswa: nisnSiswa.trim(),
+        namaSiswa2: namaSiswa2.trim(),
+        kelas2: kelas2.trim(),
+        nisnSiswa2: nisnSiswa2.trim(),
+        kronologiKejadian: kronologiKejadian.trim(),
+        kegiatanPenyadaran: kegiatanPenyadaran.trim() || 'Pemberian pemahaman dampak psikologis dan empati kawan.',
+        kegiatanPencegahan: kegiatanPencegahan.trim() || 'Penguatan norma kelas ramah anak & komitmen anti-bullying.',
+        kegiatanPenangananRespon: kegiatanPenangananRespon.trim() || 'Mediasi tatap muka damai didampingi konselor BK.',
+        kegiatanPelaporan: kegiatanPelaporan.trim() || 'Pencatatan berita acara resmi di sistem register sekolah.',
+        tindakLanjut: tindakLanjut.trim() || 'Pemantauan berkala oleh Duta Sahabat SPANJU.',
+        keterangan: keterangan.trim(),
+        status,
+        kategoriKasus,
+        tandaTanganUrl: formSignature || editingRecord.tandaTanganUrl,
+        namaPenandatangan: namaPenandatangan.trim(),
+        nipPenandatangan: nipPenandatangan.trim(),
+      };
+
+      if (onUpdateRecord) {
+        onUpdateRecord(updatedRecord);
+      }
+      setShowModal(false);
+      resetForm();
+      return;
+    }
 
     const count = records.length + 1;
     const kodeLaporan = `SPJ-${new Date().getFullYear()}-${String(count).padStart(3, '0')}`;
@@ -125,22 +214,7 @@ export const ELaporView: React.FC<Props> = ({
     onAddRecord(newRecord);
     setRecentlySubmittedCode(newRecord.kodeLaporan);
     setShowModal(false);
-    // Reset
-    setHariTanggal('');
-    setNamaSiswa('');
-    setKelas('');
-    setNisnSiswa('');
-    setNamaSiswa2('');
-    setKelas2('');
-    setNisnSiswa2('');
-    setKronologiKejadian('');
-    setKegiatanPenyadaran('');
-    setKegiatanPencegahan('');
-    setKegiatanPenangananRespon('');
-    setKegiatanPelaporan('');
-    setTindakLanjut('');
-    setKeterangan('');
-    setFormSignature('');
+    resetForm();
   };
 
   const handleCardSignatureSave = (signatureUrl: string, name?: string, title?: string) => {
@@ -220,7 +294,7 @@ export const ELaporView: React.FC<Props> = ({
           )}
           <button
             id="btn-tambah-lapor"
-            onClick={() => setShowModal(true)}
+            onClick={handleOpenAdd}
             className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-md shadow-rose-500/20 hover:from-rose-500 hover:to-red-500 transition active:scale-95 flex items-center gap-1.5 btn-3d"
           >
             <Plus className="w-4 h-4" />
@@ -251,22 +325,36 @@ export const ELaporView: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Add Report Modal */}
+      {/* Add / Edit Report Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs">
           <div className="w-full max-w-3xl bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden card-3d max-h-[92vh] flex flex-col">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-rose-50/70 to-white shrink-0">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-rose-100 text-rose-800 border border-rose-200">
-                  <ShieldAlert className="w-5 h-5" />
+                  {editingRecord ? <Pencil className="w-5 h-5 text-amber-700" /> : <ShieldAlert className="w-5 h-5" />}
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-800">Form E-Lapor & Mekanisme Penanganan</h2>
-                  <p className="text-xs text-slate-500">Pencatatan insiden perundungan & tahapan penanganan terpadu</p>
+                  <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <span>{editingRecord ? 'Edit Data Laporan Aduan' : 'Form E-Lapor & Mekanisme Penanganan'}</span>
+                    {editingRecord && (
+                      <span className="text-xs font-mono font-bold text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded-md border border-rose-300">
+                        {editingRecord.kodeLaporan}
+                      </span>
+                    )}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    {editingRecord
+                      ? 'Perbarui data identitas siswa, kronologi peristiwa, atau alur penanganan kasus'
+                      : 'Pencatatan insiden perundungan & tahapan penanganan terpadu'}
+                  </p>
                 </div>
               </div>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  resetForm();
+                }}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               >
                 <X className="w-5 h-5" />
@@ -275,7 +363,7 @@ export const ELaporView: React.FC<Props> = ({
 
             <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 text-xs">
               {/* Row 1 */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
                   <CalendarDatePicker
                     value={hariTanggal}
@@ -306,6 +394,22 @@ export const ELaporView: React.FC<Props> = ({
                     <option value="Siber">Siber (Medsos/Grup Chat)</option>
                     <option value="Sosial/Relasional">Sosial / Pengucilan</option>
                     <option value="Lainnya">Lainnya</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    STATUS PENANGANAN
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as ELaporRecord['status'])}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none font-semibold"
+                  >
+                    <option value="Investigasi">Investigasi</option>
+                    <option value="Mediasi">Mediasi</option>
+                    <option value="Selesai">Selesai</option>
+                    <option value="Terpantau Aman">Terpantau Aman</option>
                   </select>
                 </div>
               </div>
@@ -580,16 +684,26 @@ export const ELaporView: React.FC<Props> = ({
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
                   className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md btn-3d"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md btn-3d flex items-center gap-1.5"
                 >
-                  Simpan Laporan E-Lapor
+                  {editingRecord ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Simpan Perubahan Laporan
+                    </>
+                  ) : (
+                    'Simpan Laporan E-Lapor'
+                  )}
                 </button>
               </div>
             </form>
@@ -875,7 +989,7 @@ export const ELaporView: React.FC<Props> = ({
                     <select
                       value={item.status}
                       onChange={(e) => onUpdateStatus(item.id, e.target.value as ELaporRecord['status'])}
-                      className="px-2 py-1 text-[11px] bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-semibold focus:border-rose-500"
+                      className="px-2 py-1 text-[11px] bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-semibold focus:border-rose-500 cursor-pointer"
                       title="Ubah status penanganan"
                     >
                       <option value="Investigasi">Investigasi</option>
@@ -885,6 +999,16 @@ export const ELaporView: React.FC<Props> = ({
                     </select>
 
                     <button
+                      id={`btn-edit-lapor-${item.id}`}
+                      onClick={() => handleOpenEdit(item)}
+                      className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition border border-transparent hover:border-amber-200"
+                      title="Edit / Perbarui Data Laporan Aduan Ini"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      id={`btn-cetak-lapor-${item.id}`}
                       onClick={() => {
                         setSelectedForPrint(item);
                         setShowPrintModal(true);
