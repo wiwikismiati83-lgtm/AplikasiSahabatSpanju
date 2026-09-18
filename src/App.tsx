@@ -79,7 +79,7 @@ export default function App() {
   });
 
   // Navigation State
-  const [activeApp, setActiveApp] = useState<ActiveAppId>('zona_analitik');
+  const [activeApp, setActiveApp] = useState<ActiveAppId>('pilihan_menu');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAddLinkModalOpen, setIsAddLinkModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -93,6 +93,8 @@ export default function App() {
     // Auto-redirect if targetApp is provided
     if (user.targetApp) {
       setActiveApp(user.targetApp);
+    } else {
+      setActiveApp('pilihan_menu');
     }
     
     showToast(`Selamat datang, ${user.displayName}!`);
