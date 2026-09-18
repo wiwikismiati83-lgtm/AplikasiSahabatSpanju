@@ -15,6 +15,8 @@ import {
   FileSignature,
   FileText,
   Layers,
+  Pencil,
+  CheckCircle2,
 } from 'lucide-react';
 import { KebunLuasBerseriRecord, RtlItem } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
@@ -40,6 +42,7 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
   onOpenMenu,
 }) => {
   const [showModal, setShowModal] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<KebunLuasBerseriRecord | null>(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [selectedForPrint, setSelectedForPrint] = useState<KebunLuasBerseriRecord | null>(null);
   const [signingRecord, setSigningRecord] = useState<KebunLuasBerseriRecord | null>(null);
@@ -61,6 +64,46 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
     { id: '1', pic: '', targetPelaksanaan: '', deadline: '' },
   ]);
 
+  const resetForm = () => {
+    setEditingRecord(null);
+    setHariTanggal('');
+    setWaktu('13:00 - 15:30 WIB');
+    setEvaluasiProgramTerlaksana('');
+    setEvaluasiKendalaSolusi('');
+    setHasilInovasi('');
+    setProdukKreatif('');
+    setKeterangan('');
+    setFormSignature('');
+    setNamaPenandatangan('Wiwik Ismiati, S.Pd');
+    setNipPenandatangan('198311162009042003');
+    setRtlList([{ id: '1', pic: '', targetPelaksanaan: '', deadline: '' }]);
+  };
+
+  const handleOpenAdd = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (rec: KebunLuasBerseriRecord) => {
+    setEditingRecord(rec);
+    setHariTanggal(rec.hariTanggal);
+    setWaktu(rec.waktu || '13:00 - 15:30 WIB');
+    setEvaluasiProgramTerlaksana(rec.evaluasiProgramTerlaksana);
+    setEvaluasiKendalaSolusi(rec.evaluasiKendalaSolusi || '');
+    setHasilInovasi(rec.hasilInovasi || '');
+    setProdukKreatif(rec.produkKreatif || '');
+    setKeterangan(rec.keterangan || '');
+    setFormSignature(rec.tandaTanganUrl || '');
+    setNamaPenandatangan(rec.namaPenandatangan || 'Wiwik Ismiati, S.Pd');
+    setNipPenandatangan(rec.nipPenandatangan || '198311162009042003');
+    if (rec.rencanaTindakLanjut && rec.rencanaTindakLanjut.length > 0) {
+      setRtlList(rec.rencanaTindakLanjut);
+    } else {
+      setRtlList([{ id: '1', pic: '', targetPelaksanaan: '', deadline: '' }]);
+    }
+    setShowModal(true);
+  };
+
   const addRtlRow = () => {
     setRtlList([...rtlList, { id: `${Date.now()}`, pic: '', targetPelaksanaan: '', deadline: '' }]);
   };
@@ -78,6 +121,31 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!hariTanggal.trim() || !evaluasiProgramTerlaksana.trim()) return;
+
+    if (editingRecord) {
+      const updatedRecord: KebunLuasBerseriRecord = {
+        ...editingRecord,
+        hariTanggal: hariTanggal.trim(),
+        waktu: waktu.trim() || '13:00 - 15:30 WIB',
+        evaluasiProgramTerlaksana: evaluasiProgramTerlaksana.trim(),
+        evaluasiKendalaSolusi: evaluasiKendalaSolusi.trim(),
+        hasilInovasi: hasilInovasi.trim(),
+        produkKreatif: produkKreatif.trim(),
+        rencanaTindakLanjut: rtlList.filter((r) => r.pic.trim() || r.targetPelaksanaan.trim()),
+        keterangan: keterangan.trim(),
+        tandaTanganUrl: formSignature || editingRecord.tandaTanganUrl,
+        namaPenandatangan: namaPenandatangan.trim(),
+        nipPenandatangan: nipPenandatangan.trim(),
+        jabatanPenandatangan: editingRecord.jabatanPenandatangan || 'Koordinator Kebun Luas Berseri',
+      };
+
+      if (onUpdateRecord) {
+        onUpdateRecord(updatedRecord);
+      }
+      setShowModal(false);
+      resetForm();
+      return;
+    }
 
     const newRecord: KebunLuasBerseriRecord = {
       id: `kebun-${Date.now()}`,
@@ -98,15 +166,7 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
 
     onAddRecord(newRecord);
     setShowModal(false);
-    // Reset
-    setHariTanggal('');
-    setEvaluasiProgramTerlaksana('');
-    setEvaluasiKendalaSolusi('');
-    setHasilInovasi('');
-    setProdukKreatif('');
-    setKeterangan('');
-    setFormSignature('');
-    setRtlList([{ id: '1', pic: '', targetPelaksanaan: '', deadline: '' }]);
+    resetForm();
   };
 
   const handleCardSignatureSave = (signatureUrl: string, name?: string, title?: string) => {
@@ -161,7 +221,7 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
           </button>
           <button
             id="btn-tambah-kebun"
-            onClick={() => setShowModal(true)}
+            onClick={handleOpenAdd}
             className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-500/20 hover:from-teal-500 hover:to-emerald-500 transition active:scale-95 flex items-center gap-1.5 btn-3d"
           >
             <Plus className="w-4 h-4" />
@@ -177,15 +237,29 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
             <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-teal-50/70 to-white shrink-0">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-teal-100 text-teal-800 border border-teal-200">
-                  <Sparkles className="w-5 h-5" />
+                  {editingRecord ? <Pencil className="w-5 h-5 text-teal-700" /> : <Sparkles className="w-5 h-5 text-teal-700" />}
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-800">Formulir KEBUN LUAS BERSERI</h2>
-                  <p className="text-xs text-slate-500">Evaluasi, Berinovasi dan Kreatif (Bulanan)</p>
+                  <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <span>{editingRecord ? 'Edit Notulen KEBUN LUAS BERSERI' : 'Formulir KEBUN LUAS BERSERI'}</span>
+                    {editingRecord && (
+                      <span className="text-xs font-semibold text-teal-700 bg-teal-100/80 px-2 py-0.5 rounded-md border border-teal-300">
+                        {editingRecord.hariTanggal}
+                      </span>
+                    )}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    {editingRecord
+                      ? 'Perbarui evaluasi, kendala & solusi, inovasi, produk kreatif, atau matriks RTL'
+                      : 'Evaluasi, Berinovasi dan Kreatif (Bulanan)'}
+                  </p>
                 </div>
               </div>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  resetForm();
+                }}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               >
                 <X className="w-5 h-5" />
@@ -397,16 +471,26 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
                   className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-md btn-3d"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-md btn-3d flex items-center gap-1.5"
                 >
-                  Simpan Notulen Kebun Luas
+                  {editingRecord ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Simpan Perubahan Notulen
+                    </>
+                  ) : (
+                    'Simpan Notulen Kebun Luas'
+                  )}
                 </button>
               </div>
             </form>
@@ -576,6 +660,15 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
 
               <div className="flex items-center gap-1">
                 <button
+                  id={`btn-edit-kebun-${item.id}`}
+                  onClick={() => handleOpenEdit(item)}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition border border-transparent hover:border-amber-200"
+                  title="Edit / Perbarui Rapat Kebun Luas Ini"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button
+                  id={`btn-cetak-kebun-${item.id}`}
                   onClick={() => {
                     setSelectedForPrint(item);
                     setShowPrintModal(true);
@@ -587,6 +680,7 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
                 </button>
                 {canDelete && (
                   <button
+                    id={`btn-hapus-kebun-${item.id}`}
                     onClick={() => onDeleteRecord(item.id)}
                     className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
                     title="Hapus rekaman"

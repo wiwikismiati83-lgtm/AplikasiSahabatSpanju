@@ -626,7 +626,7 @@ export default function App() {
                 onUpdateRecord={async (updated) => {
                   setKebunRecords(kebunRecords.map((r) => (r.id === updated.id ? updated : r)));
                   await api.upsert('kebun_records', updated);
-                  showToast('Tanda tangan notulen Kebun Luas diperbarui.');
+                  showToast('Notulen rapat Kebun Luas berhasil diperbarui.');
                 }}
               />
             )}
