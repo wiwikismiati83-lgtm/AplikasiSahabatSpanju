@@ -146,6 +146,108 @@ const toCamelKeys = (obj: any): any => {
   return obj;
 };
 
+const KNOWN_TABLE_COLUMNS: Record<string, string[]> = {
+  e_lapor_records: [
+    'id', 'kodelaporan', 'haritanggal', 'waktukejadian', 'namasiswa', 'kelas',
+    'kronologikejadian', 'kegiatanpenyadaran', 'kegiatanpencegahan',
+    'kegiatanpenangananrespon', 'kegiatanpelaporan', 'tindaklanjut',
+    'keterangan', 'status', 'kategorikasus', 'tandatanganurl',
+    'namapenandatangan', 'jabatanpenandatangan', 'tandatanganpetugasurl',
+    'namapetugas', 'createdat', 'createdAt'
+  ],
+  sp_damai_records: [
+    'id', 'nomorsurat', 'haritanggal', 'tempatmediasi', 'namapihak1',
+    'kelaspihak1', 'nisnpihak1', 'peranpihak1', 'tandatanganpihak1',
+    'namapihak2', 'kelaspihak2', 'nisnpihak2', 'peranpihak2',
+    'tandatanganpihak2', 'ringkasanmasalah', 'butirkesepakatan',
+    'sanksiedukasi', 'namasaksiguru', 'jabatansaksiguru',
+    'tandatangansaksiguru', 'namakonselorsebaya',
+    'tandatangankonselorsebaya', 'status', 'hasilpemantauan', 'createdat', 'createdAt'
+  ],
+  buku_tamu_records: [
+    'id', 'haritanggal', 'jamkedatangan', 'namalengkap', 'nipnik',
+    'jabatan', 'instansiasal', 'tujuankunjungan', 'tandatanganurl',
+    'namapenandatangan', 'jabatanpenandatangan', 'tindaklanjut',
+    'keterangan', 'createdat', 'createdAt'
+  ],
+  piket_records: [
+    'id', 'haritanggal', 'waktu', 'namaanggota', 'kelas', 'hasiltemuan',
+    'linkfoto', 'keterangan', 'tandatanganurl', 'namapenandatangan',
+    'jabatanpenandatangan', 'createdat', 'createdAt'
+  ],
+  ceri_records: [
+    'id', 'haritanggal', 'waktu', 'hasiltemuansatuminggu',
+    'evaluasikegiatan', 'rencanainovasi', 'linkfoto', 'keterangan',
+    'tandatanganurl', 'namapenandatangan', 'jabatanpenandatangan', 'createdat', 'createdAt'
+  ],
+  kebun_records: [
+    'id', 'haritanggal', 'waktu', 'evaluasiprogramterlaksana',
+    'evaluasikendalasolusi', 'hasilinovasi', 'produkkreatif',
+    'rencanatindaklanjut', 'keterangan', 'tandatanganurl',
+    'namapenandatangan', 'jabatanpenandatangan', 'createdat', 'createdAt'
+  ],
+  serasi_records: [
+    'id', 'haritanggal', 'waktu', 'pesandisampaikan', 'keterangan',
+    'kategoriliterasi', 'penulis', 'tandatanganurl', 'namapenandatangan',
+    'jabatanpenandatangan', 'createdat', 'createdAt'
+  ],
+  arsip_records: [
+    'id', 'kodearsip', 'namakegiatan', 'kategori', 'haritanggal', 'waktu',
+    'tempat', 'penyelenggara', 'sasaranpeserta', 'jumlahpeserta',
+    'deskripsikegiatan', 'hasilnotulensi', 'linkfoto', 'linkdokumen',
+    'tandatangankoordinator', 'namakoordinator', 'jabatankoordinator',
+    'createdat', 'createdAt'
+  ],
+  media_edukasi_items: [
+    'id', 'judul', 'tipe', 'kategori', 'dokumentasimateriurl',
+    'pesanedukatif', 'thumbnailurl', 'sumber', 'tanggal', 'createdAt'
+  ],
+  kelas_zona: [
+    'kelas', 'tingkat', 'jumlahsiswa', 'totalkasustahunini',
+    'kasusterselesaikan', 'skorkeramahan', 'statuszona', 'walikelas',
+    'dutaantibullying', 'catatan', 'terakhirdiperiksa', 'createdAt'
+  ],
+  siswa_master: [
+    'id', 'nisn', 'nama', 'kelas', 'jeniskelamin', 'createdat', 'jenisKelamin', 'createdAt'
+  ],
+  guru_master: [
+    'id', 'nip', 'nama', 'jabatan', 'status', 'createdat', 'createdAt'
+  ]
+};
+
+const sanitizeForTable = (table: string, rawItem: any): any => {
+  if (!rawItem || typeof rawItem !== 'object') return rawItem;
+  const item = { ...rawItem };
+
+  if (table === 'e_lapor_records') {
+    const extraNotes: string[] = [];
+    if (item.namasiswa2) {
+      extraNotes.push(`Pihak 2: ${item.namasiswa2}${item.kelas2 ? ' (' + item.kelas2 + ')' : ''}${item.nisnsiswa2 ? ' NISN: ' + item.nisnsiswa2 : ''}`);
+    }
+    if (item.nisnsiswa && !item.keterangan?.includes(item.nisnsiswa)) {
+      extraNotes.push(`NISN Pelapor/Pihak 1: ${item.nisnsiswa}`);
+    }
+    if (extraNotes.length > 0) {
+      const existing = item.keterangan && item.keterangan !== '-' ? item.keterangan + ' | ' : '';
+      item.keterangan = existing + extraNotes.join('; ');
+    }
+  }
+
+  const allowed = KNOWN_TABLE_COLUMNS[table];
+  if (!allowed) return item;
+
+  const sanitized: any = {};
+  for (const col of allowed) {
+    const lowerCol = col.toLowerCase();
+    if (item[col] !== undefined) {
+      sanitized[col] = item[col];
+    } else if (item[lowerCol] !== undefined) {
+      sanitized[lowerCol] = item[lowerCol];
+    }
+  }
+  return sanitized;
+};
+
 // Helper for Supabase CRUD
 const handleSupabase = async (table: string, method: 'select' | 'upsert' | 'delete', body: any = null) => {
   try {
@@ -168,14 +270,18 @@ const handleSupabase = async (table: string, method: 'select' | 'upsert' | 'dele
     
     if (method === 'upsert') {
       let attempts = 0;
-      let currentBody = Array.isArray(body) ? [...body] : { ...body };
+      let currentBody = Array.isArray(body)
+        ? body.map(b => sanitizeForTable(table, b))
+        : sanitizeForTable(table, body);
       
-      while (attempts < 5) {
+      let lastError: any = null;
+      while (attempts < 30) {
         try {
           const { data, error } = await query.upsert(currentBody);
           if (error) throw error;
           return data;
         } catch (err: any) {
+          lastError = err;
           const msg = err.message || '';
           const match = msg.match(/Could not find the '([^']+)' column/i) || msg.match(/column "([^"]+)"/i);
           if (match && match[1]) {
@@ -185,10 +291,12 @@ const handleSupabase = async (table: string, method: 'select' | 'upsert' | 'dele
               currentBody = currentBody.map(item => {
                 const newItem = { ...item };
                 delete newItem[missingCol];
+                delete newItem[match[1]];
                 return newItem;
               });
             } else {
               delete currentBody[missingCol];
+              delete currentBody[match[1]];
             }
             attempts++;
             query = getSupabase().from(table);
@@ -197,6 +305,8 @@ const handleSupabase = async (table: string, method: 'select' | 'upsert' | 'dele
           throw err;
         }
       }
+      if (lastError) throw lastError;
+      throw new Error(`Failed to upsert to ${table} after ${attempts} attempts`);
     }
 
     if (method === 'delete') {
@@ -262,10 +372,13 @@ app.post('/api/bulk-upsert', async (req, res) => {
   const { table, items } = req.body;
   try {
     const client = getSupabase();
-    let currentItems = toLowerKeys(items);
+    const lowerItems = toLowerKeys(items);
+    let currentItems = Array.isArray(lowerItems)
+      ? lowerItems.map((item: any) => sanitizeForTable(table, item))
+      : sanitizeForTable(table, lowerItems);
     let attempts = 0;
     
-    while (attempts < 5) {
+    while (attempts < 30) {
       try {
         const { data, error } = await client.from(table).upsert(currentItems);
         if (error) throw error;
@@ -281,6 +394,7 @@ app.post('/api/bulk-upsert', async (req, res) => {
             currentItems = currentItems.map((item: any) => {
               const newItem = { ...item };
               delete newItem[missingCol];
+              delete newItem[match[1]];
               return newItem;
             });
           }
@@ -290,6 +404,7 @@ app.post('/api/bulk-upsert', async (req, res) => {
         throw error;
       }
     }
+    throw new Error(`Failed to bulk upsert to ${table} after ${attempts} attempts`);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -297,6 +412,7 @@ app.post('/api/bulk-upsert', async (req, res) => {
 
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
+    delete (globalThis as any).__dirname;
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',

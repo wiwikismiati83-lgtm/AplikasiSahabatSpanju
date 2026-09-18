@@ -1,6 +1,58 @@
 <!doctype html>
 <html lang="id">
   <head>
+    <script>
+      (function () {
+        function isVite(arg) {
+          if (!arg) return false;
+          var str = '';
+          if (typeof arg === 'string') {
+            str = arg;
+          } else if (arg && typeof arg.message === 'string') {
+            str = arg.message + ' ' + (arg.stack || '');
+          } else if (arg && typeof arg.stack === 'string') {
+            str = arg.stack;
+          } else {
+            try { str = JSON.stringify(arg) || String(arg); } catch (_) {
+              try { str = String(arg); } catch (__) {}
+            }
+          }
+          var lower = str.toLowerCase();
+          return (
+            lower.indexOf('[vite]') !== -1 ||
+            lower.indexOf('/@vite/') !== -1 ||
+            lower.indexOf('failed to connect to websocket') !== -1 ||
+            lower.indexOf('websocket connection') !== -1 ||
+            lower.indexOf('vite-hmr') !== -1 ||
+            lower.indexOf('[hmr]') !== -1 ||
+            lower.indexOf('server connection lost') !== -1
+          );
+        }
+        var methods = ['log', 'info', 'warn', 'error', 'debug', 'trace'];
+        methods.forEach(function (m) {
+          var orig = console[m];
+          if (!orig) return;
+          console[m] = function () {
+            for (var i = 0; i < arguments.length; i++) {
+              if (isVite(arguments[i])) return;
+            }
+            return orig.apply(console, arguments);
+          };
+        });
+        window.addEventListener('error', function (event) {
+          if (event && (isVite(event.message) || isVite(event.filename) || isVite(event.error))) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }, true);
+        window.addEventListener('unhandledrejection', function (event) {
+          if (event && (isVite(event.reason) || (event.reason && (isVite(event.reason.message) || isVite(event.reason.stack))))) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          }
+        }, true);
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Sahabat SPANJU - SMPN 7 Pasuruan</title>

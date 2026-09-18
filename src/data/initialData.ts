@@ -178,6 +178,25 @@ export const INITIAL_E_LAPOR: ELaporRecord[] = [
     status: 'Terpantau Aman',
     kategoriKasus: 'Siber',
     createdAt: '2026-09-10T14:30:00.000Z',
+  },
+  {
+    id: 'lapor-003',
+    kodeLaporan: 'SPJ-2026-003',
+    hariTanggal: 'Kamis, 13 Agustus 2026',
+    waktuKejadian: '11:00 WIB',
+    namaSiswa: 'AUXILIA PARAMITHA',
+    kelas: 'Kelas 7B',
+    kronologiKejadian: 'tes',
+    kegiatanPenyadaran: 'Pemberian pemahaman dampak psikologis dan empati kawan.',
+    kegiatanPencegahan: 'Penguatan norma kelas ramah anak & komitmen anti-bullying.',
+    kegiatanPenangananRespon: 'Mediasi tatap muka damai didampingi konselor BK.',
+    kegiatanPelaporan: 'Pencatatan berita acara resmi di sistem register sekolah.',
+    tindakLanjut: 'Pemantauan berkala oleh Duta Sahabat SPANJU.',
+    keterangan: '-',
+    status: 'Selesai',
+    kategoriKasus: 'Siber',
+    jabatanPenandatangan: 'Konselor Tim Pencegahan & Penanganan Kekerasan (TPPK)',
+    createdAt: '2026-08-13T11:00:00.000Z',
   }
 ];
 
