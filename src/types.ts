@@ -21,6 +21,7 @@ export interface PiketHarianRecord {
   keterangan: string;
   tandaTanganUrl?: string;
   namaPenandatangan?: string;
+  nipPenandatangan?: string;
   jabatanPenandatangan?: string;
   createdAt: string;
 }
@@ -36,6 +37,7 @@ export interface SabtuBeliTehCeriRecord {
   keterangan: string;
   tandaTanganUrl?: string;
   namaPenandatangan?: string;
+  nipPenandatangan?: string;
   jabatanPenandatangan?: string;
   createdAt: string;
 }
@@ -59,6 +61,7 @@ export interface KebunLuasBerseriRecord {
   keterangan: string;
   tandaTanganUrl?: string;
   namaPenandatangan?: string;
+  nipPenandatangan?: string;
   jabatanPenandatangan?: string;
   createdAt: string;
 }
@@ -73,6 +76,7 @@ export interface SenandungSerasiRecord {
   penulis?: string;
   tandaTanganUrl?: string;
   namaPenandatangan?: string;
+  nipPenandatangan?: string;
   jabatanPenandatangan?: string;
   createdAt: string;
 }
@@ -82,8 +86,14 @@ export interface ELaporRecord {
   kodeLaporan: string;
   hariTanggal: string;
   waktuKejadian: string;
+  // Siswa I
   namaSiswa: string;
   kelas: string;
+  nisnSiswa?: string;
+  // Siswa II
+  namaSiswa2?: string;
+  kelas2?: string;
+  nisnSiswa2?: string;
   kronologiKejadian: string;
   // Mekanisme Penanganan
   kegiatanPenyadaran: string;
@@ -96,6 +106,7 @@ export interface ELaporRecord {
   kategoriKasus: 'Verbal' | 'Fisik' | 'Siber' | 'Sosial/Relasional' | 'Lainnya';
   tandaTanganUrl?: string;
   namaPenandatangan?: string;
+  nipPenandatangan?: string;
   jabatanPenandatangan?: string;
   tandaTanganPetugasUrl?: string;
   namaPetugas?: string;

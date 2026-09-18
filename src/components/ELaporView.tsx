@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Trash2,
+  Users,
   Printer,
   X,
   Search,
@@ -21,13 +22,15 @@ import {
   ShieldCheck,
   Layers,
 } from 'lucide-react';
-import { ELaporRecord, UserRole } from '../types';
+import { ELaporRecord, UserRole, Siswa } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
 import { TouchSignatureModal } from './TouchSignatureModal';
 import { OfficialReportModal } from './OfficialReportModal';
+import { StudentPickerModal } from './StudentPickerModal';
 
 interface Props {
   records: ELaporRecord[];
+  siswaList?: Siswa[];
   onAddRecord: (record: ELaporRecord) => void;
   onDeleteRecord: (id: string) => void;
   onUpdateStatus: (id: string, status: ELaporRecord['status']) => void;
@@ -39,6 +42,7 @@ interface Props {
 
 export const ELaporView: React.FC<Props> = ({
   records,
+  siswaList = [],
   onAddRecord,
   onDeleteRecord,
   onUpdateStatus,
@@ -61,10 +65,19 @@ export const ELaporView: React.FC<Props> = ({
   const [signingRecord, setSigningRecord] = useState<ELaporRecord | null>(null);
 
   // Form states
-  const [hariTanggal, setHariTanggal] = useState('');
-  const [waktuKejadian, setWaktuKejadian] = useState('10:00 WIB (Jam Istirahat)');
+  const [hariTanggal, setHariTanggal] = useState(new Date().toISOString().split('T')[0]);
+  const [waktuKejadian, setWaktuKejadian] = useState(() => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
+  });
   const [namaSiswa, setNamaSiswa] = useState('');
   const [kelas, setKelas] = useState('');
+  const [nisnSiswa, setNisnSiswa] = useState('');
+  const [namaSiswa2, setNamaSiswa2] = useState('');
+  const [kelas2, setKelas2] = useState('');
+  const [nisnSiswa2, setNisnSiswa2] = useState('');
+  const [namaPenandatangan, setNamaPenandatangan] = useState('Wiwik Ismiati, S.Pd');
+  const [nipPenandatangan, setNipPenandatangan] = useState('198311162009042003');
   const [kronologiKejadian, setKronologiKejadian] = useState('');
   const [kegiatanPenyadaran, setKegiatanPenyadaran] = useState('');
   const [kegiatanPencegahan, setKegiatanPencegahan] = useState('');
@@ -75,6 +88,7 @@ export const ELaporView: React.FC<Props> = ({
   const [status, setStatus] = useState<ELaporRecord['status']>('Mediasi');
   const [kategoriKasus, setKategoriKasus] = useState<ELaporRecord['kategoriKasus']>('Verbal');
   const [formSignature, setFormSignature] = useState('');
+  const [activePicker, setActivePicker] = useState<'siswa1' | 'siswa2' | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,10 +100,19 @@ export const ELaporView: React.FC<Props> = ({
     const newRecord: ELaporRecord = {
       id: `lapor-${Date.now()}`,
       kodeLaporan,
-      hariTanggal: hariTanggal.trim(),
+      hariTanggal: new Date(hariTanggal).toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }),
       waktuKejadian: waktuKejadian.trim(),
       namaSiswa: namaSiswa.trim(),
       kelas: kelas.trim() || 'Siswa SPANJU',
+      nisnSiswa: nisnSiswa.trim(),
+      namaSiswa2: namaSiswa2.trim(),
+      kelas2: kelas2.trim(),
+      nisnSiswa2: nisnSiswa2.trim(),
       kronologiKejadian: kronologiKejadian.trim(),
       kegiatanPenyadaran: kegiatanPenyadaran.trim() || 'Pemberian pemahaman dampak psikologis dan empati kawan.',
       kegiatanPencegahan: kegiatanPencegahan.trim() || 'Penguatan norma kelas ramah anak & komitmen anti-bullying.',
@@ -100,7 +123,8 @@ export const ELaporView: React.FC<Props> = ({
       status,
       kategoriKasus,
       tandaTanganUrl: formSignature || undefined,
-      namaPenandatangan: 'Petugas Mediasi & Penanganan BK',
+      namaPenandatangan: namaPenandatangan.trim(),
+      nipPenandatangan: nipPenandatangan.trim(),
       jabatanPenandatangan: 'Konselor Tim Pencegahan & Penanganan Kekerasan (TPPK)',
       createdAt: new Date().toISOString(),
     };
@@ -112,6 +136,10 @@ export const ELaporView: React.FC<Props> = ({
     setHariTanggal('');
     setNamaSiswa('');
     setKelas('');
+    setNisnSiswa('');
+    setNamaSiswa2('');
+    setKelas2('');
+    setNisnSiswa2('');
     setKronologiKejadian('');
     setKegiatanPenyadaran('');
     setKegiatanPencegahan('');
@@ -128,6 +156,7 @@ export const ELaporView: React.FC<Props> = ({
       ...signingRecord,
       tandaTanganUrl: signatureUrl,
       namaPenandatangan: name || signingRecord.namaPenandatangan || 'Petugas Penanganan Kasus',
+      nipPenandatangan: signingRecord.nipPenandatangan,
       jabatanPenandatangan: title || signingRecord.jabatanPenandatangan || 'Konselor TPPK SPANJU',
     };
     onUpdateRecord(updated);
@@ -259,11 +288,10 @@ export const ELaporView: React.FC<Props> = ({
                     HARI / TANGGAL <span className="text-rose-500">*</span>
                   </label>
                   <input
-                    type="text"
+                    type="date"
                     required
                     value={hariTanggal}
                     onChange={(e) => setHariTanggal(e.target.value)}
-                    placeholder="Contoh: Senin, 14 September 2026"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
                   />
                 </div>
@@ -276,7 +304,7 @@ export const ELaporView: React.FC<Props> = ({
                     type="text"
                     value={waktuKejadian}
                     onChange={(e) => setWaktuKejadian(e.target.value)}
-                    placeholder="10:15 WIB (Istirahat)"
+                    placeholder="Contoh: 10:15 WIB"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
                   />
                 </div>
@@ -299,33 +327,90 @@ export const ELaporView: React.FC<Props> = ({
                 </div>
               </div>
 
-              {/* Row 2 */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    NAMA SISWA (Bisa Inisial/Lengkap) <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={namaSiswa}
-                    onChange={(e) => setNamaSiswa(e.target.value)}
-                    placeholder="Contoh: Siswa AN (Korban) & BD (Pelaku)"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
-                  />
+              {/* Dual Identity Panels (Siswa I & Siswa II) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Siswa I - Pihak Pertama (Blue Theme) */}
+                <div className="p-4 rounded-2xl bg-sky-50 border border-sky-100 space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-sky-200/60">
+                    <div className="p-1.5 rounded-lg bg-white text-sky-600 shadow-sm border border-sky-100">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <span className="text-[11px] font-black text-sky-900 uppercase tracking-tight">
+                      IDENTITAS PIHAK PERTAMA (SISWA I):
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={() => setActivePicker('siswa1')}
+                      className="w-full text-left group"
+                    >
+                      <label className="block text-[10px] font-black text-sky-800 mb-1 uppercase">Nama Siswa <span className="text-rose-500">*</span></label>
+                      <div className="w-full px-3 py-2.5 bg-white border border-sky-200 rounded-xl text-xs font-bold text-slate-800 group-hover:border-sky-500 transition flex items-center justify-between">
+                        <span className={namaSiswa ? 'text-slate-800' : 'text-slate-400 italic'}>
+                          {namaSiswa || 'Klik untuk pilih siswa...'}
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-sky-400" />
+                      </div>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => setActivePicker('siswa1')}
+                      className="w-full text-left group"
+                    >
+                      <label className="block text-[10px] font-black text-sky-800 mb-1 uppercase">Kelas</label>
+                      <div className="w-full px-3 py-2.5 bg-white border border-sky-200 rounded-xl text-xs font-bold text-slate-800 group-hover:border-sky-500 transition flex items-center justify-between">
+                        <span className={kelas ? 'text-slate-800' : 'text-slate-400 italic'}>
+                          {kelas ? `KELAS ${kelas}` : 'Contoh: 8E'}
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-sky-400" />
+                      </div>
+                    </button>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    KELAS
-                  </label>
-                  <input
-                    type="text"
-                    value={kelas}
-                    onChange={(e) => setKelas(e.target.value)}
-                    placeholder="Contoh: 7B / 8E"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
-                  />
+                {/* Siswa II - Pihak Kedua (Slate Theme) */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-200">
+                    <div className="p-1.5 rounded-lg bg-white text-slate-600 shadow-sm border border-slate-100">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
+                      IDENTITAS PIHAK KEDUA (SISWA II):
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={() => setActivePicker('siswa2')}
+                      className="w-full text-left group"
+                    >
+                      <label className="block text-[10px] font-black text-slate-800 mb-1 uppercase">Nama Siswa <span className="text-red-500">*</span></label>
+                      <div className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 group-hover:border-slate-500 transition flex items-center justify-between">
+                        <span className={namaSiswa2 ? 'text-slate-800' : 'text-slate-400 italic'}>
+                          {namaSiswa2 || 'Klik untuk pilih siswa...'}
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-slate-400" />
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActivePicker('siswa2')}
+                      className="w-full text-left group"
+                    >
+                      <label className="block text-[10px] font-black text-slate-800 mb-1 uppercase">Kelas</label>
+                      <div className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 group-hover:border-slate-500 transition flex items-center justify-between">
+                        <span className={kelas2 ? 'text-slate-800' : 'text-slate-400 italic'}>
+                          {kelas2 ? `KELAS ${kelas2}` : 'Contoh: 8E'}
+                        </span>
+                        <ChevronDown className="w-4 h-4 text-slate-400" />
+                      </div>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -451,22 +536,62 @@ export const ELaporView: React.FC<Props> = ({
               </div>
 
               {/* Touchscreen Signature Pad */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  TANDA TANGAN PETUGAS PENANGANAN KASUS (LAYAR SENTUH / LAPTOP)
-                </label>
-                <TouchSignaturePad
-                  initialSignature={formSignature}
-                  signerName="Konselor Penanganan Kasus"
-                  signerTitle="Tim TPPK UPTD SMPN 7 Pasuruan"
-                  compact={true}
-                  onSave={(dataUrl) => {
-                    setFormSignature(dataUrl);
-                    alert('Tanda tangan berhasil direkam!');
-                  }}
-                  title="Tanda Tangan Berita Acara Kasus"
-                  promptText="Goreskan jari di layar sentuh HP atau gunakan mouse laptop:"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    PILIH PENANDA TANGAN (PETUGAS BK/TPPK)
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNamaPenandatangan('Wiwik Ismiati, S.Pd');
+                        setNipPenandatangan('198311162009042003');
+                      }}
+                      className={`px-3 py-2 rounded-xl border text-left transition flex flex-col ${
+                        namaPenandatangan === 'Wiwik Ismiati, S.Pd'
+                          ? 'bg-rose-50 border-rose-300 ring-2 ring-rose-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="text-xs font-bold text-slate-800">Wiwik Ismiati, S.Pd</span>
+                      <span className="text-[10px] text-slate-500">Nip. 198311162009042003</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNamaPenandatangan('Eki Febriani, S.Pd');
+                        setNipPenandatangan('19940214 202221 2 014');
+                      }}
+                      className={`px-3 py-2 rounded-xl border text-left transition flex flex-col ${
+                        namaPenandatangan === 'Eki Febriani, S.Pd'
+                          ? 'bg-rose-50 border-rose-300 ring-2 ring-rose-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="text-xs font-bold text-slate-800">Eki Febriani, S.Pd</span>
+                      <span className="text-[10px] text-slate-500">Nip. 19940214 202221 2 014</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    TANDA TANGAN (LAYAR SENTUH / MOUSE)
+                  </label>
+                  <TouchSignaturePad
+                    initialSignature={formSignature}
+                    signerName={namaPenandatangan}
+                    signerTitle="Tim TPPK UPTD SMPN 7 Pasuruan"
+                    compact={true}
+                    onSave={(dataUrl) => {
+                      setFormSignature(dataUrl);
+                      alert('Tanda tangan berhasil direkam!');
+                    }}
+                    title="Tanda Tangan Berita Acara Kasus"
+                    promptText="Goreskan jari di layar sentuh HP atau gunakan mouse laptop:"
+                  />
+                </div>
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
@@ -520,6 +645,7 @@ export const ELaporView: React.FC<Props> = ({
           }
           firstSignerRole="Petugas Konselor / TPPK SPANJU"
           firstSignerName={selectedForPrint?.namaPenandatangan || 'Tim Konseling & Penanganan Ramah'}
+          firstSignerNip={selectedForPrint?.nipPenandatangan}
           firstSignerSignature={selectedForPrint?.tandaTanganUrl || records[0]?.tandaTanganUrl}
           onFirstSignerUpdate={(sig) => {
             if (selectedForPrint && onUpdateRecord) {
@@ -527,17 +653,18 @@ export const ELaporView: React.FC<Props> = ({
             }
           }}
           secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
-          secondSignerName="Drs. Akhmad Fauzi, M.Pd."
+          secondSignerName="Nur Fadilah, S.Pd., M.Pd"
+          secondSignerNip="19860410 201001 2 030"
         >
           {selectedForPrint ? (
             <div className="space-y-4">
-              <div className="p-3 bg-rose-50/60 border border-rose-200 rounded-lg flex items-center justify-between text-xs">
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between text-xs">
                 <div>
-                  <span className="font-bold text-rose-900 block">KODE LAPORAN: {selectedForPrint.kodeLaporan}</span>
+                  <span className="font-bold text-slate-900 block">KODE LAPORAN: {selectedForPrint.kodeLaporan}</span>
                   <span className="text-slate-600">Kategori Kasus: <strong>{selectedForPrint.kategoriKasus}</strong></span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white border border-rose-300 text-rose-800">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white border border-slate-300 text-slate-800">
                     Status: {selectedForPrint.status}
                   </span>
                 </div>
@@ -546,15 +673,27 @@ export const ELaporView: React.FC<Props> = ({
               <table className="w-full text-xs border border-slate-300">
                 <tbody>
                   <tr className="border-b border-slate-200">
-                    <td className="p-2.5 font-bold bg-rose-50/40 w-1/3">Hari / Tanggal Kejadian</td>
+                    <td className="p-2.5 font-bold bg-slate-50 w-1/3">Hari / Tanggal Kejadian</td>
                     <td className="p-2.5 text-slate-800">{selectedForPrint.hariTanggal} ({selectedForPrint.waktuKejadian})</td>
                   </tr>
                   <tr className="border-b border-slate-200">
-                    <td className="p-2.5 font-bold bg-rose-50/40">Pihak Terkait (Siswa & Kelas)</td>
-                    <td className="p-2.5 font-bold text-slate-900">{selectedForPrint.namaSiswa} &bull; Kelas {selectedForPrint.kelas}</td>
+                    <td className="p-2.5 font-bold bg-sky-50 text-sky-900">Pihak Pertama (Siswa I)</td>
+                    <td className="p-2.5 font-bold text-slate-900">
+                      {selectedForPrint.namaSiswa} &bull; Kelas {selectedForPrint.kelas}
+                      {selectedForPrint.nisnSiswa && <span className="block text-[10px] text-sky-700 font-medium">NISN: {selectedForPrint.nisnSiswa}</span>}
+                    </td>
                   </tr>
+                  {selectedForPrint.namaSiswa2 && (
+                    <tr className="border-b border-slate-200">
+                      <td className="p-2.5 font-bold bg-rose-50 text-rose-900">Pihak Kedua (Siswa II)</td>
+                      <td className="p-2.5 font-bold text-slate-900">
+                        {selectedForPrint.namaSiswa2} &bull; Kelas {selectedForPrint.kelas2 || '-'}
+                        {selectedForPrint.nisnSiswa2 && <span className="block text-[10px] text-rose-700 font-medium">NISN: {selectedForPrint.nisnSiswa2}</span>}
+                      </td>
+                    </tr>
+                  )}
                   <tr className="border-b border-slate-200">
-                    <td className="p-2.5 font-bold bg-rose-50/40 align-top">Kronologi Kejadian</td>
+                    <td className="p-2.5 font-bold bg-slate-50/40 align-top">Kronologi Kejadian</td>
                     <td className="p-2.5 text-slate-800 leading-relaxed">{selectedForPrint.kronologiKejadian}</td>
                   </tr>
                 </tbody>
@@ -615,8 +754,18 @@ export const ELaporView: React.FC<Props> = ({
                         <span>{item.hariTanggal}</span>
                       </td>
                       <td className="p-2 border-r border-slate-200">
-                        <span className="font-semibold block">{item.namaSiswa}</span>
-                        <span className="text-[10px] text-slate-500">Kelas {item.kelas}</span>
+                        <div className="space-y-1">
+                          <div className="bg-sky-50/50 p-1 rounded border border-sky-100">
+                            <span className="font-bold block text-[10px] text-sky-900 leading-tight">{item.namaSiswa}</span>
+                            <span className="text-[9px] text-sky-700">Kelas {item.kelas}</span>
+                          </div>
+                          {item.namaSiswa2 && (
+                            <div className="bg-rose-50/50 p-1 rounded border border-rose-100">
+                              <span className="font-bold block text-[10px] text-rose-900 leading-tight">{item.namaSiswa2}</span>
+                              <span className="text-[9px] text-rose-700">Kelas {item.kelas2}</span>
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="p-2 border-r border-slate-200 text-slate-700 max-w-xs truncate">
                         {item.kronologiKejadian}
@@ -645,6 +794,25 @@ export const ELaporView: React.FC<Props> = ({
           )}
         </OfficialReportModal>
       )}
+
+      {/* Student Picker Popup */}
+      <StudentPickerModal
+        isOpen={activePicker !== null}
+        onClose={() => setActivePicker(null)}
+        siswaList={siswaList}
+        title={activePicker === 'siswa1' ? 'Pilih Identitas Siswa I' : 'Pilih Identitas Siswa II'}
+        onSelect={(siswa) => {
+          if (activePicker === 'siswa1') {
+            setNamaSiswa(siswa.nama);
+            setKelas(siswa.kelas);
+            setNisnSiswa(siswa.nisn);
+          } else {
+            setNamaSiswa2(siswa.nama);
+            setKelas2(siswa.kelas);
+            setNisnSiswa2(siswa.nisn);
+          }
+        }}
+      />
 
       {/* Confidential Notice for Siswa and Orang Tua */}
       {isRestrictedFromViewingReports ? (

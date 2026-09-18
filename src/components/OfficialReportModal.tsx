@@ -24,10 +24,12 @@ interface OfficialReportModalProps {
   // Signatures
   firstSignerRole?: string;
   firstSignerName?: string;
+  firstSignerNip?: string;
   firstSignerSignature?: string;
   onFirstSignerUpdate?: (sig: string, name?: string) => void;
   secondSignerRole?: string;
   secondSignerName?: string;
+  secondSignerNip?: string;
   secondSignerSignature?: string;
   onSecondSignerUpdate?: (sig: string, name?: string) => void;
 }
@@ -45,10 +47,12 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
   children,
   firstSignerRole = 'Petugas / Koordinator Pelaksana',
   firstSignerName = 'Tim Sahabat SPANJU',
+  firstSignerNip,
   firstSignerSignature,
   onFirstSignerUpdate,
   secondSignerRole = 'Kepala UPTD SMP Negeri 7 Pasuruan',
-  secondSignerName = 'Drs. Akhmad Fauzi, M.Pd.',
+  secondSignerName = 'Nur Fadilah, S.Pd., M.Pd',
+  secondSignerNip = '19860410 201001 2 030',
   secondSignerSignature,
   onSecondSignerUpdate,
 }) => {
@@ -174,6 +178,11 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
                   <p className="font-black text-slate-900 underline underline-offset-4 decoration-1">
                     {firstSignerName}
                   </p>
+                  {firstSignerNip && (
+                    <p className="text-[10px] text-slate-700 mt-0.5 font-bold">
+                      NIP. {firstSignerNip}
+                    </p>
+                  )}
                   <p className="text-[10px] text-slate-600 mt-0.5">
                     Sahabat SPANJU UPTD SMPN 7 Pasuruan
                   </p>
@@ -233,9 +242,11 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
                   <p className="font-black text-slate-900 underline underline-offset-4 decoration-1">
                     {secondSignerName}
                   </p>
-                  <p className="text-[10px] text-slate-600 mt-0.5">
-                    NIP. 19680514 199412 1 003
-                  </p>
+                  {secondSignerNip && (
+                    <p className="text-[10px] text-slate-700 mt-0.5 font-bold">
+                      NIP. {secondSignerNip}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

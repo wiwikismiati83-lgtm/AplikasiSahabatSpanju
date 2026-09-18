@@ -70,7 +70,7 @@ export const KopSurat: React.FC<KopSuratProps> = ({
       {/* Optional Subtitle / Nomor Surat */}
       {subTitle && (
         <div className="text-center pt-3 pb-1">
-          <h2 className="text-sm sm:text-base md:text-lg font-black uppercase text-slate-900 tracking-wide underline underline-offset-4 decoration-2">
+          <h2 className="text-sm sm:text-base md:text-lg font-black uppercase text-slate-900 tracking-wide underline underline-offset-4 decoration-slate-950 decoration-2">
             {subTitle}
           </h2>
           {nomorSurat && (

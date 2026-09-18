@@ -127,11 +127,68 @@ export default function App() {
 
   const [isLoading, setIsLoading] = useState(true);
 
+  // Sync records to localStorage as fallback
+  useEffect(() => {
+    if (!isLoading) {
+      const allData = {
+        customLinks,
+        piketRecords,
+        ceriRecords,
+        kebunRecords,
+        serasiRecords,
+        eLaporRecords,
+        bukuTamuRecords,
+        mediaEdukasiItems,
+        kelasList,
+        spDamaiRecords,
+        arsipKegiatanRecords,
+        siswaList,
+        guruList,
+      };
+      localStorage.setItem('spanju_backup_data', JSON.stringify(allData));
+    }
+  }, [
+    isLoading,
+    customLinks,
+    piketRecords,
+    ceriRecords,
+    kebunRecords,
+    serasiRecords,
+    eLaporRecords,
+    bukuTamuRecords,
+    mediaEdukasiItems,
+    kelasList,
+    spDamaiRecords,
+    arsipKegiatanRecords,
+    siswaList,
+    guruList,
+  ]);
+
   // Fetch all data from Supabase on mount
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         setIsLoading(true);
+        
+        // Try to load from localStorage first for immediate results
+        const savedData = localStorage.getItem('spanju_backup_data');
+        if (savedData) {
+          const parsed = JSON.parse(savedData);
+          if (parsed.customLinks) setCustomLinks(parsed.customLinks);
+          if (parsed.piketRecords) setPiketRecords(parsed.piketRecords);
+          if (parsed.ceriRecords) setCeriRecords(parsed.ceriRecords);
+          if (parsed.kebunRecords) setKebunRecords(parsed.kebunRecords);
+          if (parsed.serasiRecords) setSerasiRecords(parsed.serasiRecords);
+          if (parsed.eLaporRecords) setELaporRecords(parsed.eLaporRecords);
+          if (parsed.bukuTamuRecords) setBukuTamuRecords(parsed.bukuTamuRecords);
+          if (parsed.mediaEdukasiItems) setMediaEdukasiItems(parsed.mediaEdukasiItems);
+          if (parsed.kelasList) setKelasList(parsed.kelasList);
+          if (parsed.spDamaiRecords) setSpDamaiRecords(parsed.spDamaiRecords);
+          if (parsed.arsipKegiatanRecords) setArsipKegiatanRecords(parsed.arsipKegiatanRecords);
+          if (parsed.siswaList) setSiswaList(parsed.siswaList);
+          if (parsed.guruList) setGuruList(parsed.guruList);
+        }
+
         const [
           piket, ceri, kebun, serasi, elapor, tamu, media, zona, damai, arsip, siswa, guru
         ] = await Promise.all([
@@ -409,7 +466,7 @@ export default function App() {
 
             <button
               onClick={() => setActiveApp('pilihan_menu')}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md hover:from-rose-500 hover:to-pink-500 transition cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md hover:from-blue-500 hover:to-indigo-500 transition cursor-pointer"
               title="Buka Pilihan Menu Aplikasi"
             >
               <Layers className="w-4 h-4" />
@@ -423,13 +480,13 @@ export default function App() {
                   onClick={() => setIsLoginModalOpen(true)}
                   className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs border font-medium transition text-left cursor-pointer hover:shadow-xs ${
                     currentUser.role === 'admin'
-                      ? 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-200'
+                      ? 'bg-blue-50 hover:bg-blue-100 text-blue-800 border-blue-200'
                       : 'bg-teal-50 hover:bg-teal-100 text-teal-800 border-teal-200'
                   }`}
                   title="Klik untuk ganti akun / login ulang"
                 >
                   {currentUser.role === 'admin' ? (
-                    <Shield className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                    <Shield className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                   ) : (
                     <UserCheck className="w-3.5 h-3.5 text-teal-600 shrink-0" />
                   )}
@@ -439,7 +496,7 @@ export default function App() {
                 <button
                   id="btn-header-logout"
                   onClick={handleLogout}
-                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition flex items-center gap-1 shadow-2xs"
+                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-blue-700 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 transition flex items-center gap-1 shadow-2xs"
                   title="Logout / Ganti Akun"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -591,6 +648,7 @@ export default function App() {
             {activeApp === 'e_lapor' && (
               <ELaporView
                 records={eLaporRecords}
+                siswaList={siswaList}
                 userRole={userRole}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}

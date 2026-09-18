@@ -52,6 +52,8 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
   const [linkFoto, setLinkFoto] = useState('');
   const [keterangan, setKeterangan] = useState('');
   const [formSignature, setFormSignature] = useState('');
+  const [namaPenandatangan, setNamaPenandatangan] = useState('Wiwik Ismiati, S.Pd');
+  const [nipPenandatangan, setNipPenandatangan] = useState('198311162009042003');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +69,8 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
       linkFoto: linkFoto.trim() || 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80',
       keterangan: keterangan.trim(),
       tandaTanganUrl: formSignature || undefined,
-      namaPenandatangan: 'Koordinator Sabtu Beli Teh Ceri',
+      namaPenandatangan: namaPenandatangan.trim(),
+      nipPenandatangan: nipPenandatangan.trim(),
       jabatanPenandatangan: 'Tim Pengembang Karakter Siswa',
       createdAt: new Date().toISOString(),
     };
@@ -90,6 +93,7 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
       ...signingRecord,
       tandaTanganUrl: signatureUrl,
       namaPenandatangan: name || signingRecord.namaPenandatangan || 'Koordinator Sesi Ceri',
+      nipPenandatangan: signingRecord.nipPenandatangan,
       jabatanPenandatangan: title || signingRecord.jabatanPenandatangan || 'Penanggung Jawab Mingguan',
     };
     onUpdateRecord(updated);
@@ -263,22 +267,62 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
               </div>
 
               {/* Tanda Tangan Touchscreen Langsung */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  TANDA TANGAN KOORDINATOR (LAYAR SENTUH / LAPTOP)
-                </label>
-                <TouchSignaturePad
-                  initialSignature={formSignature}
-                  signerName="Koordinator Sesi Ceri"
-                  signerTitle="Tim Pengembang Karakter"
-                  compact={true}
-                  onSave={(dataUrl) => {
-                    setFormSignature(dataUrl);
-                    alert('Tanda tangan berhasil direkam!');
-                  }}
-                  title="Tanda Tangan Penanggung Jawab Mingguan"
-                  promptText="Goreskan tanda tangan menggunakan sentuhan jari HP atau mouse laptop:"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    PILIH PENANDA TANGAN (KOORDINATOR)
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNamaPenandatangan('Wiwik Ismiati, S.Pd');
+                        setNipPenandatangan('198311162009042003');
+                      }}
+                      className={`px-3 py-2 rounded-xl border text-left transition flex flex-col ${
+                        namaPenandatangan === 'Wiwik Ismiati, S.Pd'
+                          ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="text-xs font-bold text-slate-800">Wiwik Ismiati, S.Pd</span>
+                      <span className="text-[10px] text-slate-500">Nip. 198311162009042003</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNamaPenandatangan('Eki Febriani, S.Pd');
+                        setNipPenandatangan('19940214 202221 2 014');
+                      }}
+                      className={`px-3 py-2 rounded-xl border text-left transition flex flex-col ${
+                        namaPenandatangan === 'Eki Febriani, S.Pd'
+                          ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="text-xs font-bold text-slate-800">Eki Febriani, S.Pd</span>
+                      <span className="text-[10px] text-slate-500">Nip. 19940214 202221 2 014</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    TANDA TANGAN (LAYAR SENTUH / MOUSE)
+                  </label>
+                  <TouchSignaturePad
+                    initialSignature={formSignature}
+                    signerName={namaPenandatangan}
+                    signerTitle="Tim Pengembang Karakter"
+                    compact={true}
+                    onSave={(dataUrl) => {
+                      setFormSignature(dataUrl);
+                      alert('Tanda tangan berhasil direkam!');
+                    }}
+                    title="Tanda Tangan Penanggung Jawab Mingguan"
+                    promptText="Goreskan tanda tangan menggunakan sentuhan jari HP atau mouse laptop:"
+                  />
+                </div>
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
@@ -328,6 +372,7 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
           nomorSurat={`421.3 / CERI-${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}
           firstSignerRole="Koordinator Program Sesi Ceri"
           firstSignerName={selectedForPrint?.namaPenandatangan || 'Tim Konseling Sebaya SPANJU'}
+          firstSignerNip={selectedForPrint?.nipPenandatangan}
           firstSignerSignature={selectedForPrint?.tandaTanganUrl || records[0]?.tandaTanganUrl}
           onFirstSignerUpdate={(sig) => {
             if (selectedForPrint && onUpdateRecord) {
@@ -335,7 +380,8 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
             }
           }}
           secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
-          secondSignerName="Drs. Akhmad Fauzi, M.Pd."
+          secondSignerName="Nur Fadilah, S.Pd., M.Pd"
+          secondSignerNip="19860410 201001 2 030"
         >
           {selectedForPrint ? (
             <div className="space-y-4">

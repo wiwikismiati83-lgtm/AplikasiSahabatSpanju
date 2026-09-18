@@ -21,13 +21,15 @@ import {
   ChevronUp,
   Layers,
 } from 'lucide-react';
-import { SPDamaiRecord } from '../types';
+import { SPDamaiRecord, Siswa } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
 import { TouchSignatureModal } from './TouchSignatureModal';
 import { OfficialReportModal } from './OfficialReportModal';
+import { StudentPickerModal } from './StudentPickerModal';
 
 interface Props {
   records: SPDamaiRecord[];
+  siswaList?: Siswa[];
   onAddRecord: (record: SPDamaiRecord) => void;
   onDeleteRecord: (id: string) => void;
   onUpdateRecord?: (record: SPDamaiRecord) => void;
@@ -37,6 +39,7 @@ interface Props {
 
 export const SPDamaiView: React.FC<Props> = ({
   records,
+  siswaList = [],
   onAddRecord,
   onDeleteRecord,
   onUpdateRecord,
@@ -61,15 +64,15 @@ export const SPDamaiView: React.FC<Props> = ({
   const [tempatMediasi, setTempatMediasi] = useState('Ruang Konseling Ramah Sahabat SPANJU / BK');
   const [namaPihak1, setNamaPihak1] = useState('');
   const [kelasPihak1, setKelasPihak1] = useState('');
-  const [nisnPihak1, setNisnPihak1] = useState('');
   const [peranPihak1, setPeranPihak1] = useState('Pihak Pertama (Siswa I)');
   const [tandaTanganPihak1, setTandaTanganPihak1] = useState('');
 
   const [namaPihak2, setNamaPihak2] = useState('');
   const [kelasPihak2, setKelasPihak2] = useState('');
-  const [nisnPihak2, setNisnPihak2] = useState('');
   const [peranPihak2, setPeranPihak2] = useState('Pihak Kedua (Siswa II)');
   const [tandaTanganPihak2, setTandaTanganPihak2] = useState('');
+
+  const [activePicker, setActivePicker] = useState<'pihak1' | 'pihak2' | null>(null);
 
   const [ringkasanMasalah, setRingkasanMasalah] = useState('');
   const [klausul1, setKlausul1] = useState(
@@ -88,7 +91,8 @@ export const SPDamaiView: React.FC<Props> = ({
   const [sanksiEdukasi, setSanksiEdukasi] = useState(
     'Kedua siswa sepakat bersama-sama merawat taman literasi kelas dan membuat poster persahabatan.'
   );
-  const [namaSaksiGuru, setNamaSaksiGuru] = useState('Drs. Supriyadi / Guru BK');
+  const [namaSaksiGuru, setNamaSaksiGuru] = useState('Wiwik Ismiati, S.Pd');
+  const [nipSaksiGuru, setNipSaksiGuru] = useState('198311162009042003');
   const [jabatanSaksiGuru, setJabatanSaksiGuru] = useState('Guru Bimbingan Konseling & Fasilitator Mediasi');
   const [namaKonselorSebaya, setNamaKonselorSebaya] = useState('Duta Sahabat SPANJU');
   const [status, setStatus] = useState<SPDamaiRecord['status']>('Damai Permanen');
@@ -107,22 +111,21 @@ export const SPDamaiView: React.FC<Props> = ({
       tempatMediasi: tempatMediasi.trim() || 'Ruang Konseling Ramah Sahabat SPANJU / BK',
       namaPihak1: namaPihak1.trim(),
       kelasPihak1: kelasPihak1.trim() || 'Kelas 8',
-      nisnPihak1: nisnPihak1.trim(),
       peranPihak1: peranPihak1.trim(),
       tandaTanganPihak1: tandaTanganPihak1 || undefined,
       namaPihak2: namaPihak2.trim(),
       kelasPihak2: kelasPihak2.trim() || 'Kelas 8',
-      nisnPihak2: nisnPihak2.trim(),
       peranPihak2: peranPihak2.trim(),
       tandaTanganPihak2: tandaTanganPihak2 || undefined,
       ringkasanMasalah: ringkasanMasalah.trim(),
       butirKesepakatan: [klausul1, klausul2, klausul3, klausul4].filter((k) => k.trim() !== ''),
       sanksiEdukasi: sanksiEdukasi.trim(),
       namaSaksiGuru: namaSaksiGuru.trim(),
+      nipSaksiGuru: nipSaksiGuru.trim(),
       jabatanSaksiGuru: jabatanSaksiGuru.trim(),
       namaKonselorSebaya: namaKonselorSebaya.trim(),
       status,
-      hasilPemantauan: 'Kedua pihak telah saling bersalaman damai dan berkomitmen menjaga keharmonisan pertemanan.',
+      hasilPemantauan: 'Kedua pihak telah saling bersalaman damai and berkomitmen menjaga keharmonisan pertemanan.',
       createdAt: new Date().toISOString(),
     };
 
@@ -132,11 +135,9 @@ export const SPDamaiView: React.FC<Props> = ({
     // Reset
     setNamaPihak1('');
     setKelasPihak1('');
-    setNisnPihak1('');
     setTandaTanganPihak1('');
     setNamaPihak2('');
     setKelasPihak2('');
-    setNisnPihak2('');
     setTandaTanganPihak2('');
     setRingkasanMasalah('');
   };
@@ -320,41 +321,36 @@ export const SPDamaiView: React.FC<Props> = ({
                     <User className="w-3.5 h-3.5 text-sky-700" />
                     IDENTITAS PIHAK PERTAMA (SISWA I):
                   </span>
-                  <div>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setActivePicker('pihak1')}
+                    className="w-full text-left group"
+                  >
                     <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                      Nama Siswa <span className="text-rose-500">*</span>
+                      Nama Siswa <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={namaPihak1}
-                      onChange={(e) => setNamaPihak1(e.target.value)}
-                      placeholder="Nama lengkap siswa I"
-                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:border-sky-500"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-0.5">Kelas</label>
-                      <input
-                        type="text"
-                        value={kelasPihak1}
-                        onChange={(e) => setKelasPihak1(e.target.value)}
-                        placeholder="Contoh: 8E"
-                        className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:border-sky-500"
-                      />
+                    <div className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 group-hover:border-sky-500 transition flex items-center justify-between">
+                      <span className={namaPihak1 ? 'text-slate-800' : 'text-slate-400 italic text-[11px]'}>
+                        {namaPihak1 || 'Klik untuk pilih siswa...'}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-sky-400" />
                     </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-0.5">NISN / NIS</label>
-                      <input
-                        type="text"
-                        value={nisnPihak1}
-                        onChange={(e) => setNisnPihak1(e.target.value)}
-                        placeholder="00982..."
-                        className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:border-sky-500"
-                      />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActivePicker('pihak1')}
+                    className="w-full text-left group"
+                  >
+                    <label className="block text-[11px] font-bold text-slate-700 mb-0.5">Kelas</label>
+                    <div className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 group-hover:border-sky-500 transition flex items-center justify-between">
+                      <span className={kelasPihak1 ? 'text-slate-800' : 'text-slate-400 italic text-[11px]'}>
+                        {kelasPihak1 ? `KELAS ${kelasPihak1}` : 'Klik untuk pilih...'}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-sky-400" />
                     </div>
-                  </div>
+                  </button>
 
                   {/* TTD Pihak 1 */}
                   <div className="pt-1">
@@ -373,50 +369,45 @@ export const SPDamaiView: React.FC<Props> = ({
                 </div>
 
                 {/* Pihak 2 */}
-                <div className="p-3.5 bg-rose-50/60 border border-rose-200 rounded-xl space-y-2.5">
-                  <span className="font-bold text-rose-900 block text-xs flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5 text-rose-700" />
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
+                  <span className="font-bold text-slate-900 block text-xs flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-slate-700" />
                     IDENTITAS PIHAK KEDUA (SISWA II):
                   </span>
-                  <div>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setActivePicker('pihak2')}
+                    className="w-full text-left group"
+                  >
                     <label className="block text-[11px] font-bold text-slate-700 mb-0.5">
-                      Nama Siswa <span className="text-rose-500">*</span>
+                      Nama Siswa <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={namaPihak2}
-                      onChange={(e) => setNamaPihak2(e.target.value)}
-                      placeholder="Nama lengkap siswa II"
-                      className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:border-rose-500"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-0.5">Kelas</label>
-                      <input
-                        type="text"
-                        value={kelasPihak2}
-                        onChange={(e) => setKelasPihak2(e.target.value)}
-                        placeholder="Contoh: 8E"
-                        className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:border-rose-500"
-                      />
+                    <div className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 group-hover:border-slate-500 transition flex items-center justify-between">
+                      <span className={namaPihak2 ? 'text-slate-800' : 'text-slate-400 italic text-[11px]'}>
+                        {namaPihak2 || 'Klik untuk pilih siswa...'}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
                     </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-0.5">NISN / NIS</label>
-                      <input
-                        type="text"
-                        value={nisnPihak2}
-                        onChange={(e) => setNisnPihak2(e.target.value)}
-                        placeholder="00982..."
-                        className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 focus:border-rose-500"
-                      />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setActivePicker('pihak2')}
+                    className="w-full text-left group"
+                  >
+                    <label className="block text-[11px] font-bold text-slate-700 mb-0.5">Kelas</label>
+                    <div className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 group-hover:border-slate-500 transition flex items-center justify-between">
+                      <span className={kelasPihak2 ? 'text-slate-800' : 'text-slate-400 italic text-[11px]'}>
+                        {kelasPihak2 ? `KELAS ${kelasPihak2}` : 'Klik untuk pilih...'}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
                     </div>
-                  </div>
+                  </button>
 
                   {/* TTD Pihak 2 */}
                   <div className="pt-1">
-                    <label className="block text-[10px] font-bold text-rose-800 mb-1">
+                    <label className="block text-[10px] font-bold text-slate-800 mb-1">
                       TTD LAYAR SENTUH PIHAK KEDUA:
                     </label>
                     <TouchSignaturePad
@@ -513,13 +504,38 @@ export const SPDamaiView: React.FC<Props> = ({
                   <label className="block font-bold text-slate-700 mb-1">
                     GURU BK / WALI KELAS SAKSI MEDIASI
                   </label>
-                  <input
-                    type="text"
-                    value={namaSaksiGuru}
-                    onChange={(e) => setNamaSaksiGuru(e.target.value)}
-                    placeholder="Nama guru saksi & pendamping"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:border-emerald-500 focus:outline-none"
-                  />
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNamaSaksiGuru('Wiwik Ismiati, S.Pd');
+                        setNipSaksiGuru('198311162009042003');
+                      }}
+                      className={`px-3 py-2 rounded-xl border text-left transition flex flex-col ${
+                        namaSaksiGuru === 'Wiwik Ismiati, S.Pd'
+                          ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="text-xs font-bold text-slate-800">Wiwik Ismiati, S.Pd</span>
+                      <span className="text-[10px] text-slate-500">Nip. 198311162009042003</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNamaSaksiGuru('Eki Febriani, S.Pd');
+                        setNipSaksiGuru('19940214 202221 2 014');
+                      }}
+                      className={`px-3 py-2 rounded-xl border text-left transition flex flex-col ${
+                        namaSaksiGuru === 'Eki Febriani, S.Pd'
+                          ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="text-xs font-bold text-slate-800">Eki Febriani, S.Pd</span>
+                      <span className="text-[10px] text-slate-500">Nip. 19940214 202221 2 014</span>
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
@@ -617,7 +633,8 @@ export const SPDamaiView: React.FC<Props> = ({
             }
           }}
           secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
-          secondSignerName="Drs. Akhmad Fauzi, M.Pd."
+          secondSignerName="Nur Fadilah, S.Pd., M.Pd"
+          secondSignerNip="19860410 201001 2 030"
         >
           {selectedForPrint ? (
             <div className="space-y-4 text-xs text-slate-800">
@@ -735,6 +752,11 @@ export const SPDamaiView: React.FC<Props> = ({
                     <span className="font-bold text-slate-800 underline block">
                       {selectedForPrint.namaSaksiGuru || 'Guru BK'}
                     </span>
+                    {selectedForPrint.nipSaksiGuru && (
+                      <span className="text-[9px] text-slate-700 font-bold block">
+                        NIP. {selectedForPrint.nipSaksiGuru}
+                      </span>
+                    )}
                     <span className="text-slate-500">Fasilitator Mediasi</span>
                   </div>
                 </div>
@@ -788,6 +810,23 @@ export const SPDamaiView: React.FC<Props> = ({
           )}
         </OfficialReportModal>
       )}
+
+      {/* Student Picker Popup */}
+      <StudentPickerModal
+        isOpen={activePicker !== null}
+        onClose={() => setActivePicker(null)}
+        siswaList={siswaList}
+        title={activePicker === 'pihak1' ? 'Pilih Pihak Pertama' : 'Pilih Pihak Kedua'}
+        onSelect={(siswa) => {
+          if (activePicker === 'pihak1') {
+            setNamaPihak1(siswa.nama);
+            setKelasPihak1(siswa.kelas);
+          } else {
+            setNamaPihak2(siswa.nama);
+            setKelasPihak2(siswa.kelas);
+          }
+        }}
+      />
 
       {/* Filter and Search Bar */}
       <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
@@ -986,14 +1025,14 @@ export const SPDamaiView: React.FC<Props> = ({
                       )}
                       <div>
                         <span className="text-[11px] font-bold text-slate-800 block">{item.namaPihak2}</span>
-                        <span className="text-[10px] text-rose-700 font-medium">Pihak II (Kelas {item.kelasPihak2})</span>
+                        <span className="text-[10px] text-slate-700 font-medium">Pihak II (Kelas {item.kelasPihak2})</span>
                       </div>
                     </div>
 
                     <button
                       type="button"
                       onClick={() => setSigningRecord({ record: item, targetParty: 'pihak2' })}
-                      className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-rose-800 bg-rose-100 hover:bg-rose-200 border border-rose-300 flex items-center gap-1 transition"
+                      className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 flex items-center gap-1 transition"
                     >
                       <FileSignature className="w-3 h-3" />
                       {item.tandaTanganPihak2 ? 'Ubah TTD' : 'TTD HP'}
@@ -1005,6 +1044,25 @@ export const SPDamaiView: React.FC<Props> = ({
           })}
         </div>
       </div>
+
+      {/* Student Picker Modal */}
+      {activePicker && (
+        <StudentPickerModal
+          isOpen={true}
+          onClose={() => setActivePicker(null)}
+          siswaList={siswaList}
+          onSelect={(siswa) => {
+            if (activePicker === 'pihak1') {
+              setNamaPihak1(siswa.nama);
+              setKelasPihak1(siswa.kelas);
+            } else {
+              setNamaPihak2(siswa.nama);
+              setKelasPihak2(siswa.kelas);
+            }
+            setActivePicker(null);
+          }}
+        />
+      )}
     </div>
   );
 };

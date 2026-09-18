@@ -215,6 +215,61 @@ export const ArsipKegiatanView: React.FC<Props> = ({
           />
         </div>
       </div>
+
+      {/* Official Report Modal */}
+      {showPrintModal && (
+        <OfficialReportModal
+          isOpen={true}
+          onClose={() => setShowPrintModal(false)}
+          title="ARSIP & DOKUMENTASI KEGIATAN SAHABAT SPANJU"
+          nomorSurat={`421.3 / ARS-${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}
+          firstSignerRole="Koordinator Program Sahabat SPANJU"
+          firstSignerName="Hj. Siti Aminah, S.Pd"
+          firstSignerNip="19720512 199803 2 005"
+          secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
+          secondSignerName="Nur Fadilah, S.Pd., M.Pd"
+          secondSignerNip="19860410 201001 2 030"
+        >
+          <div className="space-y-4">
+            <p className="text-xs text-slate-700">
+              Berikut adalah daftar dokumentasi dan arsip kegiatan <strong>Sahabat SPANJU</strong> (Satgas Anti Perundungan dan Pelayanan Siswa SMPN 7 Pasuruan) yang telah terdokumentasi dalam sistem repositori digital:
+            </p>
+            <table className="w-full text-[11px] border border-slate-300 border-collapse">
+              <thead>
+                <tr className="bg-amber-100/70 border-b border-slate-300 text-slate-900 font-bold">
+                  <th className="p-2 border-r border-slate-300 text-center w-8">No</th>
+                  <th className="p-2 border-r border-slate-300 text-left">Kode Arsip</th>
+                  <th className="p-2 border-r border-slate-300 text-left">Nama Kegiatan</th>
+                  <th className="p-2 border-r border-slate-300 text-left">Hari / Tanggal</th>
+                  <th className="p-2 text-left">Penyelenggara</th>
+                </tr>
+              </thead>
+              <tbody>
+                {records.length > 0 ? (
+                  records.map((item, idx) => (
+                    <tr key={item.id} className="border-b border-slate-200">
+                      <td className="p-2 border-r border-slate-200 text-center">{idx + 1}</td>
+                      <td className="p-2 border-r border-slate-200 font-mono text-[10px] text-amber-700">{item.kodeArsip}</td>
+                      <td className="p-2 border-r border-slate-200 font-bold text-slate-800">{item.namaKegiatan}</td>
+                      <td className="p-2 border-r border-slate-200">{item.hariTanggal}</td>
+                      <td className="p-2">{item.penyelenggara}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="p-4 text-center italic text-slate-400">
+                      Belum ada rekaman arsip kegiatan di repositori digital.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <div className="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg text-[10px] text-slate-500 italic">
+              * Arsip lengkap beserta galeri foto dan dokumen pendukung dapat diakses melalui portal Google Sites resmi Sahabat SPANJU yang terintegrasi dengan aplikasi ini.
+            </div>
+          </div>
+        </OfficialReportModal>
+      )}
     </div>
   );
 };

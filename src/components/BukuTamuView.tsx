@@ -373,6 +373,7 @@ export const BukuTamuView: React.FC<Props> = ({
           nomorSurat={`421.3 / TAMU-${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}
           firstSignerRole={selectedForPrint?.jabatan || 'Tamu / Pejabat Terkait'}
           firstSignerName={selectedForPrint?.namaLengkap || 'Perwakilan Tamu'}
+          firstSignerNip={selectedForPrint?.nipNik}
           firstSignerSignature={selectedForPrint?.tandaTanganUrl || records[0]?.tandaTanganUrl}
           onFirstSignerUpdate={(sig) => {
             if (selectedForPrint && onUpdateRecord) {
@@ -380,7 +381,8 @@ export const BukuTamuView: React.FC<Props> = ({
             }
           }}
           secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
-          secondSignerName="Drs. Akhmad Fauzi, M.Pd."
+          secondSignerName="Nur Fadilah, S.Pd., M.Pd"
+          secondSignerNip="19860410 201001 2 030"
         >
           {selectedForPrint ? (
             <div className="space-y-4">

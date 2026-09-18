@@ -53,6 +53,8 @@ export const SenandungSerasiView: React.FC<Props> = ({
   const [kategoriLiterasi, setKategoriLiterasi] = useState('Kata Mutiara & Budi Pekerti');
   const [penulis, setPenulis] = useState('Duta Literasi Sahabat SPANJU');
   const [formSignature, setFormSignature] = useState('');
+  const [namaPenandatangan, setNamaPenandatangan] = useState('Wiwik Ismiati, S.Pd');
+  const [nipPenandatangan, setNipPenandatangan] = useState('198311162009042003');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +69,8 @@ export const SenandungSerasiView: React.FC<Props> = ({
       kategoriLiterasi: kategoriLiterasi.trim(),
       penulis: penulis.trim() || 'Sahabat SPANJU',
       tandaTanganUrl: formSignature || undefined,
-      namaPenandatangan: penulis.trim() || 'Duta Literasi SPANJU',
+      namaPenandatangan: namaPenandatangan.trim(),
+      nipPenandatangan: nipPenandatangan.trim(),
       jabatanPenandatangan: 'Duta Literasi & Karakter',
       createdAt: new Date().toISOString(),
     };
@@ -93,6 +96,7 @@ export const SenandungSerasiView: React.FC<Props> = ({
       ...signingRecord,
       tandaTanganUrl: signatureUrl,
       namaPenandatangan: name || signingRecord.namaPenandatangan || 'Duta Literasi',
+      nipPenandatangan: signingRecord.nipPenandatangan,
       jabatanPenandatangan: title || signingRecord.jabatanPenandatangan || 'Pembawa Pesan Karakter',
     };
     onUpdateRecord(updated);
@@ -286,22 +290,62 @@ export const SenandungSerasiView: React.FC<Props> = ({
               </div>
 
               {/* Touchscreen Signature Pad */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  TANDA TANGAN PEMBAWA PESAN (LAYAR SENTUH / LAPTOP)
-                </label>
-                <TouchSignaturePad
-                  initialSignature={formSignature}
-                  signerName={penulis}
-                  signerTitle="Duta Literasi Sahabat SPANJU"
-                  compact={true}
-                  onSave={(dataUrl) => {
-                    setFormSignature(dataUrl);
-                    alert('Tanda tangan berhasil direkam!');
-                  }}
-                  title="Tanda Tangan Duta Literasi"
-                  promptText="Sentuh layar HP dengan jari atau gunakan mouse laptop:"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    PILIH PENANDA TANGAN (KOORDINATOR)
+                  </label>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNamaPenandatangan('Wiwik Ismiati, S.Pd');
+                        setNipPenandatangan('198311162009042003');
+                      }}
+                      className={`px-3 py-2 rounded-xl border text-left transition flex flex-col ${
+                        namaPenandatangan === 'Wiwik Ismiati, S.Pd'
+                          ? 'bg-indigo-50 border-indigo-300 ring-2 ring-indigo-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="text-xs font-bold text-slate-800">Wiwik Ismiati, S.Pd</span>
+                      <span className="text-[10px] text-slate-500">Nip. 198311162009042003</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNamaPenandatangan('Eki Febriani, S.Pd');
+                        setNipPenandatangan('19940214 202221 2 014');
+                      }}
+                      className={`px-3 py-2 rounded-xl border text-left transition flex flex-col ${
+                        namaPenandatangan === 'Eki Febriani, S.Pd'
+                          ? 'bg-indigo-50 border-indigo-300 ring-2 ring-indigo-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="text-xs font-bold text-slate-800">Eki Febriani, S.Pd</span>
+                      <span className="text-[10px] text-slate-500">Nip. 19940214 202221 2 014</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    TANDA TANGAN (LAYAR SENTUH / MOUSE)
+                  </label>
+                  <TouchSignaturePad
+                    initialSignature={formSignature}
+                    signerName={namaPenandatangan}
+                    signerTitle="Duta Literasi Sahabat SPANJU"
+                    compact={true}
+                    onSave={(dataUrl) => {
+                      setFormSignature(dataUrl);
+                      alert('Tanda tangan berhasil direkam!');
+                    }}
+                    title="Tanda Tangan Duta Literasi"
+                    promptText="Sentuh layar HP dengan jari atau gunakan mouse laptop:"
+                  />
+                </div>
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
@@ -350,7 +394,8 @@ export const SenandungSerasiView: React.FC<Props> = ({
           }
           nomorSurat={`421.3 / SRS-${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}
           firstSignerRole="Duta Literasi Ramah Anak"
-          firstSignerName={selectedForPrint?.penulis || 'Tim Literasi Sahabat SPANJU'}
+          firstSignerName={selectedForPrint?.namaPenandatangan || 'Tim Literasi Sahabat SPANJU'}
+          firstSignerNip={selectedForPrint?.nipPenandatangan}
           firstSignerSignature={selectedForPrint?.tandaTanganUrl || records[0]?.tandaTanganUrl}
           onFirstSignerUpdate={(sig) => {
             if (selectedForPrint && onUpdateRecord) {
@@ -358,7 +403,8 @@ export const SenandungSerasiView: React.FC<Props> = ({
             }
           }}
           secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
-          secondSignerName="Drs. Akhmad Fauzi, M.Pd."
+          secondSignerName="Nur Fadilah, S.Pd., M.Pd"
+          secondSignerNip="19860410 201001 2 030"
         >
           {selectedForPrint ? (
             <div className="space-y-4">

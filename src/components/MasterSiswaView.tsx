@@ -92,14 +92,13 @@ export const MasterSiswaView: React.FC<Props> = ({
           };
 
           const rawNama = findVal(['nama', 'nama lengkap', 'student name', 'name', 'nama_lengkap']);
-          const rawNisn = findVal(['nisn', 'nomor induk', 'id', 'nis', 'nomor_induk']);
           const rawKelas = findVal(['kelas', 'rombel', 'class', 'grade']);
           const rawJk = findVal(['jk', 'jenis kelamin', 'gender', 'sex', 'p/l', 'l/p']);
 
           return {
             id: `siswa-${Date.now()}-${idx}`,
             nama: String(rawNama || '').trim(),
-            nisn: String(rawNisn || '').trim(),
+            nisn: '-',
             kelas: String(rawKelas || 'Umum').trim(),
             jenisKelamin: (String(rawJk || 'L').toUpperCase().startsWith('P') ? 'P' : 'L') as 'L' | 'P',
             createdAt: new Date().toISOString(),
@@ -164,7 +163,7 @@ export const MasterSiswaView: React.FC<Props> = ({
             Data Siswa Sahabat SPANJU
           </h1>
           <p className="text-xs text-slate-600 mt-1">
-            Manajemen data siswa, NISN, dan rombel. Mendukung pengunggahan masal via Excel untuk pemutakhiran data cepat.
+            Manajemen data siswa dan rombel. Mendukung pengunggahan masal via Excel untuk pemutakhiran data cepat.
           </p>
         </div>
 
@@ -218,7 +217,7 @@ export const MasterSiswaView: React.FC<Props> = ({
           <Search className="w-4 h-4 text-slate-400 mr-2" />
           <input
             type="text"
-            placeholder="Cari berdasarkan nama, NISN, atau kelas..."
+            placeholder="Cari berdasarkan nama atau kelas..."
             className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -233,7 +232,6 @@ export const MasterSiswaView: React.FC<Props> = ({
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">No</th>
-                <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">NISN</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nama Lengkap</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Kelas</th>
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">JK</th>
@@ -244,7 +242,6 @@ export const MasterSiswaView: React.FC<Props> = ({
               {filtered.map((siswa, idx) => (
                 <tr key={siswa.id} className="hover:bg-slate-50/50 transition">
                   <td className="px-6 py-4 text-xs text-slate-500">{idx + 1}</td>
-                  <td className="px-6 py-4 text-xs font-mono font-bold text-emerald-700">{siswa.nisn}</td>
                   <td className="px-6 py-4 text-xs font-bold text-slate-800">{siswa.nama}</td>
                   <td className="px-6 py-4">
                     <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200">
@@ -256,7 +253,7 @@ export const MasterSiswaView: React.FC<Props> = ({
                     {canDelete && (
                       <button
                         onClick={() => onDeleteRecord(siswa.id)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -285,7 +282,7 @@ export const MasterSiswaView: React.FC<Props> = ({
         <div>
           <h4 className="text-sm font-bold text-emerald-900">Petunjuk Pengunggahan Excel</h4>
           <p className="text-xs text-emerald-700 leading-relaxed mt-1">
-            Pastikan file Excel Anda memiliki kolom header berikut: <b>Nama</b>, <b>NISN</b>, <b>Kelas</b>, dan <b>JK</b> (L/P). 
+            Pastikan file Excel Anda memiliki kolom header berikut: <b>Nama</b>, <b>Kelas</b>, dan <b>JK</b> (L/P). 
             Sistem akan secara otomatis mendeteksi baris data dan menambahkannya ke database pusat Sahabat SPANJU.
           </p>
         </div>
@@ -318,29 +315,16 @@ export const MasterSiswaView: React.FC<Props> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">NISN</label>
-                  <input
-                    type="text"
-                    required
-                    value={nisn}
-                    onChange={(e) => setNisn(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm transition font-mono"
-                    placeholder="10 digit NISN"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Kelas</label>
-                  <input
-                    type="text"
-                    required
-                    value={kelas}
-                    onChange={(e) => setKelas(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm transition"
-                    placeholder="Contoh: 7A"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Kelas</label>
+                <input
+                  type="text"
+                  required
+                  value={kelas}
+                  onChange={(e) => setKelas(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm transition"
+                  placeholder="Contoh: 7A"
+                />
               </div>
 
               <div className="space-y-1.5">

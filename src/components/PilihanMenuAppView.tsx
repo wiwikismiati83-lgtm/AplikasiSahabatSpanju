@@ -37,9 +37,9 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
       subtitle: 'BUKU PANDUAN FLIPBOOK HEYZINE',
       icon: BookOpen,
       category: 'prioritas',
-      color: 'from-rose-500 to-pink-600',
-      textColor: 'text-rose-600',
-      bgColor: 'bg-rose-50',
+      color: 'from-sky-500 to-blue-600',
+      textColor: 'text-sky-600',
+      bgColor: 'bg-sky-50',
       action: () => setActiveApp('tutorial_flipbook')
     },
     {
@@ -59,9 +59,9 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
       subtitle: 'PENGADUAN SATGAS BK & BULLYING',
       icon: ShieldAlert,
       category: 'prioritas',
-      color: 'from-rose-600 to-red-700',
-      textColor: 'text-rose-600',
-      bgColor: 'bg-rose-50',
+      color: 'from-red-600 to-red-700',
+      textColor: 'text-red-600',
+      bgColor: 'bg-red-50',
       badge: totalLaporan > 0 ? `${totalLaporan} Aduan` : undefined,
       action: () => setActiveApp('e_lapor')
     },
@@ -208,7 +208,7 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
       <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase bg-rose-600 text-white tracking-wider">
+            <span className="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase bg-blue-600 text-white tracking-wider">
               MENU APLIKASI
             </span>
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
@@ -248,7 +248,7 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
             onClick={() => setActiveTab('semua')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
               activeTab === 'semua'
-                ? 'bg-rose-600 text-white shadow-xs'
+                ? 'bg-blue-600 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -258,7 +258,7 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
             onClick={() => setActiveTab('prioritas')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
               activeTab === 'prioritas'
-                ? 'bg-rose-600 text-white shadow-xs'
+                ? 'bg-blue-600 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -268,8 +268,8 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
             onClick={() => setActiveTab('karakter')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
               activeTab === 'karakter'
-                ? 'bg-rose-600 text-white shadow-xs'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Inovasi Karakter
@@ -278,7 +278,7 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
             onClick={() => setActiveTab('master')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
               activeTab === 'master'
-                ? 'bg-rose-600 text-white shadow-xs'
+                ? 'bg-blue-600 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -293,11 +293,11 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari aplikasi..."
-            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:border-rose-500"
+            className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:border-blue-500"
           />
         </div>
       </div>
-
+ 
       {/* Grid of Apps */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filtered.map((item) => {
@@ -306,28 +306,28 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
             <div
               key={item.id}
               onClick={item.action}
-              className="bg-white rounded-3xl border border-slate-200/90 hover:border-rose-300 shadow-xs hover:shadow-lg transition-all duration-300 p-6 flex flex-col items-center text-center group cursor-pointer relative overflow-hidden"
+              className="bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300 shadow-xs hover:shadow-lg transition-all duration-300 p-6 flex flex-col items-center text-center group cursor-pointer relative overflow-hidden"
             >
               {item.badge && (
-                <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
+                <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
                   {item.badge}
                 </span>
               )}
-
+ 
               <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-lg mb-5 group-hover:scale-110 transition duration-300`}>
                 <Icon className="w-10 h-10" />
               </div>
-
-              <h3 className="text-base font-black text-slate-900 tracking-tight mb-1 group-hover:text-rose-600 transition">
+ 
+              <h3 className="text-base font-black text-slate-900 tracking-tight mb-1 group-hover:text-blue-600 transition">
                 {item.title}
               </h3>
               <p className="text-[11px] text-slate-500 font-medium uppercase tracking-wider mb-6 leading-relaxed">
                 {item.subtitle}
               </p>
-
+ 
               <button
                 type="button"
-                className="mt-auto w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition flex items-center justify-center gap-1.5 shadow-2xs"
+                className="mt-auto w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 transition flex items-center justify-center gap-1.5 shadow-2xs"
               >
                 <span>Buka Aplikasi</span>
                 <ExternalLink className="w-3.5 h-3.5" />

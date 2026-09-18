@@ -17,13 +17,15 @@ import {
   Download,
   Layers,
 } from 'lucide-react';
-import { PiketHarianRecord } from '../types';
+import { PiketHarianRecord, Siswa } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
 import { TouchSignatureModal } from './TouchSignatureModal';
 import { OfficialReportModal } from './OfficialReportModal';
+import { StudentPickerModal } from './StudentPickerModal';
 
 interface PiketHarianViewProps {
   records: PiketHarianRecord[];
+  siswaList?: Siswa[];
   onAddRecord: (record: PiketHarianRecord) => void;
   onDeleteRecord: (id: string) => void;
   onUpdateRecord?: (record: PiketHarianRecord) => void;
@@ -33,6 +35,7 @@ interface PiketHarianViewProps {
 
 export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
   records,
+  siswaList = [],
   onAddRecord,
   onDeleteRecord,
   onUpdateRecord,
@@ -53,11 +56,12 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
   const [hariTanggal, setHariTanggal] = useState('');
   const [waktu, setWaktu] = useState('06:45 - 13:30 WIB');
   const [namaAnggota, setNamaAnggota] = useState('');
-  const [kelas, setKelas] = useState('Semua Kelas (7A - 9H)');
+  const [kelas, setKelas] = useState('');
   const [hasilTemuan, setHasilTemuan] = useState('');
   const [linkFoto, setLinkFoto] = useState('');
   const [keterangan, setKeterangan] = useState('');
   const [formSignature, setFormSignature] = useState<string>('');
+  const [showPicker, setShowPicker] = useState(false);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +78,7 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
       keterangan: keterangan.trim(),
       tandaTanganUrl: formSignature || undefined,
       namaPenandatangan: namaAnggota.trim(),
+      nipPenandatangan: undefined, // Piket members are usually students or don't have NIP in this context
       jabatanPenandatangan: 'Petugas Piket Harian',
       createdAt: new Date().toISOString(),
     };
@@ -210,32 +215,37 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
+                <button
+                  type="button"
+                  onClick={() => setShowPicker(true)}
+                  className="w-full text-left group"
+                >
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     NAMA ANGGOTA HARIAN <span className="text-rose-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={namaAnggota}
-                    onChange={(e) => setNamaAnggota(e.target.value)}
-                    placeholder="Nama guru piket & duta siswa"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
+                  <div className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs font-bold flex items-center justify-between group-hover:border-blue-500 transition">
+                    <span className={namaAnggota ? 'text-slate-800' : 'text-slate-400 italic font-normal'}>
+                      {namaAnggota || 'Klik untuk pilih petugas/siswa...'}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-blue-400" />
+                  </div>
+                </button>
 
-                <div>
+                <button
+                  type="button"
+                  onClick={() => setShowPicker(true)}
+                  className="w-full text-left group"
+                >
                   <label className="block text-xs font-bold text-slate-700 mb-1">
                     KELAS / LOKASI
                   </label>
-                  <input
-                    type="text"
-                    value={kelas}
-                    onChange={(e) => setKelas(e.target.value)}
-                    placeholder="Contoh: Semua Kelas (7A - 9H) / Lantai 2"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
+                  <div className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs font-bold flex items-center justify-between group-hover:border-blue-500 transition">
+                    <span className={kelas ? 'text-slate-800' : 'text-slate-400 italic font-normal'}>
+                      {kelas ? `KELAS ${kelas}` : 'Contoh: 8E / Area Kantin'}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-blue-400" />
+                  </div>
+                </button>
               </div>
 
               <div>
@@ -350,6 +360,7 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
           nomorSurat={`421.3 / PKT-${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}
           firstSignerRole="Koordinator Piket Sahabat SPANJU"
           firstSignerName={selectedRecordForPrint?.namaAnggota || 'Tim Piket Harian'}
+          firstSignerNip={selectedRecordForPrint?.nipPenandatangan}
           firstSignerSignature={selectedRecordForPrint?.tandaTanganUrl || records[0]?.tandaTanganUrl}
           onFirstSignerUpdate={(sig) => {
             if (selectedRecordForPrint && onUpdateRecord) {
@@ -357,7 +368,8 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
             }
           }}
           secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
-          secondSignerName="Drs. Akhmad Fauzi, M.Pd."
+          secondSignerName="Nur Fadilah, S.Pd., M.Pd"
+          secondSignerNip="19860410 201001 2 030"
         >
           {selectedRecordForPrint ? (
             /* Single record official document */
@@ -453,6 +465,18 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
           )}
         </OfficialReportModal>
       )}
+
+      {/* Student Picker Popup */}
+      <StudentPickerModal
+        isOpen={showPicker}
+        onClose={() => setShowPicker(false)}
+        siswaList={siswaList}
+        title="Pilih Petugas Piket / Duta Siswa"
+        onSelect={(siswa) => {
+          setNamaAnggota(siswa.nama);
+          setKelas(siswa.kelas);
+        }}
+      />
 
       {/* Search and List */}
       <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
