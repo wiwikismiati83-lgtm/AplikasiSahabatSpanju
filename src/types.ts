@@ -240,12 +240,13 @@ export type ActiveAppId =
   | 'hotline_bantuan'
   | string; // for custom link IDs
 
-export type UserRole = 'admin' | 'siswa' | 'orang_tua' | 'guru';
+export type UserRole = 'admin' | 'operator' | 'siswa' | 'orang_tua' | 'guru';
 
 export interface AuthUser {
   username: string;
   role: UserRole;
   displayName: string;
   loginTime: string;
+  targetApp?: ActiveAppId;
 }
 

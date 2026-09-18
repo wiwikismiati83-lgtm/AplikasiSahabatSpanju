@@ -12,8 +12,11 @@ import {
   Briefcase,
   CheckCircle2,
   X,
+  BookOpen,
+  PhoneCall,
+  ExternalLink,
 } from 'lucide-react';
-import { AuthUser, UserRole } from '../types';
+import { AuthUser, UserRole, ActiveAppId } from '../types';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -35,6 +38,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [selectedRole, setSelectedRole] = useState<UserRole>('siswa');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showHotline, setShowHotline] = useState(false);
 
   if (!isOpen) return null;
 
@@ -77,7 +81,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setErrorMessage('Username atau password tidak sesuai. Silakan periksa kembali petunjuk login di bawah.');
   };
 
-  const handleQuickLogin = (userType: 'siswa' | 'orang_tua' | 'guru' | 'admin') => {
+  const handleQuickLogin = (userType: 'siswa' | 'orang_tua' | 'guru' | 'admin', targetApp?: ActiveAppId) => {
     if (userType === 'admin') {
       setUsername('admin');
       setPassword('admin123');
@@ -88,6 +92,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         role: 'admin',
         displayName: 'Administrator / Operator Sekolah',
         loginTime: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+        targetApp,
       };
       onLoginSuccess(user);
     } else {
@@ -104,6 +109,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         role: userType,
         displayName,
         loginTime: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+        targetApp,
       };
       onLoginSuccess(user);
     }
@@ -229,140 +235,77 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             </div>
 
-            {/* Peran Jika Login Sebagai passtemenan */}
-            {username.trim().toLowerCase() !== 'admin' && (
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  MASUK SEBAGAI PERAN:
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole('siswa')}
-                    className={`py-2 px-2.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1 ${
-                      selectedRole === 'siswa'
-                        ? 'bg-emerald-50 border-emerald-500 text-emerald-850 font-bold shadow-xs'
-                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    <GraduationCap className="w-4 h-4 text-emerald-600" />
-                    <span className="text-[11px]">Siswa</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole('orang_tua')}
-                    className={`py-2 px-2.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1 ${
-                      selectedRole === 'orang_tua'
-                        ? 'bg-teal-50 border-teal-500 text-teal-850 font-bold shadow-xs'
-                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Users className="w-4 h-4 text-teal-600" />
-                    <span className="text-[11px]">Orang Tua</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole('guru')}
-                    className={`py-2 px-2.5 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1 ${
-                      selectedRole === 'guru'
-                        ? 'bg-sky-50 border-sky-500 text-sky-850 font-bold shadow-xs'
-                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Briefcase className="w-4 h-4 text-sky-600" />
-                    <span className="text-[11px]">Guru</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
             <button
               id="btn-submit-login"
               type="submit"
-              className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white text-xs font-bold rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 mt-4"
             >
               <LogIn className="w-4 h-4" />
               Masuk ke Aplikasi Sahabat SPANJU
             </button>
           </form>
 
-          {/* Quick Login Presets for convenience */}
+          {/* Access Portals & Help Icons Grid */}
           <div className="pt-2 border-t border-slate-100">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2 text-center">
-              Atau Pilih Akses Cepat (1 Klik Masuk):
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-3 text-center">
+              Pilih Portal Akses Cepat (1 Klik Masuk):
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('siswa')}
-                className="p-2 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-left transition group"
-              >
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 group-hover:text-emerald-800">
-                  <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
-                  Siswa
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                  passtemenan / smpn7
-                </div>
-              </button>
+            
+            <div className="space-y-2">
+              {/* Row 1: Portals */}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('siswa')}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 transition group text-center"
+                >
+                  <GraduationCap className="w-5 h-5 text-emerald-600 mb-1 group-hover:scale-110 transition" />
+                  <span className="text-[10px] font-black text-emerald-900 uppercase tracking-tight">Portal Siswa</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('orang_tua')}
-                className="p-2 rounded-xl bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-left transition group"
-              >
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 group-hover:text-teal-800">
-                  <Users className="w-3.5 h-3.5 text-teal-600" />
-                  Orang Tua
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                  passtemenan / smpn7
-                </div>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('orang_tua')}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-teal-50 border border-teal-100 hover:bg-teal-100 transition group text-center"
+                >
+                  <Users className="w-5 h-5 text-teal-600 mb-1 group-hover:scale-110 transition" />
+                  <span className="text-[10px] font-black text-teal-900 uppercase tracking-tight">Orang Tua</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('guru')}
-                className="p-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-left transition group"
-              >
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 group-hover:text-sky-800">
-                  <Briefcase className="w-3.5 h-3.5 text-sky-600" />
-                  Guru
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                  passtemenan / smpn7
-                </div>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('guru')}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-sky-50 border border-sky-100 hover:bg-sky-100 transition group text-center"
+                >
+                  <Briefcase className="w-5 h-5 text-sky-600 mb-1 group-hover:scale-110 transition" />
+                  <span className="text-[10px] font-black text-sky-900 uppercase tracking-tight">Portal Guru</span>
+                </button>
+              </div>
+
+              {/* Row 2: Help & Hotline */}
+              <div className="grid grid-cols-2 gap-2">
+                <a 
+                  href="https://heyzine.com/flip-book/45802adfc1.html" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-rose-50 border border-rose-100 hover:bg-rose-100 transition group text-center"
+                >
+                  <BookOpen className="w-5 h-5 text-rose-600 mb-1 group-hover:scale-110 transition" />
+                  <span className="text-[10px] font-black text-rose-900 uppercase tracking-tight">Manual Book</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickLogin('siswa', 'hotline_bantuan')}
+                  className="flex flex-col items-center justify-center p-3 rounded-xl bg-amber-50 border border-amber-100 hover:bg-amber-100 transition group text-center"
+                >
+                  <PhoneCall className="w-5 h-5 text-amber-600 mb-1 group-hover:scale-110 transition" />
+                  <span className="text-[10px] font-black text-amber-900 uppercase tracking-tight">Portal Hotline</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Hak Akses Breakdown */}
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-600 space-y-1.5">
-            <div className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              Aturan Hak Akses Pengguna:
-            </div>
-            <div className="flex items-start gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0"></span>
-              <span>
-                <strong>Siswa, Orang Tua & Guru:</strong> Bisa melihat & mengedit/input data baru, <em>tidak bisa menghapus laporan</em>.
-              </span>
-            </div>
-            <div className="flex items-start gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0"></span>
-              <span>
-                <strong>Admin / Operator:</strong> Akses penuh untuk melihat, mengedit, dan <em>menghapus semua data & laporan</em>.
-              </span>
-            </div>
-            <div className="flex items-start gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0"></span>
-              <span>
-                <strong>Khusus E-Lapor Perundungan:</strong> Siswa & orang tua <em>tidak dapat melihat daftar laporan</em> demi privasi & kerahasiaan TPPK, hanya Admin/Operator yang dapat melihat, mengedit status, dan menghapus.
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

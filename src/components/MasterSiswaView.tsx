@@ -178,25 +178,29 @@ export const MasterSiswaView: React.FC<Props> = ({
               Menu Utama
             </button>
           )}
-          <button
-            onClick={downloadTemplate}
-            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 transition shadow-xs"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Download Template
-          </button>
-          <label className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition cursor-pointer shadow-md shadow-emerald-500/20 active:scale-95">
-            <Upload className="w-3.5 h-3.5" />
-            Upload Excel
-            <input type="file" accept=".xlsx, .xls" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
-          </label>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 transition active:scale-95 shadow-xs"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Tambah Manual
-          </button>
+          {canDelete && (
+            <>
+              <button
+                onClick={downloadTemplate}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 transition shadow-xs"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download Template
+              </button>
+              <label className="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition cursor-pointer shadow-md shadow-emerald-500/20 active:scale-95">
+                <Upload className="w-3.5 h-3.5" />
+                Upload Excel
+                <input type="file" accept=".xlsx, .xls" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
+              </label>
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 transition active:scale-95 shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Tambah Manual
+              </button>
+            </>
+          )}
         </div>
       </div>
 

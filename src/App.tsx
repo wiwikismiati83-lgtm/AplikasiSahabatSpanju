@@ -65,6 +65,7 @@ import { PilihanMenuAppView } from './components/PilihanMenuAppView';
 import { TutorialFlipbookView } from './components/TutorialFlipbookView';
 import { HotlineView } from './components/HotlineView';
 import { WebFrameViewer } from './components/WebFrameViewer';
+import { PWAInstallButton } from './components/PWAInstallButton';
 
 export default function App() {
   // Role-Based Authentication State
@@ -88,6 +89,12 @@ export default function App() {
     setCurrentUser(user);
     localStorage.setItem('spanju_auth_user', JSON.stringify(user));
     setIsLoginModalOpen(false);
+    
+    // Auto-redirect if targetApp is provided
+    if (user.targetApp) {
+      setActiveApp(user.targetApp);
+    }
+    
     showToast(`Selamat datang, ${user.displayName}!`);
   };
 
@@ -99,7 +106,7 @@ export default function App() {
   };
 
   const userRole: UserRole = currentUser?.role || 'siswa';
-  const canDelete = currentUser?.role === 'admin';
+  const canDelete = currentUser?.role === 'admin' || currentUser?.role === 'operator';
 
   // Persistent Module Records
   const [customLinks, setCustomLinks] = useState<CustomLink[]>(INITIAL_CUSTOM_LINKS);
@@ -345,8 +352,9 @@ export default function App() {
       {/* Right Content Area: Active Application */}
       <main className="flex-1 flex flex-col h-full overflow-hidden bg-gradient-to-br from-slate-50 via-slate-50/80 to-emerald-50/20">
         {/* Top Header Bar */}
-        <header className="h-16 shrink-0 border-b border-slate-200/80 bg-white/85 backdrop-blur-md px-4 lg:px-8 flex items-center justify-between z-10 shadow-xs">
-          <div className="flex items-center gap-3">
+        <header className="h-16 shrink-0 border-b border-slate-200/80 bg-white/85 backdrop-blur-md z-10 shadow-xs">
+          <div className="max-w-7xl mx-auto w-full h-full px-4 lg:px-8 flex items-center justify-between">
+            <div className="flex items-center gap-3">
             {/* Mobile Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -383,6 +391,10 @@ export default function App() {
 
           {/* Right Status Badge & User Profile */}
           <div className="flex items-center gap-2.5">
+            <div className="hidden lg:block">
+              <PWAInstallButton />
+            </div>
+
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200 text-xs text-slate-600">
               <Clock className="w-3.5 h-3.5 text-sky-600" />
               <span>Tahun Ajaran 2026/2027</span>
@@ -434,11 +446,12 @@ export default function App() {
               </div>
             )}
           </div>
-        </header>
+        </div>
+      </header>
 
         {/* Dynamic Main Body (Scrollable Right View) */}
-        <div className="flex-1 overflow-y-auto p-4 lg:p-8">
-          <div className="max-w-7xl mx-auto h-full">
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-7xl mx-auto w-full p-4 lg:p-8 min-h-full">
             {/* Pilihan Menu Aplikasi */}
             {activeApp === 'pilihan_menu' && (
               <PilihanMenuAppView

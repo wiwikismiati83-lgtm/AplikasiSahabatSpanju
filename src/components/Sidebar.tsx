@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { ActiveAppId, AuthUser } from '../types';
 
+import { PWAInstallButton } from './PWAInstallButton';
+
 interface SidebarProps {
   activeApp: ActiveAppId;
   setActiveApp: (id: ActiveAppId) => void;
@@ -320,6 +322,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Bottom Action Footer: Backup & Upload / Restore */}
       <div id="sidebar-footer" className="p-3 border-t border-slate-200/90 bg-slate-50/80 space-y-2">
+        <div className="lg:hidden pb-1">
+          <PWAInstallButton />
+        </div>
         <div className="flex items-center justify-between">
           <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-1 flex items-center gap-1.5">
             <FolderSync className="w-3 h-3 text-emerald-600" />
