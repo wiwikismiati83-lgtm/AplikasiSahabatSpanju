@@ -16,6 +16,8 @@ import {
   FileText,
   CheckCircle,
   Layers,
+  Pencil,
+  CheckCircle2,
 } from 'lucide-react';
 import { SenandungSerasiRecord } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
@@ -41,6 +43,7 @@ export const SenandungSerasiView: React.FC<Props> = ({
   onOpenMenu,
 }) => {
   const [showModal, setShowModal] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<SenandungSerasiRecord | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [selectedForPrint, setSelectedForPrint] = useState<SenandungSerasiRecord | null>(null);
@@ -52,14 +55,92 @@ export const SenandungSerasiView: React.FC<Props> = ({
   const [pesanDisampaikan, setPesanDisampaikan] = useState('');
   const [keterangan, setKeterangan] = useState('');
   const [kategoriLiterasi, setKategoriLiterasi] = useState('Kata Mutiara & Budi Pekerti');
+  const [isManualKategori, setIsManualKategori] = useState(false);
+  const [manualKategoriText, setManualKategoriText] = useState('');
   const [penulis, setPenulis] = useState('Duta Literasi Sahabat SPANJU');
   const [formSignature, setFormSignature] = useState('');
   const [namaPenandatangan, setNamaPenandatangan] = useState('Wiwik Ismiati, S.Pd');
   const [nipPenandatangan, setNipPenandatangan] = useState('198311162009042003');
 
+  const defaultKategoriOptions = [
+    'Kata Mutiara & Budi Pekerti',
+    'Salam Persahabatan & Empati',
+    'Adab Bertutur & Santun Digital',
+    'Puisi & Sastra Sahabat',
+  ];
+
+  const resetForm = () => {
+    setEditingRecord(null);
+    setHariTanggal('');
+    setWaktu('07:00 - 07:30 WIB');
+    setPesanDisampaikan('');
+    setKeterangan('');
+    setKategoriLiterasi('Kata Mutiara & Budi Pekerti');
+    setIsManualKategori(false);
+    setManualKategoriText('');
+    setPenulis('Duta Literasi Sahabat SPANJU');
+    setFormSignature('');
+    setNamaPenandatangan('Wiwik Ismiati, S.Pd');
+    setNipPenandatangan('198311162009042003');
+  };
+
+  const handleOpenAdd = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (rec: SenandungSerasiRecord) => {
+    setEditingRecord(rec);
+    setHariTanggal(rec.hariTanggal);
+    setWaktu(rec.waktu || '07:00 - 07:30 WIB');
+    setPesanDisampaikan(rec.pesanDisampaikan);
+    setKeterangan(rec.keterangan || '');
+    const currentKategori = rec.kategoriLiterasi || 'Kata Mutiara & Budi Pekerti';
+    if (defaultKategoriOptions.includes(currentKategori)) {
+      setKategoriLiterasi(currentKategori);
+      setIsManualKategori(false);
+      setManualKategoriText('');
+    } else {
+      setKategoriLiterasi('Kata Mutiara & Budi Pekerti');
+      setIsManualKategori(true);
+      setManualKategoriText(currentKategori);
+    }
+    setPenulis(rec.penulis || 'Duta Literasi Sahabat SPANJU');
+    setFormSignature(rec.tandaTanganUrl || '');
+    setNamaPenandatangan(rec.namaPenandatangan || 'Wiwik Ismiati, S.Pd');
+    setNipPenandatangan(rec.nipPenandatangan || '198311162009042003');
+    setShowModal(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!hariTanggal.trim() || !pesanDisampaikan.trim()) return;
+
+    const finalKategori = isManualKategori
+      ? (manualKategoriText.trim() || 'Literasi & Karakter')
+      : kategoriLiterasi;
+
+    if (editingRecord) {
+      const updated: SenandungSerasiRecord = {
+        ...editingRecord,
+        hariTanggal: hariTanggal.trim(),
+        waktu: waktu.trim() || '07:00 - 07:30 WIB',
+        pesanDisampaikan: pesanDisampaikan.trim(),
+        keterangan: keterangan.trim(),
+        kategoriLiterasi: finalKategori,
+        penulis: penulis.trim() || 'Sahabat SPANJU',
+        tandaTanganUrl: formSignature || editingRecord.tandaTanganUrl,
+        namaPenandatangan: namaPenandatangan.trim(),
+        nipPenandatangan: nipPenandatangan.trim(),
+      };
+
+      if (onUpdateRecord) {
+        onUpdateRecord(updated);
+      }
+      setShowModal(false);
+      resetForm();
+      return;
+    }
 
     const newRecord: SenandungSerasiRecord = {
       id: `serasi-${Date.now()}`,
@@ -67,7 +148,7 @@ export const SenandungSerasiView: React.FC<Props> = ({
       waktu: waktu.trim() || '07:00 - 07:30 WIB',
       pesanDisampaikan: pesanDisampaikan.trim(),
       keterangan: keterangan.trim(),
-      kategoriLiterasi: kategoriLiterasi.trim(),
+      kategoriLiterasi: finalKategori,
       penulis: penulis.trim() || 'Sahabat SPANJU',
       tandaTanganUrl: formSignature || undefined,
       namaPenandatangan: namaPenandatangan.trim(),
@@ -78,11 +159,7 @@ export const SenandungSerasiView: React.FC<Props> = ({
 
     onAddRecord(newRecord);
     setShowModal(false);
-    // Reset
-    setHariTanggal('');
-    setPesanDisampaikan('');
-    setKeterangan('');
-    setFormSignature('');
+    resetForm();
   };
 
   const handleCopy = (id: string, text: string) => {
@@ -171,7 +248,7 @@ export const SenandungSerasiView: React.FC<Props> = ({
           </button>
           <button
             id="btn-tambah-serasi"
-            onClick={() => setShowModal(true)}
+            onClick={handleOpenAdd}
             className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/20 hover:from-indigo-500 hover:to-purple-500 transition active:scale-95 flex items-center gap-1.5 btn-3d"
           >
             <Plus className="w-4 h-4" />
@@ -180,22 +257,36 @@ export const SenandungSerasiView: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Modal Add */}
+      {/* Modal Add / Edit */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs">
           <div className="w-full max-w-xl bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden card-3d max-h-[92vh] flex flex-col">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-indigo-50/60 to-white shrink-0">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-indigo-100 text-indigo-800 border border-indigo-200">
-                  <Music2 className="w-5 h-5" />
+                  {editingRecord ? <Pencil className="w-5 h-5 text-indigo-700" /> : <Music2 className="w-5 h-5 text-indigo-700" />}
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-800">Form Senandung Serasi</h2>
-                  <p className="text-xs text-slate-500">Salam dan Pesan Mendukung Ramah dan Berliterasi</p>
+                  <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <span>{editingRecord ? 'Edit Data Senandung Serasi' : 'Form Senandung Serasi'}</span>
+                    {editingRecord && (
+                      <span className="text-[11px] font-semibold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-300">
+                        {editingRecord.hariTanggal}
+                      </span>
+                    )}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    {editingRecord
+                      ? 'Perbarui pesan inspiratif, kategori literasi, atau pembawa pesan'
+                      : 'Salam dan Pesan Mendukung Ramah dan Berliterasi'}
+                  </p>
                 </div>
               </div>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  resetForm();
+                }}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               >
                 <X className="w-5 h-5" />
@@ -218,19 +309,59 @@ export const SenandungSerasiView: React.FC<Props> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    KATEGORI LITERASI
-                  </label>
-                  <select
-                    value={kategoriLiterasi}
-                    onChange={(e) => setKategoriLiterasi(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-indigo-500 focus:outline-none"
-                  >
-                    <option value="Kata Mutiara & Budi Pekerti">Kata Mutiara & Budi Pekerti</option>
-                    <option value="Salam Persahabatan & Empati">Salam Persahabatan & Empati</option>
-                    <option value="Adab Bertutur & Santun Digital">Adab Bertutur & Santun Digital</option>
-                    <option value="Puisi & Sastra Sahabat">Puisi & Sastra Sahabat</option>
-                  </select>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-700">
+                      KATEGORI LITERASI
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = !isManualKategori;
+                        setIsManualKategori(next);
+                        if (next && !manualKategoriText) {
+                          setManualKategoriText('');
+                        }
+                      }}
+                      className="text-[11px] font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded-lg border border-indigo-200 transition flex items-center gap-1 cursor-pointer"
+                    >
+                      {isManualKategori ? '← Pilih dari Daftar' : '✍️ Isi Manual'}
+                    </button>
+                  </div>
+
+                  {isManualKategori ? (
+                    <div className="space-y-1">
+                      <input
+                        type="text"
+                        value={manualKategoriText}
+                        onChange={(e) => setManualKategoriText(e.target.value)}
+                        placeholder="Ketik kategori literasi manual (contoh: Pantun Sahabat, Dongeng Ceria)..."
+                        className="w-full px-3 py-2 bg-white border-2 border-indigo-400 rounded-xl text-slate-800 text-xs focus:ring-2 focus:ring-indigo-200 focus:outline-none font-medium placeholder:text-slate-400"
+                        autoFocus
+                      />
+                      <p className="text-[10px] text-indigo-600 font-medium">
+                        Mode isi manual aktif. Ketikkan kategori bebas atau klik "Pilih dari Daftar".
+                      </p>
+                    </div>
+                  ) : (
+                    <select
+                      value={kategoriLiterasi}
+                      onChange={(e) => {
+                        if (e.target.value === '__manual__') {
+                          setIsManualKategori(true);
+                          setManualKategoriText('');
+                        } else {
+                          setKategoriLiterasi(e.target.value);
+                        }
+                      }}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-indigo-500 focus:outline-none cursor-pointer font-medium"
+                    >
+                      <option value="Kata Mutiara & Budi Pekerti">Kata Mutiara & Budi Pekerti</option>
+                      <option value="Salam Persahabatan & Empati">Salam Persahabatan & Empati</option>
+                      <option value="Adab Bertutur & Santun Digital">Adab Bertutur & Santun Digital</option>
+                      <option value="Puisi & Sastra Sahabat">Puisi & Sastra Sahabat</option>
+                      <option value="__manual__">✍️ Isi Manual (Ketik Sendiri)...</option>
+                    </select>
+                  )}
                 </div>
 
                 <div>
@@ -336,16 +467,26 @@ export const SenandungSerasiView: React.FC<Props> = ({
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
                   className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md btn-3d"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-md btn-3d flex items-center gap-1.5"
                 >
-                  Simpan Pesan Serasi
+                  {editingRecord ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Simpan Perubahan Pesan
+                    </>
+                  ) : (
+                    'Simpan Pesan Serasi'
+                  )}
                 </button>
               </div>
             </form>
@@ -492,6 +633,15 @@ export const SenandungSerasiView: React.FC<Props> = ({
 
                 <div className="flex items-center gap-1">
                   <button
+                    id={`btn-edit-serasi-${item.id}`}
+                    onClick={() => handleOpenEdit(item)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition border border-transparent hover:border-amber-200"
+                    title="Edit / Perbarui Pesan Ini"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    id={`btn-cetak-serasi-${item.id}`}
                     onClick={() => {
                       setSelectedForPrint(item);
                       setShowPrintModal(true);

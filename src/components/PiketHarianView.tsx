@@ -454,7 +454,7 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
           onClose={() => setShowPrintModal(false)}
           title={
             selectedRecordForPrint
-              ? `LAPORAN PIKET HARIAN - ${selectedRecordForPrint.hariTanggal.toUpperCase()}`
+              ? 'LAPORAN PIKET HARIAN'
               : 'REKAPITULASI LAPORAN PIKET HARIAN TIM SAHABAT SPANJU'
           }
           nomorSurat={`421.3 / PKT-${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}

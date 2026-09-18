@@ -650,7 +650,7 @@ export default function App() {
                 onUpdateRecord={async (updated) => {
                   setSerasiRecords(serasiRecords.map((r) => (r.id === updated.id ? updated : r)));
                   await api.upsert('serasi_records', updated);
-                  showToast('Tanda tangan pesan serasi diperbarui.');
+                  showToast('Pesan Senandung Serasi berhasil diperbarui.');
                 }}
               />
             )}
