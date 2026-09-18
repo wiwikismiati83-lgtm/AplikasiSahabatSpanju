@@ -27,6 +27,7 @@ import { TouchSignaturePad } from './TouchSignaturePad';
 import { TouchSignatureModal } from './TouchSignatureModal';
 import { OfficialReportModal } from './OfficialReportModal';
 import { StudentPickerModal } from './StudentPickerModal';
+import { CalendarDatePicker, RealTimeTimePicker } from './DateTimeWidgets';
 
 interface Props {
   records: ELaporRecord[];
@@ -65,11 +66,8 @@ export const ELaporView: React.FC<Props> = ({
   const [signingRecord, setSigningRecord] = useState<ELaporRecord | null>(null);
 
   // Form states
-  const [hariTanggal, setHariTanggal] = useState(new Date().toISOString().split('T')[0]);
-  const [waktuKejadian, setWaktuKejadian] = useState(() => {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
-  });
+  const [hariTanggal, setHariTanggal] = useState('');
+  const [waktuKejadian, setWaktuKejadian] = useState('');
   const [namaSiswa, setNamaSiswa] = useState('');
   const [kelas, setKelas] = useState('');
   const [nisnSiswa, setNisnSiswa] = useState('');
@@ -100,12 +98,7 @@ export const ELaporView: React.FC<Props> = ({
     const newRecord: ELaporRecord = {
       id: `lapor-${Date.now()}`,
       kodeLaporan,
-      hariTanggal: new Date(hariTanggal).toLocaleDateString('id-ID', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }),
+      hariTanggal: hariTanggal.trim(),
       waktuKejadian: waktuKejadian.trim(),
       namaSiswa: namaSiswa.trim(),
       kelas: kelas.trim() || 'Siswa SPANJU',
@@ -209,7 +202,7 @@ export const ELaporView: React.FC<Props> = ({
               onClick={onOpenMenu}
               className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
             >
-              <Layers className="w-3.5 h-3.5 text-rose-600" />
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
               Pilihan Menu Aplikasi
             </button>
           )}
@@ -284,28 +277,18 @@ export const ELaporView: React.FC<Props> = ({
               {/* Row 1 */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    HARI / TANGGAL <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    required
+                  <CalendarDatePicker
                     value={hariTanggal}
-                    onChange={(e) => setHariTanggal(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                    onChange={setHariTanggal}
+                    required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    WAKTU KEJADIAN
-                  </label>
-                  <input
-                    type="text"
+                  <RealTimeTimePicker
                     value={waktuKejadian}
-                    onChange={(e) => setWaktuKejadian(e.target.value)}
-                    placeholder="Contoh: 10:15 WIB"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-rose-500 focus:outline-none"
+                    onChange={setWaktuKejadian}
+                    label="WAKTU KEJADIAN"
                   />
                 </div>
 
@@ -815,57 +798,7 @@ export const ELaporView: React.FC<Props> = ({
       />
 
       {/* Confidential Notice for Siswa and Orang Tua */}
-      {isRestrictedFromViewingReports ? (
-        <div
-          id="confidential-e-lapor-notice"
-          className="p-8 sm:p-10 rounded-2xl bg-white border border-rose-200 shadow-xs text-center space-y-5 animate-in fade-in"
-        >
-          <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto shadow-inner">
-            <Lock className="w-8 h-8" />
-          </div>
-
-          <div className="max-w-lg mx-auto space-y-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-rose-100 text-rose-900 border border-rose-200 inline-block shadow-2xs">
-              PRIVASI & KERAHASIAAN DILINDUNGI TPPK
-            </span>
-            <h3 className="text-lg sm:text-xl font-black text-slate-800 tracking-tight">
-              Daftar Laporan Kasus Bersifat Konfidensial (Rahasia)
-            </h3>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Sesuai dengan regulasi perlindungan anak dan kode etik penanganan kekerasan sekolah, data riwayat serta berkas aduan siswa lain <strong>tidak dapat dilihat oleh akun Siswa maupun Orang Tua</strong> demi melindungi integritas psikologis, nama baik, dan privasi keluarga.
-            </p>
-            <p className="text-xs text-slate-500 font-medium">
-              Seluruh rekaman aduan hanya dapat ditinjau, diverifikasi, dan ditindaklanjuti secara resmi oleh <strong>Admin / Operator TPPK SMPN 7 Pasuruan</strong>.
-            </p>
-          </div>
-
-          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              id="btn-lapor-confidential-view"
-              onClick={() => setShowModal(true)}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 text-white text-xs font-bold shadow-md hover:from-rose-500 hover:to-red-500 transition active:scale-95 flex items-center justify-center gap-2 btn-3d"
-            >
-              <Plus className="w-4 h-4" />
-              Kirim Aduan / Lapor Sekarang
-            </button>
-          </div>
-
-          <div className="pt-5 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px] text-slate-600 max-w-xl mx-auto">
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Identitas Pelapor Aman</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-sky-600 shrink-0" />
-              <span>Didampingi Guru BK</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/60 flex items-center justify-center gap-2">
-              <Lock className="w-4 h-4 text-rose-600 shrink-0" />
-              <span>Kerahasiaan Terjamin</span>
-            </div>
-          </div>
-        </div>
-      ) : (
+      {isRestrictedFromViewingReports ? null : (
         /* Filter and Search Bar + Admin Reports List */
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

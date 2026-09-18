@@ -60,8 +60,147 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
 
   if (!isOpen) return null;
 
+  const isIframe = typeof window !== 'undefined' && window.self !== window.top;
+
   const handlePrint = () => {
-    window.print();
+    try {
+      window.print();
+    } catch (e) {
+      console.error('Print failed:', e);
+    }
+  };
+
+  const handleDownloadHTML = () => {
+    const docElement = document.getElementById("printable-official-document");
+    if (!docElement) return;
+
+    const documentContent = docElement.innerHTML;
+    const documentTitle = title || "Laporan_Resmi";
+
+    const fullHtml = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${documentTitle}</title>
+  <!-- Load Tailwind CSS to perfectly render all custom school tables, sigs, and alignments -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['Georgia', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    
+    @page {
+      size: A4 portrait;
+      margin: 0.5cm 1.5cm 1.5cm 1.5cm;
+    }
+    
+    body {
+      background-color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      margin: 0;
+      padding: 40px 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .paper-container {
+      background: white;
+      width: 100%;
+      max-width: 794px; /* Standard A4 width in pixels at 96 dpi */
+      padding: 45px 55px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    .print\\:hidden { display: none !important; }
+    
+    @media print {
+      body {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .paper-container {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    .print-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+      z-index: 9999;
+    }
+    .print-button:hover {
+      background-color: #1d4ed8;
+      transform: translateY(-1px);
+    }
+    .print-button:active {
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+<body>
+  <button class="print-button no-print" onclick="window.print()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+    Cetak & Simpan Laporan
+  </button>
+
+  <div class="paper-container">
+    <div id="printable-official-document">
+      ${documentContent}
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
+    const blob = new Blob([fullHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${documentTitle.replace(/[^a-zA-Z0-9]/g, '_')}_Laporan.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -86,6 +225,15 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               type="button"
+              onClick={handleDownloadHTML}
+              className="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-xs flex items-center gap-1.5 transition active:scale-95"
+              title="Unduh file laporan offline yang siap dicetak/dibuka di komputer Anda"
+            >
+              <Download className="w-4 h-4" />
+              Simpan Laporan Offline
+            </button>
+            <button
+              type="button"
               onClick={handlePrint}
               className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md flex items-center gap-1.5 transition active:scale-95 btn-3d btn-3d-blue"
             >
@@ -103,13 +251,34 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
           </div>
         </div>
 
+        {isIframe && (
+          <div className="mx-6 sm:mx-10 mt-4 p-3.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs flex items-start gap-2.5 shadow-xs print:hidden">
+            <span className="text-base">⚠️</span>
+            <div className="space-y-1">
+              <p className="font-extrabold text-amber-900">Petunjuk Penggunaan Fitur Cetak:</p>
+              <p className="leading-relaxed">
+                Karena aplikasi saat ini sedang berjalan di dalam panel pratinjau, fitur <strong>Cetak / Simpan PDF</strong> mungkin dibatasi oleh browser Anda.
+              </p>
+              <p className="font-medium text-slate-700">
+                Solusi: 
+                1. Klik tombol <strong>"Simpan Laporan Offline"</strong> di atas untuk mengunduh laporan ke komputer Anda, lalu buka file tersebut untuk mencetak langsung kapan saja.
+                2. Atau, klik tombol <strong>"Buka di Tab Baru" ↗️</strong> di sudut kanan atas layar panel utama agar browser Anda dapat membuka jendela cetak resmi secara sempurna.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Paper Document Container (Target for Print & Viewing) */}
-        <div id="printable-official-document" className="p-6 sm:p-10 overflow-y-auto bg-white text-slate-900 font-sans space-y-6 print:p-0 print:overflow-visible">
-          {/* 1. KOP SURAT RESMI */}
-          <KopSurat
-            subTitle={title}
-            nomorSurat={nomorSurat || `421.3 / ${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}
-          />
+        <div className="flex-1 bg-slate-100/60 overflow-y-auto p-4 sm:p-6 print:p-0 print:bg-white print:overflow-visible">
+          <div 
+            id="printable-official-document" 
+            className="mx-auto w-full max-w-[760px] bg-white p-6 sm:p-10 text-slate-900 font-sans space-y-5 border border-slate-200/50 rounded-xl shadow-xs print:shadow-none print:border-none print:p-0 print:max-w-full print:rounded-none"
+          >
+            {/* 1. KOP SURAT RESMI */}
+            <KopSurat
+              subTitle={title}
+              nomorSurat={nomorSurat || `421.3 / ${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}
+            />
 
           {/* 2. Tanggal & Lokasi */}
           <div className="flex justify-between items-center text-xs text-slate-600 pt-1 pb-2 border-b border-slate-100">
@@ -252,6 +421,7 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
             </div>
           </div>
         </div>
+      </div>
 
         {/* Modals for Direct Touchscreen Signature on Report */}
         {activeSignerModal === 'first' && onFirstSignerUpdate && (

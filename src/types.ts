@@ -179,6 +179,7 @@ export interface SPDamaiRecord {
   sanksiEdukasi?: string;
   // Mediator & Saksi
   namaSaksiGuru?: string;
+  nipSaksiGuru?: string;
   jabatanSaksiGuru?: string;
   tandaTanganSaksiGuru?: string;
   namaKonselorSebaya?: string;

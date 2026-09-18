@@ -545,6 +545,8 @@ export default function App() {
                   api.bulkUpsert('kelas_zona', updated);
                 }}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
+                siswaList={siswaList}
+                guruList={guruList}
               />
             )}
 
@@ -552,6 +554,7 @@ export default function App() {
             {activeApp === 'piket_harian' && (
               <PiketHarianView
                 records={piketRecords}
+                siswaList={siswaList}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={async (rec) => {
@@ -681,6 +684,7 @@ export default function App() {
             {activeApp === 'sp_damai' && (
               <SPDamaiView
                 records={spDamaiRecords}
+                siswaList={siswaList}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={async (rec) => {

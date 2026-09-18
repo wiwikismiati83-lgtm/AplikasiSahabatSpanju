@@ -36,7 +36,7 @@ export const StudentPickerModal: React.FC<Props> = ({
         {/* Header */}
         <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-rose-100 text-rose-600 rounded-xl">
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-xl">
               <Users className="w-5 h-5" />
             </div>
             <div>
@@ -58,7 +58,7 @@ export const StudentPickerModal: React.FC<Props> = ({
                 onClick={() => setSelectedClass(c)}
                 className={`px-3 py-1.5 rounded-lg text-[11px] font-black transition ${
                   selectedClass === c 
-                    ? 'bg-rose-600 text-white shadow-md shadow-rose-200' 
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200' 
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
@@ -74,7 +74,7 @@ export const StudentPickerModal: React.FC<Props> = ({
               placeholder="Cari nama siswa di kelas ini..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-rose-500 focus:bg-white transition"
+              className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition"
             />
           </div>
         </div>
@@ -90,16 +90,16 @@ export const StudentPickerModal: React.FC<Props> = ({
                     onSelect(s);
                     onClose();
                   }}
-                  className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl hover:border-rose-300 hover:bg-rose-50/50 transition group text-left"
+                  className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/50 transition group text-left"
                 >
-                  <div className="p-2 bg-slate-100 text-slate-400 group-hover:bg-rose-100 group-hover:text-rose-600 rounded-lg transition">
+                  <div className="p-2 bg-slate-100 text-slate-400 group-hover:bg-blue-100 group-hover:text-blue-600 rounded-lg transition">
                     <User className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="block text-xs font-black text-slate-800 group-hover:text-rose-900 transition uppercase">{s.nama}</span>
+                    <span className="block text-xs font-black text-slate-800 group-hover:text-blue-900 transition uppercase">{s.nama}</span>
                     <span className="text-[10px] text-slate-500 font-bold">KELAS {s.kelas}</span>
                   </div>
-                  <CheckCircle2 className="w-4 h-4 ml-auto text-rose-500 opacity-0 group-hover:opacity-100 transition" />
+                  <CheckCircle2 className="w-4 h-4 ml-auto text-blue-500 opacity-0 group-hover:opacity-100 transition" />
                 </button>
               ))}
             </div>

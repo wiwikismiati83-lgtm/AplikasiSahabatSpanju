@@ -15,11 +15,16 @@ import {
   FileSignature,
   FileText,
   Layers,
+  Link as LinkIcon,
+  Upload,
+  Camera,
+  Pencil,
 } from 'lucide-react';
 import { SabtuBeliTehCeriRecord } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
 import { TouchSignatureModal } from './TouchSignatureModal';
 import { OfficialReportModal } from './OfficialReportModal';
+import { CalendarDatePicker, RealTimeTimePicker } from './DateTimeWidgets';
 
 interface Props {
   records: SabtuBeliTehCeriRecord[];
@@ -39,6 +44,7 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
   onOpenMenu,
 }) => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<SabtuBeliTehCeriRecord | null>(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [selectedForPrint, setSelectedForPrint] = useState<SabtuBeliTehCeriRecord | null>(null);
   const [signingRecord, setSigningRecord] = useState<SabtuBeliTehCeriRecord | null>(null);
@@ -59,24 +65,44 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
     e.preventDefault();
     if (!hariTanggal.trim() || !hasilTemuanSatuMinggu.trim()) return;
 
-    const newRecord: SabtuBeliTehCeriRecord = {
-      id: `ceri-${Date.now()}`,
-      hariTanggal: hariTanggal.trim(),
-      waktu: waktu.trim() || '09:00 - 11:30 WIB',
-      hasilTemuanSatuMinggu: hasilTemuanSatuMinggu.trim(),
-      evaluasiKegiatan: evaluasiKegiatan.trim(),
-      rencanaInovasi: rencanaInovasi.trim(),
-      linkFoto: linkFoto.trim() || 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80',
-      keterangan: keterangan.trim(),
-      tandaTanganUrl: formSignature || undefined,
-      namaPenandatangan: namaPenandatangan.trim(),
-      nipPenandatangan: nipPenandatangan.trim(),
-      jabatanPenandatangan: 'Tim Pengembang Karakter Siswa',
-      createdAt: new Date().toISOString(),
-    };
+    if (editingRecord) {
+      const updatedRecord: SabtuBeliTehCeriRecord = {
+        ...editingRecord,
+        hariTanggal: hariTanggal.trim(),
+        waktu: waktu.trim() || '09:00 - 11:30 WIB',
+        hasilTemuanSatuMinggu: hasilTemuanSatuMinggu.trim(),
+        evaluasiKegiatan: evaluasiKegiatan.trim(),
+        rencanaInovasi: rencanaInovasi.trim(),
+        linkFoto: linkFoto.trim() || 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80',
+        keterangan: keterangan.trim(),
+        tandaTanganUrl: formSignature || editingRecord.tandaTanganUrl,
+        namaPenandatangan: namaPenandatangan.trim(),
+        nipPenandatangan: nipPenandatangan.trim(),
+      };
+      if (onUpdateRecord) {
+        onUpdateRecord(updatedRecord);
+      }
+    } else {
+      const newRecord: SabtuBeliTehCeriRecord = {
+        id: `ceri-${Date.now()}`,
+        hariTanggal: hariTanggal.trim(),
+        waktu: waktu.trim() || '09:00 - 11:30 WIB',
+        hasilTemuanSatuMinggu: hasilTemuanSatuMinggu.trim(),
+        evaluasiKegiatan: evaluasiKegiatan.trim(),
+        rencanaInovasi: rencanaInovasi.trim(),
+        linkFoto: linkFoto.trim() || 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80',
+        keterangan: keterangan.trim(),
+        tandaTanganUrl: formSignature || undefined,
+        namaPenandatangan: namaPenandatangan.trim(),
+        nipPenandatangan: nipPenandatangan.trim(),
+        jabatanPenandatangan: 'Tim Pengembang Karakter Siswa',
+        createdAt: new Date().toISOString(),
+      };
+      onAddRecord(newRecord);
+    }
 
-    onAddRecord(newRecord);
     setShowAddModal(false);
+    setEditingRecord(null);
     // Reset
     setHariTanggal('');
     setHasilTemuanSatuMinggu('');
@@ -123,7 +149,7 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
               onClick={onOpenMenu}
               className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
             >
-              <Layers className="w-3.5 h-3.5 text-rose-600" />
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
               Pilihan Menu Aplikasi
             </button>
           )}
@@ -158,12 +184,19 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
                   <Coffee className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-800">Form Sabtu Beli Teh Ceri</h2>
-                  <p className="text-xs text-slate-500">Sabtu Bersama Mengulik Temuan Harian Cerita dan Ide</p>
+                  <h2 className="text-base font-bold text-slate-800">
+                    {editingRecord ? 'Edit Temuan & Ide Ceri' : 'Form Sabtu Beli Teh Ceri'}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    {editingRecord ? 'Perbarui data temuan mingguan' : 'Sabtu Bersama Mengulik Temuan Harian Cerita dan Ide'}
+                  </p>
                 </div>
               </div>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={() => {
+                  setShowAddModal(false);
+                  setEditingRecord(null);
+                }}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               >
                 <X className="w-5 h-5" />
@@ -172,32 +205,16 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
 
             <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    HARI / TANGGAL <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={hariTanggal}
-                    onChange={(e) => setHariTanggal(e.target.value)}
-                    placeholder="Contoh: Sabtu, 19 September 2026"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-amber-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    WAKTU
-                  </label>
-                  <input
-                    type="text"
-                    value={waktu}
-                    onChange={(e) => setWaktu(e.target.value)}
-                    placeholder="09:00 - 11:30 WIB"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-amber-500 focus:outline-none"
-                  />
-                </div>
+                <CalendarDatePicker
+                  value={hariTanggal}
+                  onChange={setHariTanggal}
+                  required
+                />
+                <RealTimeTimePicker
+                  value={waktu}
+                  onChange={setWaktu}
+                  label="WAKTU"
+                />
               </div>
 
               <div>
@@ -241,16 +258,95 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  LINK FOTO KEGIATAN (URL)
-                </label>
-                <input
-                  type="text"
-                  value={linkFoto}
-                  onChange={(e) => setLinkFoto(e.target.value)}
-                  placeholder="https://... foto sesi diskusi atau kegiatan"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-amber-500 focus:outline-none"
-                />
+                <div className="bg-amber-50/50 border border-amber-100/80 rounded-2xl p-4 space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-amber-100/80 flex items-center justify-center text-amber-600 shrink-0">
+                      <ImageIcon className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-[11px] font-bold text-slate-800 tracking-wide uppercase leading-tight">LINK FOTO KEGIATAN</h4>
+                      <p className="text-[9.5px] text-slate-500 font-medium leading-none mt-0.5">Bisa Input Link URL atau Upload Foto</p>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <LinkIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={linkFoto}
+                      onChange={(e) => setLinkFoto(e.target.value)}
+                      placeholder="https://... (URL foto Google Drive / ImgBB)"
+                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 text-xs focus:border-amber-500 focus:outline-none placeholder-slate-400 shadow-sm"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="file"
+                      id="file-ceri-upload"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            if (typeof reader.result === 'string') {
+                              setLinkFoto(reader.result);
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                    <input
+                      type="file"
+                      id="file-ceri-camera"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            if (typeof reader.result === 'string') {
+                              setLinkFoto(reader.result);
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('file-ceri-upload')?.click()}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-semibold shadow-xs transition active:scale-95"
+                    >
+                      <Upload className="w-3.5 h-3.5 text-amber-500" />
+                      Upload Foto dari Perangkat
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('file-ceri-camera')?.click()}
+                      className="flex-grow-0 shrink-0 flex items-center justify-center gap-1.5 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-semibold shadow-xs transition active:scale-95"
+                    >
+                      <Camera className="w-3.5 h-3.5 text-amber-500" />
+                      Kamera HP
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[9.5px] text-slate-400 leading-none">
+                    <span>Format JPG, PNG, WEBP</span>
+                    {linkFoto && linkFoto.startsWith('data:') && (
+                      <span className="text-emerald-600 font-bold flex items-center gap-1">
+                        ✓ Foto Berhasil Diunggah
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -328,7 +424,10 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setEditingRecord(null);
+                  }}
                   className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800"
                 >
                   Batal
@@ -337,7 +436,7 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
                   type="submit"
                   className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-md btn-3d"
                 >
-                  Simpan Sesi Ceri
+                  {editingRecord ? 'Perbarui Sesi Ceri' : 'Simpan Sesi Ceri'}
                 </button>
               </div>
             </form>
@@ -366,7 +465,7 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
           onClose={() => setShowPrintModal(false)}
           title={
             selectedForPrint
-              ? `LAPORAN MINGGUAN SABTU BELI TEH CERI - ${selectedForPrint.hariTanggal.toUpperCase()}`
+              ? 'LAPORAN MINGGUAN SABTU BELI TEH CERI'
               : 'REKAPITULASI PROGRAM MINGGUAN SABTU BELI TEH CERI'
           }
           nomorSurat={`421.3 / CERI-${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}
@@ -488,6 +587,24 @@ export const SabtuBeliTehCeriView: React.FC<Props> = ({
               </div>
 
               <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    setEditingRecord(item);
+                    setHariTanggal(item.hariTanggal);
+                    setWaktu(item.waktu || '09:00 - 11:30 WIB');
+                    setHasilTemuanSatuMinggu(item.hasilTemuanSatuMinggu);
+                    setEvaluasiKegiatan(item.evaluasiKegiatan || '');
+                    setRencanaInovasi(item.rencanaInovasi || '');
+                    setLinkFoto(item.linkFoto || '');
+                    setKeterangan(item.keterangan || '');
+                    setFormSignature(item.tandaTanganUrl || '');
+                    setShowAddModal(true);
+                  }}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition"
+                  title="Edit data sesi ceri"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => {
                     setSelectedForPrint(item);

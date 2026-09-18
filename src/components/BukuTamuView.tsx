@@ -20,6 +20,7 @@ import { BukuTamuRecord } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
 import { TouchSignatureModal } from './TouchSignatureModal';
 import { OfficialReportModal } from './OfficialReportModal';
+import { CalendarDatePicker, RealTimeTimePicker } from './DateTimeWidgets';
 
 interface Props {
   records: BukuTamuRecord[];
@@ -121,7 +122,7 @@ export const BukuTamuView: React.FC<Props> = ({
               onClick={onOpenMenu}
               className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
             >
-              <Layers className="w-3.5 h-3.5 text-rose-600" />
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
               Pilihan Menu Aplikasi
             </button>
           )}
@@ -175,31 +176,16 @@ export const BukuTamuView: React.FC<Props> = ({
                   WAKTU KUNJUNGAN:
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      HARI / TANGGAL <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={hariTanggal}
-                      onChange={(e) => setHariTanggal(e.target.value)}
-                      placeholder="Contoh: Selasa, 16 September 2026"
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 text-xs focus:border-sky-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      JAM KEDATANGAN
-                    </label>
-                    <input
-                      type="text"
-                      value={jamKedatangan}
-                      onChange={(e) => setJamKedatangan(e.target.value)}
-                      placeholder="08:30 WIB"
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 text-xs focus:border-sky-500 focus:outline-none"
-                    />
-                  </div>
+                  <CalendarDatePicker
+                    value={hariTanggal}
+                    onChange={setHariTanggal}
+                    required
+                  />
+                  <RealTimeTimePicker
+                    value={jamKedatangan}
+                    onChange={setJamKedatangan}
+                    label="JAM KEDATANGAN"
+                  />
                 </div>
               </div>
 
@@ -367,7 +353,7 @@ export const BukuTamuView: React.FC<Props> = ({
           onClose={() => setShowPrintModal(false)}
           title={
             selectedForPrint
-              ? `LEMBAR KUNJUNGAN TAMU RESMI - ${selectedForPrint.namaLengkap.toUpperCase()}`
+              ? 'LEMBAR KUNJUNGAN TAMU RESMI'
               : 'REKAPITULASI BUKU TAMU & KUNJUNGAN KEDINASAN'
           }
           nomorSurat={`421.3 / TAMU-${Math.floor(100 + Math.random() * 900)} / 101.4.7 / 2026`}

@@ -26,6 +26,7 @@ import { TouchSignaturePad } from './TouchSignaturePad';
 import { TouchSignatureModal } from './TouchSignatureModal';
 import { OfficialReportModal } from './OfficialReportModal';
 import { StudentPickerModal } from './StudentPickerModal';
+import { CalendarDatePicker } from './DateTimeWidgets';
 
 interface Props {
   records: SPDamaiRecord[];
@@ -197,7 +198,7 @@ export const SPDamaiView: React.FC<Props> = ({
               onClick={onOpenMenu}
               className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
             >
-              <Layers className="w-3.5 h-3.5 text-rose-600" />
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
               Pilihan Menu Aplikasi
             </button>
           )}
@@ -287,16 +288,10 @@ export const SPDamaiView: React.FC<Props> = ({
               {/* Mediasi Info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    HARI / TANGGAL MEDIASI <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
+                  <CalendarDatePicker
                     value={hariTanggal}
-                    onChange={(e) => setHariTanggal(e.target.value)}
-                    placeholder="Contoh: Senin, 14 September 2026"
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 focus:border-emerald-500 focus:outline-none"
+                    onChange={setHariTanggal}
+                    required
                   />
                 </div>
                 <div>
@@ -1051,6 +1046,7 @@ export const SPDamaiView: React.FC<Props> = ({
           isOpen={true}
           onClose={() => setActivePicker(null)}
           siswaList={siswaList}
+          title={activePicker === 'pihak1' ? 'Pilih Identitas Pihak I (Siswa)' : 'Pilih Identitas Pihak II (Siswa)'}
           onSelect={(siswa) => {
             if (activePicker === 'pihak1') {
               setNamaPihak1(siswa.nama);

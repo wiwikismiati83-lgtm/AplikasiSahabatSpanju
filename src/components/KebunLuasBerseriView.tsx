@@ -20,6 +20,7 @@ import { KebunLuasBerseriRecord, RtlItem } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
 import { TouchSignatureModal } from './TouchSignatureModal';
 import { OfficialReportModal } from './OfficialReportModal';
+import { CalendarDatePicker, RealTimeTimePicker } from './DateTimeWidgets';
 
 interface Props {
   records: KebunLuasBerseriRecord[];
@@ -144,7 +145,7 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
               onClick={onOpenMenu}
               className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
             >
-              <Layers className="w-3.5 h-3.5 text-rose-600" />
+              <Layers className="w-3.5 h-3.5 text-blue-600" />
               Pilihan Menu Aplikasi
             </button>
           )}
@@ -193,32 +194,16 @@ export const KebunLuasBerseriView: React.FC<Props> = ({
 
             <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    HARI / TANGGAL <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={hariTanggal}
-                    onChange={(e) => setHariTanggal(e.target.value)}
-                    placeholder="Contoh: Rabu, 30 September 2026"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-teal-500 focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    WAKTU PELAKSANAAN
-                  </label>
-                  <input
-                    type="text"
-                    value={waktu}
-                    onChange={(e) => setWaktu(e.target.value)}
-                    placeholder="13:00 - 15:30 WIB"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-teal-500 focus:outline-none"
-                  />
-                </div>
+                <CalendarDatePicker
+                  value={hariTanggal}
+                  onChange={setHariTanggal}
+                  required
+                />
+                <RealTimeTimePicker
+                  value={waktu}
+                  onChange={setWaktu}
+                  label="WAKTU PELAKSANAAN"
+                />
               </div>
 
               <div>

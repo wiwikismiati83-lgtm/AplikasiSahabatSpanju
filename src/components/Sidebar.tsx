@@ -222,13 +222,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {currentUser && (
         <div id="sidebar-user-session" className="px-4 py-2.5 bg-slate-50/90 border-b border-slate-200/80 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${currentUser.role === 'admin' ? 'bg-rose-100 text-rose-700 border border-rose-300' : 'bg-teal-100 text-teal-700 border border-teal-300'}`}>
-              {currentUser.role === 'admin' ? <Shield className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${currentUser.role === 'admin' ? 'bg-blue-100 text-blue-700 border border-blue-300' : 'bg-teal-100 text-teal-700 border border-teal-300'}`}>
+              {currentUser.role === 'admin' ? <Shield className="w-4 h-4 text-blue-600" /> : <UserCheck className="w-4 h-4 text-teal-600" />}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-bold text-slate-800 truncate font-mono">@{currentUser.username}</span>
-                <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase ${currentUser.role === 'admin' ? 'bg-rose-600 text-white' : 'bg-teal-600 text-white'}`}>
+                <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded uppercase ${currentUser.role === 'admin' ? 'bg-blue-600 text-white' : 'bg-teal-600 text-white'}`}>
                   {currentUser.role === 'admin' ? 'Admin' : 'Tamu / Warga'}
                 </span>
               </div>
@@ -240,7 +240,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               id="btn-sidebar-logout"
               onClick={onLogout}
               title="Keluar / Ganti Akun"
-              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
+              className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition shrink-0"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
@@ -334,7 +334,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               id="btn-sidebar-footer-logout"
               onClick={onLogout}
-              className="px-2 py-0.5 text-[10px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded flex items-center gap-1 transition"
+              className="px-2 py-0.5 text-[10px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded flex items-center gap-1 transition"
               title="Keluar / Ganti Akun"
             >
               <LogOut className="w-2.5 h-2.5" />

@@ -33,25 +33,36 @@ import {
   Save,
   X,
 } from 'lucide-react';
-import { KelasZonaStatus } from '../types';
+import { KelasZonaStatus, Siswa, Guru } from '../types';
 import { MONTHLY_TREND_DATA, CATEGORY_BREAKDOWN_DATA } from '../data/initialData';
 
 interface ZonaHijauProps {
   kelasList: KelasZonaStatus[];
   onUpdateKelas: (updated: KelasZonaStatus[]) => void;
   onOpenMenu?: () => void;
+  siswaList?: Siswa[];
+  guruList?: Guru[];
 }
 
 export const ZonaHijauAnalyticsView: React.FC<ZonaHijauProps> = ({
   kelasList,
   onUpdateKelas,
   onOpenMenu,
+  siswaList = [],
+  guruList = [],
 }) => {
   const [filterTingkat, setFilterTingkat] = useState<'semua' | '7' | '8' | '9'>('semua');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<'kelas' | 'skorKeramahan' | 'totalKasusTahunIni'>('kelas');
   const [sortAsc, setSortAsc] = useState(true);
   const [editingKelas, setEditingKelas] = useState<KelasZonaStatus | null>(null);
+
+  // States for Master Data Pickers
+  const [isGuruPickerOpen, setIsGuruPickerOpen] = useState(false);
+  const [isSiswaPickerOpen, setIsSiswaPickerOpen] = useState(false);
+  const [searchTermGuru, setSearchTermGuru] = useState('');
+  const [searchTermSiswa, setSearchTermSiswa] = useState('');
+  const [selectedClassFilterSiswa, setSelectedClassFilterSiswa] = useState('Semua');
 
   // Filtered and sorted class list
   const filteredKelas = useMemo(() => {
@@ -124,7 +135,7 @@ export const ZonaHijauAnalyticsView: React.FC<ZonaHijauProps> = ({
                 onClick={onOpenMenu}
                 className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
               >
-                <Layers className="w-3.5 h-3.5 text-rose-600" />
+                <Layers className="w-3.5 h-3.5 text-blue-600" />
                 Pilihan Menu Aplikasi
               </button>
             )}
@@ -432,13 +443,13 @@ export const ZonaHijauAnalyticsView: React.FC<ZonaHijauProps> = ({
       {/* Edit Modal */}
       {editingKelas && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-6 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 flex flex-col max-h-[92vh] animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 shrink-0">
               <div>
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase tracking-wider">
                   EDIT ZONA KELAS {editingKelas.kelas}
                 </span>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight mt-1">
+                <h3 className="text-lg font-black text-slate-900 tracking-tight mt-1">
                   Perbarui Informasi Rombel
                 </h3>
               </div>
@@ -450,29 +461,58 @@ export const ZonaHijauAnalyticsView: React.FC<ZonaHijauProps> = ({
               </button>
             </div>
 
-            <div className="space-y-4">
+            {/* Scrollable Form Body */}
+            <div className="space-y-4 overflow-y-auto py-1 pr-1 flex-1 min-h-0">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Wali Kelas
                 </label>
-                <input
-                  type="text"
-                  value={editingKelas.waliKelas}
-                  onChange={(e) => setEditingKelas({ ...editingKelas, waliKelas: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-emerald-500"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={editingKelas.waliKelas}
+                    onClick={() => setIsGuruPickerOpen(true)}
+                    placeholder="Klik untuk memilih Guru..."
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-emerald-500 cursor-pointer hover:bg-slate-100 transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsGuruPickerOpen(true)}
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition whitespace-nowrap active:scale-95"
+                  >
+                    Pilih Guru
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Duta Anti-Bullying (Nama Siswa)
                 </label>
-                <input
-                  type="text"
-                  value={editingKelas.dutaAntiBullying}
-                  onChange={(e) => setEditingKelas({ ...editingKelas, dutaAntiBullying: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-emerald-500"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={editingKelas.dutaAntiBullying}
+                    onClick={() => {
+                      setSelectedClassFilterSiswa(editingKelas.kelas);
+                      setIsSiswaPickerOpen(true);
+                    }}
+                    placeholder="Klik untuk memilih Siswa..."
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-emerald-500 cursor-pointer hover:bg-slate-100 transition"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedClassFilterSiswa(editingKelas.kelas);
+                      setIsSiswaPickerOpen(true);
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition whitespace-nowrap active:scale-95"
+                  >
+                    Pilih Siswa
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -480,7 +520,7 @@ export const ZonaHijauAnalyticsView: React.FC<ZonaHijauProps> = ({
                   Motto / Catatan / Slogan Kelas
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   value={editingKelas.catatan}
                   onChange={(e) => setEditingKelas({ ...editingKelas, catatan: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:border-emerald-500"
@@ -518,7 +558,8 @@ export const ZonaHijauAnalyticsView: React.FC<ZonaHijauProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+            {/* Sticky Action Footer */}
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 shrink-0">
               <button
                 onClick={() => setEditingKelas(null)}
                 className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
@@ -645,6 +686,172 @@ export const ZonaHijauAnalyticsView: React.FC<ZonaHijauProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Guru Picker Modal */}
+      {isGuruPickerOpen && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[80vh] animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-black text-slate-800 uppercase tracking-tight text-sm">Pilih Wali Kelas</h4>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Cari dan pilih guru dari Master Data</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setIsGuruPickerOpen(false);
+                  setSearchTermGuru('');
+                }}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="relative mb-3 shrink-0">
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={searchTermGuru}
+                onChange={(e) => setSearchTermGuru(e.target.value)}
+                placeholder="Cari Nama Guru atau NIP..."
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-1 pr-1">
+              {guruList.filter(g => 
+                g.nama.toLowerCase().includes(searchTermGuru.toLowerCase()) ||
+                g.nip.includes(searchTermGuru)
+              ).length === 0 ? (
+                <div className="text-center py-8 text-xs text-slate-400 font-bold">
+                  Tidak ada guru yang ditemukan.
+                </div>
+              ) : (
+                guruList.filter(g => 
+                  g.nama.toLowerCase().includes(searchTermGuru.toLowerCase()) ||
+                  g.nip.includes(searchTermGuru)
+                ).map((g) => (
+                  <button
+                    key={g.id}
+                    onClick={() => {
+                      if (editingKelas) {
+                        setEditingKelas({ ...editingKelas, waliKelas: g.nama });
+                      }
+                      setIsGuruPickerOpen(false);
+                      setSearchTermGuru('');
+                    }}
+                    className="w-full text-left p-3 rounded-xl hover:bg-slate-50 active:bg-slate-100 border border-transparent hover:border-slate-100 transition flex items-center justify-between group"
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-600 transition block">{g.nama}</span>
+                      <span className="text-[10px] font-medium text-slate-500 block">NIP: {g.nip || '-'} &bull; {g.jabatan}</span>
+                    </div>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition uppercase">
+                      Pilih
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Siswa Picker Modal */}
+      {isSiswaPickerOpen && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[80vh] animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-black text-slate-800 uppercase tracking-tight text-sm">Pilih Duta Anti-Bullying</h4>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Cari dan pilih siswa dari Master Data</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setIsSiswaPickerOpen(false);
+                  setSearchTermSiswa('');
+                }}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 mb-3 shrink-0">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  value={searchTermSiswa}
+                  onChange={(e) => setSearchTermSiswa(e.target.value)}
+                  placeholder="Cari Nama Siswa..."
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div>
+                <select
+                  value={selectedClassFilterSiswa}
+                  onChange={(e) => setSelectedClassFilterSiswa(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:outline-none focus:border-emerald-500 text-slate-700"
+                >
+                  <option value="Semua">Semua Kelas</option>
+                  {['7A','7B','7C','7D','7E','7F','7G','7H','8A','8B','8C','8D','8E','8F','8G','8H','9A','9B','9C','9D','9E','9F','9G','9H'].map((cl) => (
+                    <option key={cl} value={cl}>Kelas {cl}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-1 pr-1">
+              {siswaList.filter(s => {
+                const matchesClass = selectedClassFilterSiswa === 'Semua' || s.kelas === selectedClassFilterSiswa;
+                const matchesSearch = s.nama.toLowerCase().includes(searchTermSiswa.toLowerCase()) || s.nisn.includes(searchTermSiswa);
+                return matchesClass && matchesSearch;
+              }).length === 0 ? (
+                <div className="text-center py-8 text-xs text-slate-400 font-bold">
+                  Tidak ada siswa yang ditemukan.
+                </div>
+              ) : (
+                siswaList.filter(s => {
+                  const matchesClass = selectedClassFilterSiswa === 'Semua' || s.kelas === selectedClassFilterSiswa;
+                  const matchesSearch = s.nama.toLowerCase().includes(searchTermSiswa.toLowerCase()) || s.nisn.includes(searchTermSiswa);
+                  return matchesClass && matchesSearch;
+                }).map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => {
+                      if (editingKelas) {
+                        setEditingKelas({ ...editingKelas, dutaAntiBullying: s.nama });
+                      }
+                      setIsSiswaPickerOpen(false);
+                      setSearchTermSiswa('');
+                    }}
+                    className="w-full text-left p-3 rounded-xl hover:bg-slate-50 active:bg-slate-100 border border-transparent hover:border-slate-100 transition flex items-center justify-between group"
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-600 transition block">{s.nama}</span>
+                      <span className="text-[10px] font-medium text-slate-500 block">Kelas {s.kelas} &bull; NISN: {s.nisn || '-'}</span>
+                    </div>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition uppercase">
+                      Pilih
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
