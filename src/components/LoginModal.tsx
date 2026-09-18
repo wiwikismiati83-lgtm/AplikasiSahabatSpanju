@@ -122,53 +122,54 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     >
       <div
         id="modal-login-card"
-        className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden relative animate-in fade-in zoom-in duration-200"
+        className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden relative animate-in fade-in zoom-in duration-200 max-h-[95vh] flex flex-col"
       >
         {/* Close Button if dismissible */}
         {canDismiss && onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition z-10"
+            className="absolute top-3 right-3 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition z-10"
             title="Tutup"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         )}
 
-        {/* Header Branding - Clean Elegant Light Theme */}
-        <div className="bg-white px-6 pt-8 pb-6 text-slate-900 text-center relative border-b border-slate-100">
-          <div className="inline-flex p-1.5 bg-white rounded-full shadow-md border border-emerald-100 mb-3 ring-4 ring-emerald-50">
-            <img
-              src="https://i.ibb.co.com/pBbfS44d/LOGO-PASS-TEMENAN.jpg"
-              alt="Logo Pass Temenan"
-              className="w-16 h-16 rounded-full object-cover bg-white"
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src =
-                  'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=100&q=80';
-              }}
-            />
+        <div className="overflow-y-auto flex-1 custom-scrollbar">
+          {/* Header Branding - Clean Elegant Light Theme */}
+          <div className="bg-white px-6 pt-6 pb-4 text-slate-900 text-center relative border-b border-slate-100 flex flex-col items-center shrink-0">
+            <div className="inline-flex p-1 bg-white rounded-full shadow-md border border-emerald-100 mb-3 ring-2 ring-emerald-50">
+              <img
+                src="https://i.ibb.co.com/pBbfS44d/LOGO-PASS-TEMENAN.jpg"
+                alt="Logo Pass Temenan"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover bg-white"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=100&q=80';
+                }}
+              />
+            </div>
+
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-black tracking-wide uppercase mb-2 shadow-xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>APLIKASI SAHABAT SPANJU</span>
+            </div>
+
+            <p className="text-[10px] text-slate-500 font-bold leading-tight max-w-[280px] mx-auto mb-3 italic">
+              (Sekolah Aman, Harmonis, Anti Bullying dan Tindak Kekerasan SMP Negeri 7 Pasuruan)
+            </p>
+
+            <h2 className="text-xl font-black tracking-tighter text-slate-900 uppercase">
+              AKSES MASUK APLIKASI
+            </h2>
+            <p className="text-[10px] text-slate-400 font-bold mt-0.5 tracking-[0.2em] uppercase">
+              UPT SMP Negeri 7 Pasuruan
+            </p>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold tracking-wide uppercase mb-2 shadow-xs">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>APLIKASI SAHABAT SPANJU</span>
-          </div>
-
-          <p className="text-[11px] text-slate-600 font-medium leading-relaxed max-w-sm mx-auto mb-4">
-            (Sekolah Aman, Harmonis, Anti Bullying dan Tindak Kekerasan SMP Negeri 7 Pasuruan)
-          </p>
-
-          <h2 className="text-xl font-extrabold tracking-tight text-slate-900 uppercase">
-            AKSES MASUK APLIKASI
-          </h2>
-          <p className="text-xs text-slate-500 font-medium mt-0.5">
-            UPT SMP Negeri 7 Pasuruan
-          </p>
-        </div>
-
-        {/* Body Content */}
-        <div className="p-6 space-y-5">
+          {/* Body Content */}
+          <div className="p-5 space-y-4">
           {/* Error Notice */}
           {errorMessage && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-700 animate-in shake">
@@ -305,9 +306,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
