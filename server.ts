@@ -27,6 +27,11 @@ const getSupabase = () => {
 
 app.use(express.json({ limit: '10mb' }));
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 // Lookup map for mapping database lowercase keys back to React camelCase properties
 const camelToLowerMap: Record<string, string> = {
   createdat: 'createdAt',

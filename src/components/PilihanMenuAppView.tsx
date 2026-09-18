@@ -26,11 +26,25 @@ interface PilihanMenuAppViewProps {
   totalLaporan: number;
 }
 
+interface MenuItemConfig {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: React.ComponentType<{ className?: string }>;
+  category: 'prioritas' | 'karakter' | 'master';
+  color: string;
+  textColor: string;
+  bgColor: string;
+  badge?: string;
+  externalUrl?: string;
+  action: () => void;
+}
+
 export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiveApp, totalLaporan }) => {
   const [activeTab, setActiveTab] = useState<'semua' | 'prioritas' | 'karakter' | 'master'>('semua');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const menuItems = [
+  const menuItems: MenuItemConfig[] = [
     {
       id: 'tutorial_flipbook',
       title: 'TUTORIAL MANUAL BOOK',
@@ -162,7 +176,11 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
       color: 'from-amber-700 to-orange-800',
       textColor: 'text-amber-700',
       bgColor: 'bg-amber-50',
-      action: () => setActiveApp('arsip_kegiatan')
+      badge: 'Buka Web Eksternal',
+      externalUrl: 'https://sites.google.com/view/berandapasstemenanspanju/home',
+      action: () => {
+        window.open('https://sites.google.com/view/berandapasstemenanspanju/home', '_blank', 'noopener,noreferrer');
+      }
     },
     {
       id: 'media_edukasi',
@@ -316,11 +334,21 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
           return (
             <div
               key={item.id}
-              onClick={item.action}
+              onClick={() => {
+                if (item.externalUrl) {
+                  window.open(item.externalUrl, '_blank', 'noopener,noreferrer');
+                } else {
+                  item.action();
+                }
+              }}
               className="bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300 shadow-xs hover:shadow-lg transition-all duration-300 p-6 flex flex-col items-center text-center group cursor-pointer relative overflow-hidden"
             >
               {item.badge && (
-                <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
+                <span className={`absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                  item.externalUrl
+                    ? 'bg-amber-100 text-amber-800 border-amber-300'
+                    : 'bg-blue-100 text-blue-700 border border-blue-200'
+                }`}>
                   {item.badge}
                 </span>
               )}
@@ -336,13 +364,30 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
                 {item.subtitle}
               </p>
  
-              <button
-                type="button"
-                className="mt-auto w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 transition flex items-center justify-center gap-1.5 shadow-2xs"
-              >
-                <span>Buka Aplikasi</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </button>
+              {item.externalUrl ? (
+                <a
+                  href={item.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="mt-auto w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 hover:text-amber-900 border border-amber-200 hover:border-amber-300 transition flex items-center justify-center gap-1.5 shadow-2xs group-hover:bg-amber-600 group-hover:text-white"
+                >
+                  <span>Buka Aplikasi</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    item.action();
+                  }}
+                  className="mt-auto w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-200 transition flex items-center justify-center gap-1.5 shadow-2xs"
+                >
+                  <span>Buka Aplikasi</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           );
         })}

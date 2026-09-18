@@ -22,6 +22,7 @@ import {
   PhoneCall,
   Users,
   GraduationCap,
+  ExternalLink,
 } from 'lucide-react';
 import { ActiveAppId, AuthUser } from '../types';
 
@@ -125,11 +126,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       id: 'arsip_kegiatan',
       title: 'Arsip Kegiatan',
-      subtitle: 'Dokumentasi, Foto & Laporan',
+      subtitle: 'Dokumentasi Google Sites',
       icon: FolderArchive,
       accentColor: 'from-amber-500 to-orange-600',
-      badge: 'Galeri',
+      badge: 'Buka Web',
       badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
+      externalUrl: 'https://sites.google.com/view/berandapasstemenanspanju/home',
     },
     {
       id: 'buku_tamu',
@@ -277,7 +279,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={item.id}
                   id={`btn-nav-${item.id}`}
-                  onClick={() => setActiveApp(item.id)}
+                  onClick={() => {
+                    if (item.externalUrl) {
+                      window.open(item.externalUrl, '_blank', 'noopener,noreferrer');
+                    } else {
+                      setActiveApp(item.id);
+                    }
+                  }}
                   className={`w-full group text-left px-3 py-2.5 rounded-xl flex items-center gap-3 transition-all duration-200 relative overflow-hidden ${
                     isActive
                       ? 'bg-emerald-50/90 text-emerald-950 border border-emerald-300 shadow-xs translate-x-0.5 font-semibold'
@@ -317,11 +325,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </p>
                   </div>
 
-                  <ChevronRight
-                    className={`w-3.5 h-3.5 shrink-0 transition-transform ${
-                      isActive ? 'text-emerald-700 translate-x-0.5' : 'text-slate-400 group-hover:text-slate-600'
-                    }`}
-                  />
+                  {item.externalUrl ? (
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0 text-amber-600 group-hover:text-amber-700" />
+                  ) : (
+                    <ChevronRight
+                      className={`w-3.5 h-3.5 shrink-0 transition-transform ${
+                        isActive ? 'text-emerald-700 translate-x-0.5' : 'text-slate-400 group-hover:text-slate-600'
+                      }`}
+                    />
+                  )}
                 </button>
               );
             })}
