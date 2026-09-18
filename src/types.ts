@@ -205,6 +205,24 @@ export interface ArsipKegiatanRecord {
   createdAt: string;
 }
 
+export interface Siswa {
+  id: string;
+  nisn: string;
+  nama: string;
+  kelas: string;
+  jenisKelamin: 'L' | 'P';
+  createdAt: string;
+}
+
+export interface Guru {
+  id: string;
+  nip: string;
+  nama: string;
+  jabatan: string;
+  status: string;
+  createdAt: string;
+}
+
 export type ActiveAppId =
   | 'zona_analitik'
   | 'piket_harian'
@@ -216,6 +234,8 @@ export type ActiveAppId =
   | 'arsip_kegiatan'
   | 'buku_tamu'
   | 'media_edukasi'
+  | 'master_siswa'
+  | 'master_guru'
   | 'tutorial_flipbook'
   | 'hotline_bantuan'
   | string; // for custom link IDs

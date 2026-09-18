@@ -20,6 +20,8 @@ import {
   Shield,
   BookOpen,
   PhoneCall,
+  Users,
+  GraduationCap,
 } from 'lucide-react';
 import { ActiveAppId, AuthUser } from '../types';
 
@@ -140,6 +142,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       subtitle: 'Dokumentasi Materi & Pesan Edukatif',
       icon: Tv,
       accentColor: 'from-violet-500 to-fuchsia-600',
+    },
+    {
+      id: 'master_siswa',
+      title: 'Master Data Siswa',
+      subtitle: 'Database Siswa & Upload Excel',
+      icon: Users,
+      accentColor: 'from-emerald-500 to-teal-600',
+    },
+    {
+      id: 'master_guru',
+      title: 'Master Data Guru',
+      subtitle: 'Database Guru & Upload Excel',
+      icon: GraduationCap,
+      accentColor: 'from-blue-500 to-indigo-600',
     },
     {
       id: 'tutorial_flipbook',

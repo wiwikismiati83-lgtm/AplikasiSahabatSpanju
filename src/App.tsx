@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from './lib/api';
 import {
   Menu,
   X,
@@ -29,6 +30,8 @@ import {
   ArsipKegiatanRecord,
   AuthUser,
   UserRole,
+  Siswa,
+  Guru,
 } from './types';
 import {
   INITIAL_CUSTOM_LINKS,
@@ -56,6 +59,8 @@ import { SPDamaiView } from './components/SPDamaiView';
 import { ArsipKegiatanView } from './components/ArsipKegiatanView';
 import { BukuTamuView } from './components/BukuTamuView';
 import { MediaEdukasiView } from './components/MediaEdukasiView';
+import { MasterSiswaView } from './components/MasterSiswaView';
+import { MasterGuruView } from './components/MasterGuruView';
 import { PilihanMenuAppView } from './components/PilihanMenuAppView';
 import { TutorialFlipbookView } from './components/TutorialFlipbookView';
 import { HotlineView } from './components/HotlineView';
@@ -96,141 +101,65 @@ export default function App() {
   const userRole: UserRole = currentUser?.role || 'siswa';
   const canDelete = currentUser?.role === 'admin';
 
-  // Persistent Custom Links
-  const [customLinks, setCustomLinks] = useState<CustomLink[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_custom_links');
-      return saved ? JSON.parse(saved) : INITIAL_CUSTOM_LINKS;
-    } catch {
-      return INITIAL_CUSTOM_LINKS;
-    }
-  });
-
   // Persistent Module Records
-  const [piketRecords, setPiketRecords] = useState<PiketHarianRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_piket');
-      return saved ? JSON.parse(saved) : INITIAL_PIKET_HARIAN;
-    } catch {
-      return INITIAL_PIKET_HARIAN;
-    }
-  });
+  const [customLinks, setCustomLinks] = useState<CustomLink[]>(INITIAL_CUSTOM_LINKS);
+  const [piketRecords, setPiketRecords] = useState<PiketHarianRecord[]>([]);
+  const [ceriRecords, setCeriRecords] = useState<SabtuBeliTehCeriRecord[]>([]);
+  const [kebunRecords, setKebunRecords] = useState<KebunLuasBerseriRecord[]>([]);
+  const [serasiRecords, setSerasiRecords] = useState<SenandungSerasiRecord[]>([]);
+  const [eLaporRecords, setELaporRecords] = useState<ELaporRecord[]>([]);
+  const [bukuTamuRecords, setBukuTamuRecords] = useState<BukuTamuRecord[]>([]);
+  const [mediaEdukasiItems, setMediaEdukasiItems] = useState<MediaEdukasiItem[]>([]);
+  const [kelasList, setKelasList] = useState<KelasZonaStatus[]>(INITIAL_KELAS_ZONA);
+  const [spDamaiRecords, setSpDamaiRecords] = useState<SPDamaiRecord[]>([]);
+  const [arsipKegiatanRecords, setArsipKegiatanRecords] = useState<ArsipKegiatanRecord[]>([]);
+  const [siswaList, setSiswaList] = useState<Siswa[]>([]);
+  const [guruList, setGuruList] = useState<Guru[]>([]);
 
-  const [ceriRecords, setCeriRecords] = useState<SabtuBeliTehCeriRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_ceri');
-      return saved ? JSON.parse(saved) : INITIAL_SABTU_BELI_TEH_CERI;
-    } catch {
-      return INITIAL_SABTU_BELI_TEH_CERI;
-    }
-  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [kebunRecords, setKebunRecords] = useState<KebunLuasBerseriRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_kebun');
-      return saved ? JSON.parse(saved) : INITIAL_KEBUN_LUAS_BERSERI;
-    } catch {
-      return INITIAL_KEBUN_LUAS_BERSERI;
-    }
-  });
+  // Fetch all data from Supabase on mount
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        setIsLoading(true);
+        const [
+          piket, ceri, kebun, serasi, elapor, tamu, media, zona, damai, arsip, siswa, guru
+        ] = await Promise.all([
+          api.get('piket_records').catch(() => []),
+          api.get('ceri_records').catch(() => []),
+          api.get('kebun_records').catch(() => []),
+          api.get('serasi_records').catch(() => []),
+          api.get('e_lapor_records').catch(() => []),
+          api.get('buku_tamu_records').catch(() => []),
+          api.get('media_edukasi_items').catch(() => []),
+          api.get('kelas_zona').catch(() => []),
+          api.get('sp_damai_records').catch(() => []),
+          api.get('arsip_records').catch(() => []),
+          api.get('siswa_master').catch(() => []),
+          api.get('guru_master').catch(() => []),
+        ]);
 
-  const [serasiRecords, setSerasiRecords] = useState<SenandungSerasiRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_serasi');
-      return saved ? JSON.parse(saved) : INITIAL_SENANDUNG_SERASI;
-    } catch {
-      return INITIAL_SENANDUNG_SERASI;
-    }
-  });
-
-  const [eLaporRecords, setELaporRecords] = useState<ELaporRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_elapor');
-      return saved ? JSON.parse(saved) : INITIAL_E_LAPOR;
-    } catch {
-      return INITIAL_E_LAPOR;
-    }
-  });
-
-  const [bukuTamuRecords, setBukuTamuRecords] = useState<BukuTamuRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_tamu');
-      return saved ? JSON.parse(saved) : INITIAL_BUKU_TAMU;
-    } catch {
-      return INITIAL_BUKU_TAMU;
-    }
-  });
-
-  const [mediaEdukasiItems, setMediaEdukasiItems] = useState<MediaEdukasiItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_media');
-      return saved ? JSON.parse(saved) : INITIAL_MEDIA_EDUKASI;
-    } catch {
-      return INITIAL_MEDIA_EDUKASI;
-    }
-  });
-
-  const [kelasList, setKelasList] = useState<KelasZonaStatus[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_kelas_zona');
-      return saved ? JSON.parse(saved) : INITIAL_KELAS_ZONA;
-    } catch {
-      return INITIAL_KELAS_ZONA;
-    }
-  });
-
-  const [spDamaiRecords, setSpDamaiRecords] = useState<SPDamaiRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_sp_damai');
-      return saved ? JSON.parse(saved) : INITIAL_SP_DAMAI;
-    } catch {
-      return INITIAL_SP_DAMAI;
-    }
-  });
-
-  const [arsipKegiatanRecords, setArsipKegiatanRecords] = useState<ArsipKegiatanRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('spanju_arsip_kegiatan');
-      return saved ? JSON.parse(saved) : INITIAL_ARSIP_KEGIATAN;
-    } catch {
-      return INITIAL_ARSIP_KEGIATAN;
-    }
-  });
-
-  // LocalStorage synchronizers
-  useEffect(() => {
-    localStorage.setItem('spanju_custom_links', JSON.stringify(customLinks));
-  }, [customLinks]);
-  useEffect(() => {
-    localStorage.setItem('spanju_piket', JSON.stringify(piketRecords));
-  }, [piketRecords]);
-  useEffect(() => {
-    localStorage.setItem('spanju_ceri', JSON.stringify(ceriRecords));
-  }, [ceriRecords]);
-  useEffect(() => {
-    localStorage.setItem('spanju_kebun', JSON.stringify(kebunRecords));
-  }, [kebunRecords]);
-  useEffect(() => {
-    localStorage.setItem('spanju_serasi', JSON.stringify(serasiRecords));
-  }, [serasiRecords]);
-  useEffect(() => {
-    localStorage.setItem('spanju_elapor', JSON.stringify(eLaporRecords));
-  }, [eLaporRecords]);
-  useEffect(() => {
-    localStorage.setItem('spanju_tamu', JSON.stringify(bukuTamuRecords));
-  }, [bukuTamuRecords]);
-  useEffect(() => {
-    localStorage.setItem('spanju_media', JSON.stringify(mediaEdukasiItems));
-  }, [mediaEdukasiItems]);
-  useEffect(() => {
-    localStorage.setItem('spanju_kelas_zona', JSON.stringify(kelasList));
-  }, [kelasList]);
-  useEffect(() => {
-    localStorage.setItem('spanju_sp_damai', JSON.stringify(spDamaiRecords));
-  }, [spDamaiRecords]);
-  useEffect(() => {
-    localStorage.setItem('spanju_arsip_kegiatan', JSON.stringify(arsipKegiatanRecords));
-  }, [arsipKegiatanRecords]);
+        if (piket?.length) setPiketRecords(piket);
+        if (ceri?.length) setCeriRecords(ceri);
+        if (kebun?.length) setKebunRecords(kebun);
+        if (serasi?.length) setSerasiRecords(serasi);
+        if (elapor?.length) setELaporRecords(elapor);
+        if (tamu?.length) setBukuTamuRecords(tamu);
+        if (media?.length) setMediaEdukasiItems(media);
+        if (zona?.length) setKelasList(zona);
+        if (damai?.length) setSpDamaiRecords(damai);
+        if (arsip?.length) setArsipKegiatanRecords(arsip);
+        if (siswa?.length) setSiswaList(siswa);
+        if (guru?.length) setGuruList(guru);
+      } catch (err) {
+        console.error('Error fetching Supabase data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAllData();
+  }, []);
 
   // Toast Helper
   const showToast = (msg: string) => {
@@ -536,7 +465,13 @@ export default function App() {
             {activeApp === 'zona_analitik' && (
               <ZonaHijauAnalyticsView
                 kelasList={kelasList}
-                onUpdateKelas={(updated) => setKelasList(updated)}
+                onUpdateKelas={async (updated) => {
+                  setKelasList(updated);
+                  // Since updated is an array in this context usually, let's check ZonaHijauAnalyticsView
+                  // Actually setKelasList(updated) suggests updated is the new full array.
+                  // For bulk update:
+                  api.bulkUpsert('kelas_zona', updated);
+                }}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
               />
             )}
@@ -547,16 +482,19 @@ export default function App() {
                 records={piketRecords}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
-                onAddRecord={(rec) => {
+                onAddRecord={async (rec) => {
                   setPiketRecords([rec, ...piketRecords]);
+                  await api.upsert('piket_records', rec);
                   showToast('Laporan piket harian tersimpan!');
                 }}
-                onDeleteRecord={(id) => {
+                onDeleteRecord={async (id) => {
                   setPiketRecords(piketRecords.filter((r) => r.id !== id));
+                  await api.delete('piket_records', id);
                   showToast('Laporan piket dihapus.');
                 }}
-                onUpdateRecord={(updated) => {
+                onUpdateRecord={async (updated) => {
                   setPiketRecords(piketRecords.map((r) => (r.id === updated.id ? updated : r)));
+                  await api.upsert('piket_records', updated);
                   showToast('Tanda tangan laporan piket diperbarui.');
                 }}
               />
@@ -568,16 +506,19 @@ export default function App() {
                 records={ceriRecords}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
-                onAddRecord={(rec) => {
+                onAddRecord={async (rec) => {
                   setCeriRecords([rec, ...ceriRecords]);
+                  await api.upsert('ceri_records', rec);
                   showToast('Sesi Sabtu Beli Teh Ceri tersimpan!');
                 }}
-                onDeleteRecord={(id) => {
+                onDeleteRecord={async (id) => {
                   setCeriRecords(ceriRecords.filter((r) => r.id !== id));
+                  await api.delete('ceri_records', id);
                   showToast('Catatan dihapus.');
                 }}
-                onUpdateRecord={(updated) => {
+                onUpdateRecord={async (updated) => {
                   setCeriRecords(ceriRecords.map((r) => (r.id === updated.id ? updated : r)));
+                  await api.upsert('ceri_records', updated);
                   showToast('Tanda tangan sesi ceri diperbarui.');
                 }}
               />
@@ -589,16 +530,19 @@ export default function App() {
                 records={kebunRecords}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
-                onAddRecord={(rec) => {
+                onAddRecord={async (rec) => {
                   setKebunRecords([rec, ...kebunRecords]);
+                  await api.upsert('kebun_records', rec);
                   showToast('Rapat Kebun Luas Berseri tersimpan!');
                 }}
-                onDeleteRecord={(id) => {
+                onDeleteRecord={async (id) => {
                   setKebunRecords(kebunRecords.filter((r) => r.id !== id));
+                  await api.delete('kebun_records', id);
                   showToast('Catatan dihapus.');
                 }}
-                onUpdateRecord={(updated) => {
+                onUpdateRecord={async (updated) => {
                   setKebunRecords(kebunRecords.map((r) => (r.id === updated.id ? updated : r)));
+                  await api.upsert('kebun_records', updated);
                   showToast('Tanda tangan notulen Kebun Luas diperbarui.');
                 }}
               />
@@ -610,16 +554,19 @@ export default function App() {
                 records={serasiRecords}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
-                onAddRecord={(rec) => {
+                onAddRecord={async (rec) => {
                   setSerasiRecords([rec, ...serasiRecords]);
+                  await api.upsert('serasi_records', rec);
                   showToast('Pesan Senandung Serasi berhasil ditambahkan!');
                 }}
-                onDeleteRecord={(id) => {
+                onDeleteRecord={async (id) => {
                   setSerasiRecords(serasiRecords.filter((r) => r.id !== id));
+                  await api.delete('serasi_records', id);
                   showToast('Pesan dihapus.');
                 }}
-                onUpdateRecord={(updated) => {
+                onUpdateRecord={async (updated) => {
                   setSerasiRecords(serasiRecords.map((r) => (r.id === updated.id ? updated : r)));
+                  await api.upsert('serasi_records', updated);
                   showToast('Tanda tangan pesan serasi diperbarui.');
                 }}
               />
@@ -632,22 +579,26 @@ export default function App() {
                 userRole={userRole}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
-                onAddRecord={(rec) => {
+                onAddRecord={async (rec) => {
                   setELaporRecords([rec, ...eLaporRecords]);
+                  await api.upsert('e_lapor_records', rec);
                   showToast('Laporan aduan perundungan berhasil didaftarkan!');
                 }}
-                onDeleteRecord={(id) => {
+                onDeleteRecord={async (id) => {
                   setELaporRecords(eLaporRecords.filter((r) => r.id !== id));
+                  await api.delete('e_lapor_records', id);
                   showToast('Laporan dihapus.');
                 }}
-                onUpdateStatus={(id, status) => {
-                  setELaporRecords(
-                    eLaporRecords.map((r) => (r.id === id ? { ...r, status } : r))
-                  );
+                onUpdateStatus={async (id, status) => {
+                  const updated = eLaporRecords.map((r) => (r.id === id ? { ...r, status } : r));
+                  setELaporRecords(updated);
+                  const item = updated.find(r => r.id === id);
+                  if (item) await api.upsert('e_lapor_records', item);
                   showToast(`Status laporan diperbarui: ${status}`);
                 }}
-                onUpdateRecord={(updated) => {
+                onUpdateRecord={async (updated) => {
                   setELaporRecords(eLaporRecords.map((r) => (r.id === updated.id ? updated : r)));
+                  await api.upsert('e_lapor_records', updated);
                   showToast('Tanda tangan berita acara diperbarui.');
                 }}
               />
@@ -659,16 +610,19 @@ export default function App() {
                 records={spDamaiRecords}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
-                onAddRecord={(rec) => {
+                onAddRecord={async (rec) => {
                   setSpDamaiRecords([rec, ...spDamaiRecords]);
+                  await api.upsert('sp_damai_records', rec);
                   showToast('Surat kesepakatan damai berhasil diterbitkan!');
                 }}
-                onDeleteRecord={(id) => {
+                onDeleteRecord={async (id) => {
                   setSpDamaiRecords(spDamaiRecords.filter((r) => r.id !== id));
+                  await api.delete('sp_damai_records', id);
                   showToast('Surat damai dihapus.');
                 }}
-                onUpdateRecord={(updated) => {
+                onUpdateRecord={async (updated) => {
                   setSpDamaiRecords(spDamaiRecords.map((r) => (r.id === updated.id ? updated : r)));
+                  await api.upsert('sp_damai_records', updated);
                   showToast('Tanda tangan surat damai diperbarui.');
                 }}
               />
@@ -680,18 +634,21 @@ export default function App() {
                 records={arsipKegiatanRecords}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
-                onAddRecord={(rec) => {
+                onAddRecord={async (rec) => {
                   setArsipKegiatanRecords([rec, ...arsipKegiatanRecords]);
+                  await api.upsert('arsip_records', rec);
                   showToast('Arsip kegiatan berhasil didokumentasikan!');
                 }}
-                onDeleteRecord={(id) => {
+                onDeleteRecord={async (id) => {
                   setArsipKegiatanRecords(arsipKegiatanRecords.filter((r) => r.id !== id));
+                  await api.delete('arsip_records', id);
                   showToast('Arsip kegiatan dihapus.');
                 }}
-                onUpdateRecord={(updated) => {
+                onUpdateRecord={async (updated) => {
                   setArsipKegiatanRecords(
                     arsipKegiatanRecords.map((r) => (r.id === updated.id ? updated : r))
                   );
+                  await api.upsert('arsip_records', updated);
                   showToast('Tanda tangan koordinator arsip diperbarui.');
                 }}
               />
@@ -703,16 +660,19 @@ export default function App() {
                 records={bukuTamuRecords}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
-                onAddRecord={(rec) => {
+                onAddRecord={async (rec) => {
                   setBukuTamuRecords([rec, ...bukuTamuRecords]);
+                  await api.upsert('buku_tamu_records', rec);
                   showToast('Buku tamu digital tersimpan dengan tanda tangan!');
                 }}
-                onDeleteRecord={(id) => {
+                onDeleteRecord={async (id) => {
                   setBukuTamuRecords(bukuTamuRecords.filter((r) => r.id !== id));
+                  await api.delete('buku_tamu_records', id);
                   showToast('Catatan tamu dihapus.');
                 }}
-                onUpdateRecord={(updated) => {
+                onUpdateRecord={async (updated) => {
                   setBukuTamuRecords(bukuTamuRecords.map((r) => (r.id === updated.id ? updated : r)));
+                  await api.upsert('buku_tamu_records', updated);
                   showToast('Tanda tangan buku tamu diperbarui.');
                 }}
               />
@@ -724,13 +684,73 @@ export default function App() {
                 items={mediaEdukasiItems}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
-                onAddItem={(item) => {
+                onAddItem={async (item) => {
                   setMediaEdukasiItems([item, ...mediaEdukasiItems]);
+                  await api.upsert('media_edukasi_items', item);
                   showToast('Media edukasi digital berhasil ditambahkan!');
                 }}
-                onDeleteItem={(id) => {
+                onDeleteItem={async (id) => {
                   setMediaEdukasiItems(mediaEdukasiItems.filter((m) => m.id !== id));
+                  await api.delete('media_edukasi_items', id);
                   showToast('Media edukasi dihapus.');
+                }}
+              />
+            )}
+
+            {/* 10. Master Data Siswa */}
+            {activeApp === 'master_siswa' && (
+              <MasterSiswaView
+                records={siswaList}
+                canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
+                onAddRecords={async (recs) => {
+                  try {
+                    await api.bulkUpsert('siswa_master', recs);
+                    setSiswaList(prev => [...recs, ...prev]);
+                    showToast(`${recs.length} data siswa berhasil disimpan.`);
+                  } catch (err) {
+                    showToast('Gagal menyimpan data siswa.');
+                    throw err;
+                  }
+                }}
+                onDeleteRecord={async (id) => {
+                  try {
+                    await api.delete('siswa_master', id);
+                    setSiswaList(prev => prev.filter(s => s.id !== id));
+                    showToast('Data siswa berhasil dihapus.');
+                  } catch (err) {
+                    showToast('Gagal menghapus data siswa.');
+                    throw err;
+                  }
+                }}
+              />
+            )}
+
+            {/* 11. Master Data Guru */}
+            {activeApp === 'master_guru' && (
+              <MasterGuruView
+                records={guruList}
+                canDelete={canDelete}
+                onOpenMenu={() => setActiveApp('pilihan_menu')}
+                onAddRecords={async (recs) => {
+                  try {
+                    await api.bulkUpsert('guru_master', recs);
+                    setGuruList(prev => [...recs, ...prev]);
+                    showToast(`${recs.length} data guru berhasil disimpan.`);
+                  } catch (err) {
+                    showToast('Gagal menyimpan data guru.');
+                    throw err;
+                  }
+                }}
+                onDeleteRecord={async (id) => {
+                  try {
+                    await api.delete('guru_master', id);
+                    setGuruList(prev => prev.filter(g => g.id !== id));
+                    showToast('Data guru berhasil dihapus.');
+                  } catch (err) {
+                    showToast('Gagal menghapus data guru.');
+                    throw err;
+                  }
                 }}
               />
             )}

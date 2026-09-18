@@ -15,7 +15,9 @@ import {
   ExternalLink,
   Layers,
   CheckCircle2,
-  Search
+  Search,
+  Users,
+  GraduationCap
 } from 'lucide-react';
 import { ActiveAppId } from '../types';
 
@@ -161,6 +163,28 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiv
       textColor: 'text-violet-600',
       bgColor: 'bg-violet-50',
       action: () => setActiveApp('media_edukasi')
+    },
+    {
+      id: 'master_siswa',
+      title: 'MASTER DATA SISWA',
+      subtitle: 'DATABASE SISWA & UPLOAD EXCEL',
+      icon: Users,
+      category: 'master',
+      color: 'from-emerald-500 to-teal-600',
+      textColor: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+      action: () => setActiveApp('master_siswa')
+    },
+    {
+      id: 'master_guru',
+      title: 'MASTER DATA GURU',
+      subtitle: 'DATABASE GURU & UPLOAD EXCEL',
+      icon: GraduationCap,
+      category: 'master',
+      color: 'from-blue-500 to-indigo-600',
+      textColor: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      action: () => setActiveApp('master_guru')
     }
   ];
 

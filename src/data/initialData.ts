@@ -221,38 +221,6 @@ export const INITIAL_MEDIA_EDUKASI: MediaEdukasiItem[] = [
     thumbnailUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
     sumber: 'Tim BK & Satgas PUSPEKA SMPN 7 Pasuruan',
     tanggal: '10 September 2026',
-  },
-  {
-    id: 'med-2',
-    judul: 'Video Edukasi: Jejak Digital & Menjadi Netizen Ramah Berbudaya',
-    tipe: 'video',
-    kategori: 'Literasi Digital',
-    dokumentasiMateriUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    pesanEdukatif: 'Ketiklah kebaikan di ruang siber. Kata-kata yang kita kirimkan mencerminkan adab dan kemuliaan karakter keluarga besar SMPN 7 Pasuruan.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1616469829941-c7200edec809?auto=format&fit=crop&w=800&q=80',
-    sumber: 'Duta Media Siber Sahabat SPANJU',
-    tanggal: '05 September 2026',
-  },
-  {
-    id: 'med-3',
-    judul: 'Infografis 5S: Senyum, Salam, Sapa, Sopan, Santun di Gerbang SPANJU',
-    tipe: 'infografis',
-    kategori: 'Budaya Sekolah Ramah',
-    dokumentasiMateriUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1200&q=80',
-    pesanEdukatif: 'Satu senyuman tulus di pagi hari dapat meluluhkan ketegangan dan menyebarkan aura semangat positif bagi seisi kelas.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
-    sumber: 'Kesiswaan SMPN 7 Pasuruan',
-    tanggal: '01 September 2026',
-  },
-  {
-    id: 'med-4',
-    judul: 'Mutiara Hari Ini: Kekuatan Empati Melebihi Kekuatan Amarah',
-    tipe: 'pesan_bijak',
-    kategori: 'Karakter & Budi Pekerti',
-    pesanEdukatif: 'Orang yang kuat bukanlah yang mampu menjatuhkan lawannya dengan kekerasan, melainkan yang mampu menguasai dirinya saat amarah membuncah.',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80',
-    sumber: 'Gerakan Literasi Karakter SPANJU',
-    tanggal: '15 September 2026',
   }
 ];
 
