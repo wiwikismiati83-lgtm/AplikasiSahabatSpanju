@@ -23,6 +23,7 @@ import {
   Users,
   GraduationCap,
   ExternalLink,
+  ClipboardCheck,
 } from 'lucide-react';
 import { ActiveAppId, AuthUser } from '../types';
 
@@ -60,6 +61,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       accentColor: 'from-emerald-600 to-teal-700',
       badge: 'Semua',
       badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    },
+    {
+      id: 'survei_kepuasan',
+      title: 'Survei Kepuasan Laporan',
+      subtitle: 'Evaluasi & Masukan Responden',
+      icon: ClipboardCheck,
+      accentColor: 'from-emerald-600 to-teal-600',
+      badge: 'Survei',
+      badgeColor: 'bg-emerald-100 text-emerald-850 border-emerald-300',
     },
     {
       id: 'infografis_spanju',

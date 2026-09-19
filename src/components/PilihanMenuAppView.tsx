@@ -17,13 +17,16 @@ import {
   CheckCircle2,
   Search,
   Users,
-  GraduationCap
+  GraduationCap,
+  ClipboardCheck
 } from 'lucide-react';
-import { ActiveAppId } from '../types';
+import { ActiveAppId, AuthUser } from '../types';
+import { SurveiKepuasanCompactBanner } from './SurveiKepuasanSection';
 
 interface PilihanMenuAppViewProps {
   setActiveApp: (id: ActiveAppId) => void;
   totalLaporan: number;
+  currentUser?: AuthUser | null;
   onOpenInfografis?: () => void;
 }
 
@@ -44,12 +47,25 @@ interface MenuItemConfig {
 export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({
   setActiveApp,
   totalLaporan,
+  currentUser,
   onOpenInfografis,
 }) => {
   const [activeTab, setActiveTab] = useState<'semua' | 'prioritas' | 'karakter' | 'master'>('semua');
   const [searchQuery, setSearchQuery] = useState('');
 
   const menuItems: MenuItemConfig[] = [
+    {
+      id: 'survei_kepuasan',
+      title: 'SURVEI KEPUASAN LAPORAN',
+      subtitle: 'EVALUASI KEMUDAHAN & KEAMANAN SISTEM',
+      icon: ClipboardCheck,
+      category: 'prioritas',
+      color: 'from-emerald-600 via-teal-600 to-emerald-800',
+      textColor: 'text-emerald-700',
+      bgColor: 'bg-emerald-50',
+      badge: 'Survei Resmi',
+      action: () => setActiveApp('survei_kepuasan'),
+    },
     {
       id: 'infografis_spanju',
       title: 'INFOGRAFIS SAHABAT SPANJU',
@@ -254,6 +270,11 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({
 
   return (
     <div className="space-y-6 pb-12">
+      {/* 1-Klik Masuk Survei Kepuasan Laporan Kekerasan & Perundungan (Bullying) */}
+      <SurveiKepuasanCompactBanner
+        onOpenSurvei={() => setActiveApp('survei_kepuasan')}
+      />
+
       {/* Top Header Card */}
       <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

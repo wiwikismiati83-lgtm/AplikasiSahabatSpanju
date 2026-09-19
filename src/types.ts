@@ -235,6 +235,19 @@ export interface Guru {
   createdAt: string;
 }
 
+export type SurveiOptionValue = 'setuju' | 'netral' | 'tidak_setuju';
+
+export type StatusResponden = 'Siswa' | 'Guru' | 'Orang tua';
+
+export interface SurveiKepuasanRecord {
+  id: string;
+  namaLengkap: string;
+  status: StatusResponden;
+  jawaban: Record<number, SurveiOptionValue>; // 1 through 8
+  saranPerbaikan: string;
+  createdAt: string;
+}
+
 export type ActiveAppId =
   | 'zona_analitik'
   | 'piket_harian'
@@ -250,6 +263,7 @@ export type ActiveAppId =
   | 'master_guru'
   | 'tutorial_flipbook'
   | 'hotline_bantuan'
+  | 'survei_kepuasan'
   | string; // for custom link IDs
 
 export type UserRole = 'admin' | 'operator' | 'siswa' | 'orang_tua' | 'guru';

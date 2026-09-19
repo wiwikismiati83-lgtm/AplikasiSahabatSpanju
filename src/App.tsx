@@ -70,6 +70,7 @@ import { WebFrameViewer } from './components/WebFrameViewer';
 import { BaganAlurView } from './components/BaganAlurView';
 import { PWAInstallButton } from './components/PWAInstallButton';
 import { InfografisWelcomeModal } from './components/InfografisWelcomeModal';
+import { SurveiKepuasanSection } from './components/SurveiKepuasanSection';
 
 // Safe localStorage helper to prevent quota exceeded and iframe storage errors
 const safeStorage = {
@@ -651,8 +652,35 @@ export default function App() {
               <PilihanMenuAppView
                 setActiveApp={setActiveApp}
                 totalLaporan={eLaporRecords.length}
+                currentUser={currentUser}
                 onOpenInfografis={() => setIsInfografisModalOpen(true)}
               />
+            )}
+
+            {/* Survei Kepuasan Laporan Kekerasan & Perundungan */}
+            {activeApp === 'survei_kepuasan' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase bg-emerald-600 text-white tracking-wider">
+                      SURVEI RESMI
+                    </span>
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                      Evaluasi TPPK &bull; SMPN 7 Pasuruan
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setActiveApp('pilihan_menu')}
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+                  >
+                    &larr; Kembali ke Menu
+                  </button>
+                </div>
+                <SurveiKepuasanSection
+                  currentUser={currentUser}
+                  defaultExpanded={true}
+                />
+              </div>
             )}
 
             {/* Tutorial Flipbook */}
