@@ -56,14 +56,14 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({
   const menuItems: MenuItemConfig[] = [
     {
       id: 'survei_kepuasan',
-      title: 'SURVEI KEPUASAN LAPORAN',
+      title: 'SURVEY KEPUASAN LAPORAN',
       subtitle: 'EVALUASI KEMUDAHAN & KEAMANAN SISTEM',
       icon: ClipboardCheck,
       category: 'prioritas',
       color: 'from-emerald-600 via-teal-600 to-emerald-800',
       textColor: 'text-emerald-700',
       bgColor: 'bg-emerald-50',
-      badge: 'Survei Resmi',
+      badge: 'Survey Resmi',
       action: () => setActiveApp('survei_kepuasan'),
     },
     {

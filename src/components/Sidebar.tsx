@@ -64,11 +64,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'survei_kepuasan',
-      title: 'Survei Kepuasan Laporan',
+      title: 'Survey Kepuasan Laporan',
       subtitle: 'Evaluasi & Masukan Responden',
       icon: ClipboardCheck,
       accentColor: 'from-emerald-600 to-teal-600',
-      badge: 'Survei',
+      badge: 'Survey',
       badgeColor: 'bg-emerald-100 text-emerald-850 border-emerald-300',
     },
     {

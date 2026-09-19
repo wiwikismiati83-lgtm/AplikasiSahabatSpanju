@@ -657,13 +657,13 @@ export default function App() {
               />
             )}
 
-            {/* Survei Kepuasan Laporan Kekerasan & Perundungan */}
+            {/* Survey Kepuasan Laporan Kekerasan & Perundungan */}
             {activeApp === 'survei_kepuasan' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase bg-emerald-600 text-white tracking-wider">
-                      SURVEI RESMI
+                      SURVEY RESMI
                     </span>
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
                       Evaluasi TPPK &bull; SMPN 7 Pasuruan

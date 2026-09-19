@@ -524,7 +524,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
   // EXPORT EXCEL (.xlsx) WITH OFFICIAL KOP SURAT
   const handleExportExcel = (signerKey: SignerOptionKey = selectedSigner) => {
     if (responses.length === 0) {
-      alert('Belum ada data respons survei untuk diekspor.');
+      alert('Belum ada data respons survey untuk diekspor.');
       return;
     }
 
@@ -541,7 +541,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
     aoaData.push(['Jl. Simpang Slamet Riadi Nomor 2, Kota Pasuruan, Jawa Timur 67139 | Telp: (0343) 426845 | Pos-el: smp7pas@yahoo.co.id | Laman: www.smpn7pasuruan.sch.id']);
     aoaData.push(['====================================================================================================================================================']);
     aoaData.push([]);
-    aoaData.push(['LAPORAN REKAPITULASI HASIL SURVEI KEPUASAN PENGGUNA']);
+    aoaData.push(['LAPORAN REKAPITULASI HASIL SURVEY KEPUASAN PENGGUNA']);
     aoaData.push(['FITUR LAYANAN LAPORAN KEKERASAN & PERUNDUNGAN (BULLYING) - APLIKASI SAHABAT SPANJU']);
     aoaData.push([]);
 
@@ -557,7 +557,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
     aoaData.push(['II. DISTRIBUSI EVALUASI PER BUTIR PERTANYAAN (Q1 - Q8)']);
     aoaData.push([
       'No',
-      'Butir Indikator Evaluasi Survei',
+      'Butir Indikator Evaluasi Survey',
       'Kategori',
       'Jml Setuju',
       '% Setuju',
@@ -674,14 +674,14 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
     ];
 
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Rekapitulasi Survei');
-    XLSX.writeFile(wb, `Laporan_Survei_Kepuasan_SPANJU_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, 'Rekapitulasi Survey');
+    XLSX.writeFile(wb, `Laporan_Survey_Kepuasan_SPANJU_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   // EXPORT WORD (.doc) WITH OFFICIAL SCHOOL LETTERHEAD & FORMATTING
   const handleExportWord = (signerKey: SignerOptionKey = selectedSigner) => {
     if (responses.length === 0) {
-      alert('Belum ada data respons survei untuk diekspor.');
+      alert('Belum ada data respons survey untuk diekspor.');
       return;
     }
 
@@ -769,7 +769,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
       <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
       <head>
         <meta charset='utf-8'>
-        <title>Laporan Survei Kepuasan - UPT SMPN 7 Pasuruan</title>
+        <title>Laporan Survey Kepuasan - UPT SMPN 7 Pasuruan</title>
         <style>
           @page {
             size: A4 portrait;
@@ -895,7 +895,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
         <div class="double-line"></div>
 
         <!-- JUDUL DOKUMEN -->
-        <div class="doc-title">LAPORAN REKAPITULASI HASIL SURVEI KEPUASAN PENGGUNA</div>
+        <div class="doc-title">LAPORAN REKAPITULASI HASIL SURVEY KEPUASAN PENGGUNA</div>
         <div class="doc-subtitle">FITUR LAYANAN LAPORAN KEKERASAN &amp; PERUNDUNGAN (BULLYING)<br/>APLIKASI SAHABAT SPANJU &bull; TAHUN AJARAN 2026/2027</div>
 
         <!-- I. INFORMASI UMUM & STATISTIK -->
@@ -998,7 +998,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Laporan_Survei_Kepuasan_SPANJU_${new Date().toISOString().slice(0, 10)}.doc`;
+    link.download = `Laporan_Survey_Kepuasan_SPANJU_${new Date().toISOString().slice(0, 10)}.doc`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1034,7 +1034,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
     link.setAttribute('href', encodedUri);
     link.setAttribute(
       'download',
-      `Survei_Kepuasan_Sahabat_SPANJU_${new Date().toISOString().slice(0, 10)}.csv`
+      `Survey_Kepuasan_Sahabat_SPANJU_${new Date().toISOString().slice(0, 10)}.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -1055,14 +1055,14 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-400 text-emerald-950 font-black text-[10px] tracking-wider uppercase">
-                SURVEI KEPUASAN PENGGUNA
+                SURVEY KEPUASAN PENGGUNA
               </span>
               <span className="text-[11px] font-semibold text-emerald-100/90">
                 Aplikasi Sahabat SPANJU &bull; SMPN 7 Pasuruan
               </span>
             </div>
             <h2 className="text-base sm:text-lg md:text-xl font-black tracking-tight text-white leading-snug">
-              SURVEI KEPUASAN LAPORAN KEKERASAN &amp; PERUNDUNGAN (BULLYING)
+              SURVEY KEPUASAN LAPORAN KEKERASAN &amp; PERUNDUNGAN (BULLYING)
             </h2>
           </div>
         </div>
@@ -1081,7 +1081,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
                   : 'text-emerald-100 hover:text-white'
               }`}
             >
-              Isi Survei
+              Isi Survey
             </button>
             <button
               type="button"
@@ -1119,10 +1119,10 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
             <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
             <div>
               <p className="font-extrabold text-emerald-900 mb-0.5">
-                Tujuan Survei Sahabat SPANJU:
+                Tujuan Survey Sahabat SPANJU:
               </p>
               <p className="text-emerald-800 font-medium">
-                Survei ini bertujuan untuk mengukur <strong>efektivitas</strong>,{' '}
+                Survey ini bertujuan untuk mengukur <strong>efektivitas</strong>,{' '}
                 <strong>kemudahan</strong>, dan <strong>rasa aman pengguna</strong> dalam memanfaatkan
                 fitur Laporan Kekerasan &amp; Perundungan di aplikasi Sahabat SPANJU. Masukan Anda
                 sangat penting untuk menciptakan lingkungan sekolah yang lebih aman, harmonis, dan
@@ -1131,7 +1131,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
             </div>
           </div>
 
-          {/* VIEW 1: FORM PENGISIAN SURVEI */}
+          {/* VIEW 1: FORM PENGISIAN SURVEY */}
           {activeView === 'form' && (
             <div>
               {formSubmitted ? (
@@ -1155,7 +1155,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
                       className="px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs transition flex items-center gap-1.5"
                     >
                       <BarChart2 className="w-4 h-4" />
-                      <span>Lihat Rekapitulasi Survei</span>
+                      <span>Lihat Rekapitulasi Survey</span>
                     </button>
                     <button
                       type="button"
@@ -1163,7 +1163,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
                       className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition flex items-center gap-1.5"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
-                      <span>Isi Survei Lagi</span>
+                      <span>Isi Survey Lagi</span>
                     </button>
                   </div>
                 </div>
@@ -1241,13 +1241,13 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
                     </div>
                   </div>
 
-                  {/* Pertanyaan Survei (8 Butir) */}
+                  {/* Pertanyaan Survey (8 Butir) */}
                   <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-emerald-600" />
                         <h3 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wide">
-                          Pertanyaan Survei (8 Butir)
+                          Pertanyaan Survey (8 Butir)
                         </h3>
                       </div>
                       <span className="text-[11px] font-bold text-slate-500">
@@ -1369,7 +1369,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
                       ) : (
                         <>
                           <Send className="w-4 h-4" />
-                          <span>Kirim Jawaban Survei</span>
+                          <span>Kirim Jawaban Survey</span>
                         </>
                       )}
                     </button>
@@ -1382,48 +1382,50 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
           {/* VIEW 2: REKAPITULASI & STATISTIK HASIL */}
           {activeView === 'rekap' && (
             <div className="space-y-6">
-              {/* Supabase Cloud Sync & Info Bar */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-700">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                    <Database className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-200">Database Supabase:</span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                        survei_kepuasan_records
-                      </span>
+              {/* Supabase Cloud Sync & Info Bar (Hanya tampil untuk Admin / Operator) */}
+              {isAdmin && (
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-700">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      <Database className="w-4 h-4" />
                     </div>
-                    <p className="text-[11px] text-slate-400">
-                      Tersinkronisasi {responses.length} data respons survei kepuasan secara real-time.
-                    </p>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-200">Database Supabase:</span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                          survei_kepuasan_records
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-400">
+                        Tersinkronisasi {responses.length} data respons survey kepuasan secara real-time.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => loadResponsesFromSupabase(true)}
+                      disabled={isSyncing}
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      title="Muat ulang data terbaru dari Supabase"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-emerald-400' : ''}`} />
+                      <span>{isSyncing ? 'Menyinkronkan...' : 'Sinkronkan'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsSqlModalOpen(true)}
+                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600/30 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1.5 cursor-pointer"
+                      title="Lihat Skrip SQL Pembuatan Tabel di Supabase"
+                    >
+                      <Code className="w-3.5 h-3.5" />
+                      <span>Skrip SQL Tabel</span>
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => loadResponsesFromSupabase(true)}
-                    disabled={isSyncing}
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                    title="Muat ulang data terbaru dari Supabase"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-emerald-400' : ''}`} />
-                    <span>{isSyncing ? 'Menyinkronkan...' : 'Sinkronkan'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsSqlModalOpen(true)}
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600/30 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1.5 cursor-pointer"
-                    title="Lihat Skrip SQL Pembuatan Tabel di Supabase"
-                  >
-                    <Code className="w-3.5 h-3.5" />
-                    <span>Skrip SQL Tabel</span>
-                  </button>
-                </div>
-              </div>
+              )}
 
               {/* Header Summary Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1896,7 +1898,7 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
                   <span>Struktur Tabel &amp; Keamanan Cloud Supabase</span>
                 </p>
                 <p className="text-[11px] text-emerald-800">
-                  Aplikasi telah dikonfigurasi untuk secara otomatis menyimpan dan membaca hasil survei dari tabel ini. Jika Anda ingin mengeksekusi atau memverifikasi tabel langsung di <strong>Supabase SQL Editor</strong>, silakan salin kode SQL di bawah:
+                  Aplikasi telah dikonfigurasi untuk secara otomatis menyimpan dan membaca hasil survey dari tabel ini. Jika Anda ingin mengeksekusi atau memverifikasi tabel langsung di <strong>Supabase SQL Editor</strong>, silakan salin kode SQL di bawah:
                 </p>
               </div>
 
@@ -1966,13 +1968,13 @@ CREATE POLICY "Allow delete on survei_kepuasan_records"
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <span className="font-bold text-slate-700 block mb-1">Rincian Kolom:</span>
                 <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600">
-                  <li><strong className="font-mono text-slate-800">id</strong>: ID Unik respons survei</li>
+                  <li><strong className="font-mono text-slate-800">id</strong>: ID Unik respons survey</li>
                   <li><strong className="font-mono text-slate-800">namalengkap</strong>: Nama responden</li>
                   <li><strong className="font-mono text-slate-800">status</strong>: Siswa, Guru, Orang tua, atau Tamu</li>
                   <li><strong className="font-mono text-slate-800">jawaban</strong>: JSON opsi butir 1 s.d 8</li>
                   <li><strong className="font-mono text-slate-800">q1 s.d q8</strong>: Kolom data granular untuk memudahkan query SQL</li>
                   <li><strong className="font-mono text-slate-800">saranperbaikan</strong>: Aspirasi / masukan dari responden</li>
-                  <li><strong className="font-mono text-slate-800">createdat</strong>: Waktu pencatatan survei</li>
+                  <li><strong className="font-mono text-slate-800">createdat</strong>: Waktu pencatatan survey</li>
                 </ul>
               </div>
             </div>
@@ -2151,7 +2153,7 @@ CREATE POLICY "Allow delete on survei_kepuasan_records"
                 </div>
                 <div>
                   <h3 className="text-base font-black tracking-tight">Hapus Tanggapan Responden</h3>
-                  <p className="text-xs text-rose-100/90 mt-0.5">Konfirmasi penghapusan data survei</p>
+                  <p className="text-xs text-rose-100/90 mt-0.5">Konfirmasi penghapusan data survey</p>
                 </div>
               </div>
               <button
@@ -2168,7 +2170,7 @@ CREATE POLICY "Allow delete on survei_kepuasan_records"
 
             <div className="p-5 space-y-4 text-xs">
               <p className="text-slate-700 leading-relaxed">
-                Apakah Anda yakin ingin menghapus data masukan & tanggapan survei dari responden berikut?
+                Apakah Anda yakin ingin menghapus data masukan & tanggapan survey dari responden berikut?
               </p>
 
               <div className="p-3.5 bg-rose-50/70 border border-rose-200 rounded-2xl space-y-1.5">
@@ -2247,14 +2249,14 @@ export const SurveiKepuasanCompactBanner: React.FC<SurveiKepuasanCompactBannerPr
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-400 text-emerald-950 font-black text-[10px] tracking-wider uppercase shadow-xs">
-                SURVEI RESMI &bull; 1-KLIK
+                SURVEY RESMI &bull; 1-KLIK
               </span>
               <span className="text-[11px] font-semibold text-emerald-200">
                 Evaluasi TPPK &bull; Sahabat SPANJU SMPN 7 Pasuruan
               </span>
             </div>
             <h2 className="text-base sm:text-lg font-black tracking-tight text-white leading-snug group-hover:text-emerald-100 transition-colors">
-              SURVEI KEPUASAN LAPORAN KEKERASAN &amp; PERUNDUNGAN (BULLYING)
+              SURVEY KEPUASAN LAPORAN KEKERASAN &amp; PERUNDUNGAN (BULLYING)
             </h2>
             <p className="text-xs text-emerald-100/90 mt-0.5 max-w-2xl leading-relaxed hidden sm:block">
               Ukur efektivitas, kemudahan formulir, dan rasa aman pelaporan (8 butir pertanyaan &bull; Klik untuk mulai mengisi).
@@ -2279,7 +2281,7 @@ export const SurveiKepuasanCompactBanner: React.FC<SurveiKepuasanCompactBannerPr
             onClick={() => onOpenSurvei('form')}
             className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:from-emerald-300 hover:to-teal-200 text-emerald-950 shadow-md shadow-emerald-950/30 transition active:scale-95 flex items-center gap-2 group-hover:shadow-lg cursor-pointer"
           >
-            <span>Isi Survei Sekarang</span>
+            <span>Isi Survey Sekarang</span>
             <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </button>
         </div>
