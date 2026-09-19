@@ -1004,14 +1004,6 @@ export default function App() {
           setIsInfografisModalOpen(false);
           setIsLoginModalOpen(true);
         }}
-        onOpenManualBook={() => {
-          setIsInfografisModalOpen(false);
-          setActiveApp('tutorial_flipbook');
-        }}
-        onOpenHotline={() => {
-          setIsInfografisModalOpen(false);
-          setActiveApp('hotline_bantuan');
-        }}
       />
 
       {/* Modal Login & Role Switch */}

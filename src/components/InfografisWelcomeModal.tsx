@@ -5,10 +5,6 @@ import {
   Maximize2,
   ExternalLink,
   ShieldCheck,
-  BookOpen,
-  PhoneCall,
-  Sparkles,
-  Info,
   ZoomIn,
   ZoomOut,
   RotateCcw,
@@ -21,8 +17,6 @@ interface InfografisWelcomeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onProceedToLogin?: () => void;
-  onOpenManualBook?: () => void;
-  onOpenHotline?: () => void;
 }
 
 export const INFOGRAFIS_SPANJU_URL = 'https://i.ibb.co.com/n8tswpfq/INFOGRAFIS-APLIKASI-SAHABAT-SPANJU.jpg';
@@ -32,8 +26,6 @@ export const InfografisWelcomeModal: React.FC<InfografisWelcomeModalProps> = ({
   isOpen,
   onClose,
   onProceedToLogin,
-  onOpenManualBook,
-  onOpenHotline,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -222,35 +214,7 @@ export const InfografisWelcomeModal: React.FC<InfografisWelcomeModalProps> = ({
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-            {onOpenManualBook && (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onOpenManualBook();
-                }}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-50 text-sky-800 hover:bg-sky-100 border border-sky-200 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-              >
-                <BookOpen className="w-3.5 h-3.5 text-sky-600" />
-                <span className="hidden sm:inline">Manual Book</span>
-              </button>
-            )}
-
-            {onOpenHotline && (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onOpenHotline();
-                }}
-                className="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-              >
-                <PhoneCall className="w-3.5 h-3.5 text-amber-600" />
-                <span className="hidden sm:inline">Hotline</span>
-              </button>
-            )}
-
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             {onProceedToLogin ? (
               <button
                 id="btn-infografis-masuk-login"
@@ -259,7 +223,7 @@ export const InfografisWelcomeModal: React.FC<InfografisWelcomeModalProps> = ({
                   onClose();
                   onProceedToLogin();
                 }}
-                className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-700/25 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer btn-3d"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-700/25 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer btn-3d"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Masuk ke Login Aplikasi</span>
@@ -269,7 +233,7 @@ export const InfografisWelcomeModal: React.FC<InfografisWelcomeModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <ShieldCheck className="w-4 h-4" />
                 <span>Buka Dashboard</span>
