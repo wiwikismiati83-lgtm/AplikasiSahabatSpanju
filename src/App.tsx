@@ -228,18 +228,39 @@ export default function App() {
             if (Array.isArray(parsed.bukuTamuRecords) && parsed.bukuTamuRecords.length > 0) setBukuTamuRecords(parsed.bukuTamuRecords);
             if (Array.isArray(parsed.mediaEdukasiItems) && parsed.mediaEdukasiItems.length > 0) setMediaEdukasiItems(parsed.mediaEdukasiItems);
             if (Array.isArray(parsed.kelasList) && parsed.kelasList.length > 0) {
-              const sanitizedKelas = parsed.kelasList.map((k: KelasZonaStatus) =>
-                k.kelas === '7C' && k.totalKasusTahunIni === 1
-                  ? {
-                      ...k,
-                      totalKasusTahunIni: 0,
-                      kasusTerselesaikan: 0,
-                      skorKeramahan: 98,
-                      catatan: 'Kelas teladan rukun, harmonis dan zero bullying',
-                      waliKelas: k.waliKelas || 'Cahyo Kurnianto, S.Pd',
-                    }
-                  : k
-              );
+              const sanitizedKelas = parsed.kelasList.map((k: KelasZonaStatus) => {
+                if (k.kelas === '7C' && k.totalKasusTahunIni > 0) {
+                  return {
+                    ...k,
+                    totalKasusTahunIni: 0,
+                    kasusTerselesaikan: 0,
+                    skorKeramahan: 98,
+                    catatan: 'Kelas teladan rukun, harmonis dan zero bullying',
+                    waliKelas: k.waliKelas || 'Cahyo Kurnianto, S.Pd',
+                  };
+                }
+                if (k.kelas === '8E' && k.totalKasusTahunIni > 0) {
+                  return {
+                    ...k,
+                    totalKasusTahunIni: 0,
+                    kasusTerselesaikan: 0,
+                    skorKeramahan: 97,
+                    catatan: 'Kelas teladan rukun, kompak dan zero bullying',
+                    waliKelas: k.waliKelas || 'Dina Istiarni, S.Pd',
+                  };
+                }
+                if (k.kelas === '8F' && k.totalKasusTahunIni > 0) {
+                  return {
+                    ...k,
+                    totalKasusTahunIni: 0,
+                    kasusTerselesaikan: 0,
+                    skorKeramahan: 96,
+                    catatan: 'Suasana kelas kondusif, harmonis dan zero bullying',
+                    waliKelas: k.waliKelas || 'Dewi Mahindrawati, S.Pd',
+                  };
+                }
+                return k;
+              });
               setKelasList(sanitizedKelas);
             }
             if (Array.isArray(parsed.spDamaiRecords) && parsed.spDamaiRecords.length > 0) setSpDamaiRecords(parsed.spDamaiRecords);
@@ -274,18 +295,39 @@ export default function App() {
         if (Array.isArray(tamu) && tamu.length > 0) setBukuTamuRecords(tamu);
         if (Array.isArray(media) && media.length > 0) setMediaEdukasiItems(media);
         if (Array.isArray(zona) && zona.length > 0) {
-          const sanitizedZona = zona.map((k: KelasZonaStatus) =>
-            k.kelas === '7C' && k.totalKasusTahunIni === 1
-              ? {
-                  ...k,
-                  totalKasusTahunIni: 0,
-                  kasusTerselesaikan: 0,
-                  skorKeramahan: 98,
-                  catatan: 'Kelas teladan rukun, harmonis dan zero bullying',
-                  waliKelas: k.waliKelas || 'Cahyo Kurnianto, S.Pd',
-                }
-              : k
-          );
+          const sanitizedZona = zona.map((k: KelasZonaStatus) => {
+            if (k.kelas === '7C' && k.totalKasusTahunIni > 0) {
+              return {
+                ...k,
+                totalKasusTahunIni: 0,
+                kasusTerselesaikan: 0,
+                skorKeramahan: 98,
+                catatan: 'Kelas teladan rukun, harmonis dan zero bullying',
+                waliKelas: k.waliKelas || 'Cahyo Kurnianto, S.Pd',
+              };
+            }
+            if (k.kelas === '8E' && k.totalKasusTahunIni > 0) {
+              return {
+                ...k,
+                totalKasusTahunIni: 0,
+                kasusTerselesaikan: 0,
+                skorKeramahan: 97,
+                catatan: 'Kelas teladan rukun, kompak dan zero bullying',
+                waliKelas: k.waliKelas || 'Dina Istiarni, S.Pd',
+              };
+            }
+            if (k.kelas === '8F' && k.totalKasusTahunIni > 0) {
+              return {
+                ...k,
+                totalKasusTahunIni: 0,
+                kasusTerselesaikan: 0,
+                skorKeramahan: 96,
+                catatan: 'Suasana kelas kondusif, harmonis dan zero bullying',
+                waliKelas: k.waliKelas || 'Dewi Mahindrawati, S.Pd',
+              };
+            }
+            return k;
+          });
           setKelasList(sanitizedZona);
         }
         if (Array.isArray(damai) && damai.length > 0) setSpDamaiRecords(damai);
