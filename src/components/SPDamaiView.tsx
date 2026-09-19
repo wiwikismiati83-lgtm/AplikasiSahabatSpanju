@@ -622,6 +622,7 @@ export const SPDamaiView: React.FC<Props> = ({
               ? selectedForPrint.nomorSurat
               : `421.3 / SP-DAMAI-REKAP / 101.4.7 / 2026`
           }
+          hideSignaturesBlock={Boolean(selectedForPrint)}
           hideFirstSigner={Boolean(selectedForPrint)}
           firstSignerRole={selectedForPrint ? `Pihak Pertama (${selectedForPrint.namaPihak1})` : 'Perwakilan Siswa'}
           firstSignerName={selectedForPrint?.namaPihak1 || 'Siswa Pihak I'}

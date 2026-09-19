@@ -23,6 +23,8 @@ interface OfficialReportModalProps {
   children: React.ReactNode;
   // Signatures
   hideFirstSigner?: boolean;
+  hideSecondSigner?: boolean;
+  hideSignaturesBlock?: boolean;
   firstSignerRole?: string;
   firstSignerName?: string;
   firstSignerNip?: string;
@@ -47,6 +49,8 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
   }),
   children,
   hideFirstSigner = false,
+  hideSecondSigner = false,
+  hideSignaturesBlock = false,
   firstSignerRole = 'Petugas / Koordinator Pelaksana',
   firstSignerName = 'Tim Sahabat SPANJU',
   firstSignerNip,
@@ -294,136 +298,140 @@ export const OfficialReportModal: React.FC<OfficialReportModalProps> = ({
           </div>
 
           {/* 4. BLOK TANDA TANGAN RESMI KEDINASAN */}
-          <div className="pt-8 border-t border-slate-200 mt-8">
-            <div className={`grid grid-cols-1 ${hideFirstSigner ? 'sm:grid-cols-1 sm:max-w-xs sm:ml-auto' : 'sm:grid-cols-2'} gap-8 text-center text-xs text-slate-800`}>
-              {/* Kolom Kiri: Petugas / Pelapor / Koordinator (Opsional) */}
-              {!hideFirstSigner && (
-                <div className="flex flex-col items-center justify-between min-h-[170px]">
-                  <div>
-                    <p className="text-slate-600 font-medium">Petugas Pelaksana / Koordinator,</p>
-                    <p className="font-bold text-slate-800 mt-0.5">{firstSignerRole}</p>
-                  </div>
-
-                  {/* Digital Signature Area */}
-                  <div className="my-2 flex flex-col items-center justify-center">
-                    {firstSignerSignature ? (
-                      <div className="relative group">
-                        <img
-                          src={firstSignerSignature}
-                          alt="Tanda Tangan Digital"
-                          className="h-20 sm:h-24 max-w-[200px] object-contain"
-                        />
-                        {onFirstSignerUpdate && (
-                          <button
-                            type="button"
-                            onClick={() => setActiveSignerModal('first')}
-                            className="print:hidden absolute -bottom-1 -right-2 px-2 py-0.5 text-[10px] font-bold bg-white/90 text-blue-700 rounded-md border border-blue-200 shadow-xs hover:bg-blue-50 transition"
-                          >
-                            Ubah TTD
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center p-2">
-                        {onFirstSignerUpdate ? (
-                          <button
-                            type="button"
-                            onClick={() => setActiveSignerModal('first')}
-                            className="print:hidden px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-xs"
-                          >
-                            <FileSignature className="w-3.5 h-3.5" />
-                            TTD Touchscreen / Mouse
-                          </button>
-                        ) : (
-                          <div className="h-16 flex items-center justify-center text-slate-400 italic text-[11px]">
-                            (Tanda tangan tercatat resmi)
-                          </div>
-                        )}
-                        <span className="print:block hidden text-slate-300 text-[10px]">
-                          (Tanda Tangan)
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="font-black text-slate-900 underline underline-offset-4 decoration-1">
-                      {firstSignerName}
-                    </p>
-                    {firstSignerNip && (
-                      <p className="text-[10px] text-slate-700 mt-0.5 font-bold">
-                        NIP. {firstSignerNip}
-                      </p>
-                    )}
-                    <p className="text-[10px] text-slate-600 mt-0.5">
-                      Sahabat SPANJU UPTD SMPN 7 Pasuruan
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Kolom Kanan: Mengetahui Kepala Sekolah */}
-              <div className="flex flex-col items-center justify-between min-h-[170px]">
-                <div>
-                  <p className="text-slate-600 font-medium">Mengetahui,</p>
-                  <p className="font-bold text-slate-800 mt-0.5">{secondSignerRole}</p>
-                </div>
-
-                {/* Digital Signature Area */}
-                <div className="my-2 flex flex-col items-center justify-center">
-                  {secondSignerSignature ? (
-                    <div className="relative group">
-                      <img
-                        src={secondSignerSignature}
-                        alt="Tanda Tangan Kepala Sekolah"
-                        className="h-20 sm:h-24 max-w-[200px] object-contain"
-                      />
-                      {onSecondSignerUpdate && (
-                        <button
-                          type="button"
-                          onClick={() => setActiveSignerModal('second')}
-                          className="print:hidden absolute -bottom-1 -right-2 px-2 py-0.5 text-[10px] font-bold bg-white/90 text-blue-700 rounded-md border border-blue-200 shadow-xs hover:bg-blue-50 transition"
-                        >
-                          Ubah TTD
-                        </button>
-                      )}
+          {!hideSignaturesBlock && !(hideFirstSigner && hideSecondSigner) && (
+            <div className="pt-8 border-t border-slate-200 mt-8">
+              <div className={`grid grid-cols-1 ${hideFirstSigner || hideSecondSigner ? 'sm:grid-cols-1 sm:max-w-xs sm:ml-auto' : 'sm:grid-cols-2'} gap-8 text-center text-xs text-slate-800`}>
+                {/* Kolom Kiri: Petugas / Pelapor / Koordinator (Opsional) */}
+                {!hideFirstSigner && (
+                  <div className="flex flex-col items-center justify-between min-h-[170px]">
+                    <div>
+                      <p className="text-slate-600 font-medium">Petugas Pelaksana / Koordinator,</p>
+                      <p className="font-bold text-slate-800 mt-0.5">{firstSignerRole}</p>
                     </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center p-2">
-                      {onSecondSignerUpdate ? (
-                        <button
-                          type="button"
-                          onClick={() => setActiveSignerModal('second')}
-                          className="print:hidden px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-xs"
-                        >
-                          <FileSignature className="w-3.5 h-3.5 text-blue-600" />
-                          TTD Touchscreen / Mouse
-                        </button>
+
+                    {/* Digital Signature Area */}
+                    <div className="my-2 flex flex-col items-center justify-center">
+                      {firstSignerSignature ? (
+                        <div className="relative group">
+                          <img
+                            src={firstSignerSignature}
+                            alt="Tanda Tangan Digital"
+                            className="h-20 sm:h-24 max-w-[200px] object-contain"
+                          />
+                          {onFirstSignerUpdate && (
+                            <button
+                              type="button"
+                              onClick={() => setActiveSignerModal('first')}
+                              className="print:hidden absolute -bottom-1 -right-2 px-2 py-0.5 text-[10px] font-bold bg-white/90 text-blue-700 rounded-md border border-blue-200 shadow-xs hover:bg-blue-50 transition"
+                            >
+                              Ubah TTD
+                            </button>
+                          )}
+                        </div>
                       ) : (
-                        <div className="h-16 flex items-center justify-center text-slate-400 italic text-[11px]">
-                          (Tanda tangan & Stempel Sekolah)
+                        <div className="flex flex-col items-center justify-center p-2">
+                          {onFirstSignerUpdate ? (
+                            <button
+                              type="button"
+                              onClick={() => setActiveSignerModal('first')}
+                              className="print:hidden px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-xs"
+                            >
+                              <FileSignature className="w-3.5 h-3.5" />
+                              TTD Touchscreen / Mouse
+                            </button>
+                          ) : (
+                            <div className="h-16 flex items-center justify-center text-slate-400 italic text-[11px]">
+                              (Tanda tangan tercatat resmi)
+                            </div>
+                          )}
+                          <span className="print:block hidden text-slate-300 text-[10px]">
+                            (Tanda Tangan)
+                          </span>
                         </div>
                       )}
-                      <span className="print:block hidden text-slate-300 text-[10px]">
-                        (Tanda Tangan & Cap)
-                      </span>
                     </div>
-                  )}
-                </div>
 
-                <div>
-                  <p className="font-black text-slate-900 underline underline-offset-4 decoration-1">
-                    {secondSignerName}
-                  </p>
-                  {secondSignerNip && (
-                    <p className="text-[10px] text-slate-700 mt-0.5 font-bold">
-                      NIP. {secondSignerNip}
-                    </p>
-                  )}
-                </div>
+                    <div>
+                      <p className="font-black text-slate-900 underline underline-offset-4 decoration-1">
+                        {firstSignerName}
+                      </p>
+                      {firstSignerNip && (
+                        <p className="text-[10px] text-slate-700 mt-0.5 font-bold">
+                          NIP. {firstSignerNip}
+                        </p>
+                      )}
+                      <p className="text-[10px] text-slate-600 mt-0.5">
+                        Sahabat SPANJU UPTD SMPN 7 Pasuruan
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Kolom Kanan: Mengetahui Kepala Sekolah (Opsional) */}
+                {!hideSecondSigner && (
+                  <div className="flex flex-col items-center justify-between min-h-[170px]">
+                    <div>
+                      <p className="text-slate-600 font-medium">Mengetahui,</p>
+                      <p className="font-bold text-slate-800 mt-0.5">{secondSignerRole}</p>
+                    </div>
+
+                    {/* Digital Signature Area */}
+                    <div className="my-2 flex flex-col items-center justify-center">
+                      {secondSignerSignature ? (
+                        <div className="relative group">
+                          <img
+                            src={secondSignerSignature}
+                            alt="Tanda Tangan Kepala Sekolah"
+                            className="h-20 sm:h-24 max-w-[200px] object-contain"
+                          />
+                          {onSecondSignerUpdate && (
+                            <button
+                              type="button"
+                              onClick={() => setActiveSignerModal('second')}
+                              className="print:hidden absolute -bottom-1 -right-2 px-2 py-0.5 text-[10px] font-bold bg-white/90 text-blue-700 rounded-md border border-blue-200 shadow-xs hover:bg-blue-50 transition"
+                            >
+                              Ubah TTD
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-2">
+                          {onSecondSignerUpdate ? (
+                            <button
+                              type="button"
+                              onClick={() => setActiveSignerModal('second')}
+                              className="print:hidden px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-xs"
+                            >
+                              <FileSignature className="w-3.5 h-3.5 text-blue-600" />
+                              TTD Touchscreen / Mouse
+                            </button>
+                          ) : (
+                            <div className="h-16 flex items-center justify-center text-slate-400 italic text-[11px]">
+                              (Tanda tangan & Stempel Sekolah)
+                            </div>
+                          )}
+                          <span className="print:block hidden text-slate-300 text-[10px]">
+                            (Tanda Tangan & Cap)
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <p className="font-black text-slate-900 underline underline-offset-4 decoration-1">
+                        {secondSignerName}
+                      </p>
+                      {secondSignerNip && (
+                        <p className="text-[10px] text-slate-700 mt-0.5 font-bold">
+                          NIP. {secondSignerNip}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
