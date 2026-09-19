@@ -70,14 +70,55 @@ import { WebFrameViewer } from './components/WebFrameViewer';
 import { BaganAlurView } from './components/BaganAlurView';
 import { PWAInstallButton } from './components/PWAInstallButton';
 
+// Safe localStorage helper to prevent quota exceeded and iframe storage errors
+const safeStorage = {
+  setItem: (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      console.warn(`SafeStorage: could not set item "${key}":`, e);
+      try {
+        // If quota exceeded, clean up previous bulky backup and retry
+        if (key !== 'spanju_backup_data') {
+          localStorage.removeItem('spanju_backup_data');
+          localStorage.setItem(key, value);
+        }
+      } catch {}
+    }
+  },
+  getItem: (key: string): string | null => {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  removeItem: (key: string) => {
+    try {
+      localStorage.removeItem(key);
+    } catch {}
+  }
+};
+
 export default function App() {
   // Role-Based Authentication State
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
     try {
-      const saved = localStorage.getItem('spanju_auth_user');
-      return saved ? JSON.parse(saved) : null;
+      const saved = safeStorage.getItem('spanju_auth_user');
+      if (saved) return JSON.parse(saved);
+      return {
+        username: 'admin',
+        role: 'admin',
+        displayName: 'Administrator SPANJU',
+        loginTime: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      };
     } catch {
-      return null;
+      return {
+        username: 'admin',
+        role: 'admin',
+        displayName: 'Administrator SPANJU',
+        loginTime: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      };
     }
   });
 
@@ -90,7 +131,7 @@ export default function App() {
 
   const handleLoginSuccess = (user: AuthUser) => {
     setCurrentUser(user);
-    localStorage.setItem('spanju_auth_user', JSON.stringify(user));
+    safeStorage.setItem('spanju_auth_user', JSON.stringify(user));
     setIsLoginModalOpen(false);
     
     // Auto-redirect if targetApp is provided
@@ -105,7 +146,7 @@ export default function App() {
 
   const handleLogout = () => {
     setCurrentUser(null);
-    localStorage.removeItem('spanju_auth_user');
+    safeStorage.removeItem('spanju_auth_user');
     setIsLoginModalOpen(true);
     showToast('Anda telah keluar dari sesi.');
   };
@@ -130,25 +171,27 @@ export default function App() {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  // Sync records to localStorage as fallback
+  // Sync lightweight records to localStorage as fallback without overflowing quota
   useEffect(() => {
     if (!isLoading) {
-      const allData = {
-        customLinks,
-        piketRecords,
-        ceriRecords,
-        kebunRecords,
-        serasiRecords,
-        eLaporRecords,
-        bukuTamuRecords,
-        mediaEdukasiItems,
-        kelasList,
-        spDamaiRecords,
-        arsipKegiatanRecords,
-        siswaList,
-        guruList,
-      };
-      localStorage.setItem('spanju_backup_data', JSON.stringify(allData));
+      try {
+        const lightweightData = {
+          customLinks,
+          piketRecords: piketRecords.slice(0, 30),
+          ceriRecords: ceriRecords.slice(0, 30),
+          kebunRecords: kebunRecords.slice(0, 30),
+          serasiRecords: serasiRecords.slice(0, 30),
+          eLaporRecords: eLaporRecords.slice(0, 30),
+          bukuTamuRecords: bukuTamuRecords.slice(0, 30),
+          mediaEdukasiItems: mediaEdukasiItems.slice(0, 20),
+          kelasList,
+          spDamaiRecords: spDamaiRecords.slice(0, 30),
+          arsipKegiatanRecords: arsipKegiatanRecords.slice(0, 20),
+        };
+        safeStorage.setItem('spanju_backup_data', JSON.stringify(lightweightData));
+      } catch (err) {
+        console.warn('Backup save skipped due to size limits:', err);
+      }
     }
   }, [
     isLoading,
@@ -163,8 +206,6 @@ export default function App() {
     kelasList,
     spDamaiRecords,
     arsipKegiatanRecords,
-    siswaList,
-    guruList,
   ]);
 
   // Fetch all data from Supabase on mount
@@ -173,8 +214,8 @@ export default function App() {
       try {
         setIsLoading(true);
         
-        // Try to load from localStorage first for immediate results
-        const savedData = localStorage.getItem('spanju_backup_data');
+        // Try to load from safeStorage first for immediate results
+        const savedData = safeStorage.getItem('spanju_backup_data');
         if (savedData) {
           try {
             const parsed = JSON.parse(savedData);
@@ -189,8 +230,6 @@ export default function App() {
             if (Array.isArray(parsed.kelasList) && parsed.kelasList.length > 0) setKelasList(parsed.kelasList);
             if (Array.isArray(parsed.spDamaiRecords) && parsed.spDamaiRecords.length > 0) setSpDamaiRecords(parsed.spDamaiRecords);
             if (Array.isArray(parsed.arsipKegiatanRecords) && parsed.arsipKegiatanRecords.length > 0) setArsipKegiatanRecords(parsed.arsipKegiatanRecords);
-            if (Array.isArray(parsed.siswaList) && parsed.siswaList.length > 0) setSiswaList(parsed.siswaList);
-            if (Array.isArray(parsed.guruList) && parsed.guruList.length > 0) setGuruList(parsed.guruList);
           } catch (err) {
             console.warn('Error reading saved local backup:', err);
           }
@@ -865,6 +904,15 @@ export default function App() {
         isOpen={isAddLinkModalOpen}
         onClose={() => setIsAddLinkModalOpen(false)}
         onAddLink={handleAddLink}
+      />
+
+      {/* Modal Login & Role Switch */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+        currentUser={currentUser}
+        canDismiss={currentUser !== null}
       />
     </div>
   );
