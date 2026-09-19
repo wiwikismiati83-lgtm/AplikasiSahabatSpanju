@@ -553,14 +553,13 @@ export default function App() {
                 kelasList={kelasList}
                 onUpdateKelas={async (updated) => {
                   setKelasList(updated);
-                  // Since updated is an array in this context usually, let's check ZonaHijauAnalyticsView
-                  // Actually setKelasList(updated) suggests updated is the new full array.
-                  // For bulk update:
                   api.bulkUpsert('kelas_zona', updated);
                 }}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
                 siswaList={siswaList}
                 guruList={guruList}
+                eLaporRecords={eLaporRecords}
+                spDamaiRecords={spDamaiRecords}
               />
             )}
 

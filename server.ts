@@ -358,8 +358,19 @@ tables.forEach(table => {
 
   app.delete(`/api/${table}`, async (req, res) => {
     try {
-      const lowerBody = toLowerKeys(req.body);
-      const data = await handleSupabase(table, 'delete', lowerBody);
+      const lowerBody = toLowerKeys(req.body || {});
+      const idVal = req.query.id as string || lowerBody.id || lowerBody.kelas;
+      const data = await handleSupabase(table, 'delete', { id: idVal, kelas: idVal });
+      res.json(toCamelKeys(data));
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete(`/api/${table}/:id`, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const data = await handleSupabase(table, 'delete', { id, kelas: id });
       res.json(toCamelKeys(data));
     } catch (error: any) {
       res.status(500).json({ error: error.message });
