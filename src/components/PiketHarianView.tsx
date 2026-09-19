@@ -468,7 +468,7 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
             }
           }}
           secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
-          secondSignerName="Nur Fadilah, S.Pd., M.Pd"
+          secondSignerName="NUR FADILAH, S.Pd., M.Pd"
           secondSignerNip="19860410 201001 2 030"
         >
           {selectedRecordForPrint ? (

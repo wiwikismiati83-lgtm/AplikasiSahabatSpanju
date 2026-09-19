@@ -7,6 +7,42 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(() => {
   return {
     plugins: [
+      {
+        name: 'suppress-vite-hmr-logs',
+        transformIndexHtml: {
+          order: 'pre',
+          handler() {
+            return [
+              {
+                tag: 'script',
+                attrs: {},
+                children: `(function(){
+  var origError = console.error;
+  var origWarn = console.warn;
+  function isVite(arg) {
+    if (!arg) return false;
+    var str = '';
+    if (typeof arg === 'string') str = arg;
+    else if (arg && typeof arg.message === 'string') str = arg.message;
+    else { try { str = String(arg); } catch(_) {} }
+    var l = str.toLowerCase();
+    return l.indexOf('[vite]') !== -1 || l.indexOf('websocket') !== -1;
+  }
+  console.error = function() {
+    for (var i = 0; i < arguments.length; i++) { if (isVite(arguments[i])) return; }
+    return origError.apply(console, arguments);
+  };
+  console.warn = function() {
+    for (var i = 0; i < arguments.length; i++) { if (isVite(arguments[i])) return; }
+    return origWarn.apply(console, arguments);
+  };
+})();`,
+                injectTo: 'head-prepend',
+              },
+            ];
+          },
+        },
+      },
       react(),
       tailwindcss(),
       VitePWA({

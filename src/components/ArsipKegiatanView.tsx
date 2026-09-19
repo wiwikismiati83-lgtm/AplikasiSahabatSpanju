@@ -227,7 +227,7 @@ export const ArsipKegiatanView: React.FC<Props> = ({
           firstSignerName="Hj. Siti Aminah, S.Pd"
           firstSignerNip="19720512 199803 2 005"
           secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
-          secondSignerName="Nur Fadilah, S.Pd., M.Pd"
+          secondSignerName="NUR FADILAH, S.Pd., M.Pd"
           secondSignerNip="19860410 201001 2 030"
         >
           <div className="space-y-4">

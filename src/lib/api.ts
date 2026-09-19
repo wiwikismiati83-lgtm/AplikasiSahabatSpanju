@@ -84,6 +84,7 @@ const camelToLowerMap: Record<string, string> = {
   hasilpemantauan: 'hasilPemantauan',
   kodearsip: 'kodeArsip',
   namakegiatan: 'namaKegiatan',
+  saranperbaikan: 'saranPerbaikan',
 };
 
 const toLowerKeys = (obj: any): any => {
@@ -179,12 +180,28 @@ const KNOWN_TABLE_COLUMNS: Record<string, string[]> = {
   ],
   guru_master: [
     'id', 'nip', 'nama', 'jabatan', 'status', 'createdat', 'createdAt'
+  ],
+  survei_kepuasan_records: [
+    'id', 'namalengkap', 'status', 'jawaban', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'saranperbaikan', 'createdat', 'namaLengkap', 'saranPerbaikan', 'createdAt'
   ]
 };
 
 const sanitizeForTable = (table: string, rawItem: any): any => {
   if (!rawItem || typeof rawItem !== 'object') return rawItem;
   const item = { ...rawItem };
+
+  if (table === 'survei_kepuasan_records') {
+    if (item.jawaban && typeof item.jawaban === 'object') {
+      item.q1 = item.jawaban[1] || item.jawaban['1'] || item.q1 || 'setuju';
+      item.q2 = item.jawaban[2] || item.jawaban['2'] || item.q2 || 'setuju';
+      item.q3 = item.jawaban[3] || item.jawaban['3'] || item.q3 || 'setuju';
+      item.q4 = item.jawaban[4] || item.jawaban['4'] || item.q4 || 'setuju';
+      item.q5 = item.jawaban[5] || item.jawaban['5'] || item.q5 || 'setuju';
+      item.q6 = item.jawaban[6] || item.jawaban['6'] || item.q6 || 'setuju';
+      item.q7 = item.jawaban[7] || item.jawaban['7'] || item.q7 || 'setuju';
+      item.q8 = item.jawaban[8] || item.jawaban['8'] || item.q8 || 'setuju';
+    }
+  }
 
   // For e_lapor_records: preserve Siswa 2 and NISN in keterangan if not standard columns
   if (table === 'e_lapor_records') {
