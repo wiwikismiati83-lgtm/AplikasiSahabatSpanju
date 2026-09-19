@@ -24,6 +24,7 @@ import { ActiveAppId } from '../types';
 interface PilihanMenuAppViewProps {
   setActiveApp: (id: ActiveAppId) => void;
   totalLaporan: number;
+  onOpenInfografis?: () => void;
 }
 
 interface MenuItemConfig {
@@ -40,11 +41,31 @@ interface MenuItemConfig {
   action: () => void;
 }
 
-export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({ setActiveApp, totalLaporan }) => {
+export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({
+  setActiveApp,
+  totalLaporan,
+  onOpenInfografis,
+}) => {
   const [activeTab, setActiveTab] = useState<'semua' | 'prioritas' | 'karakter' | 'master'>('semua');
   const [searchQuery, setSearchQuery] = useState('');
 
   const menuItems: MenuItemConfig[] = [
+    {
+      id: 'infografis_spanju',
+      title: 'INFOGRAFIS SAHABAT SPANJU',
+      subtitle: 'BAGAN RESMI & ALUR LAYANAN SEKOLAH',
+      icon: Sparkles,
+      category: 'prioritas',
+      color: 'from-emerald-600 to-teal-700',
+      textColor: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+      badge: 'Resmi',
+      action: () => {
+        if (onOpenInfografis) {
+          onOpenInfografis();
+        }
+      },
+    },
     {
       id: 'tutorial_flipbook',
       title: 'TUTORIAL MANUAL BOOK',

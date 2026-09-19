@@ -69,6 +69,7 @@ import { HotlineView } from './components/HotlineView';
 import { WebFrameViewer } from './components/WebFrameViewer';
 import { BaganAlurView } from './components/BaganAlurView';
 import { PWAInstallButton } from './components/PWAInstallButton';
+import { InfografisWelcomeModal } from './components/InfografisWelcomeModal';
 
 // Safe localStorage helper to prevent quota exceeded and iframe storage errors
 const safeStorage = {
@@ -127,12 +128,14 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAddLinkModalOpen, setIsAddLinkModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isInfografisModalOpen, setIsInfografisModalOpen] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const handleLoginSuccess = (user: AuthUser) => {
     setCurrentUser(user);
     safeStorage.setItem('spanju_auth_user', JSON.stringify(user));
     setIsLoginModalOpen(false);
+    setIsInfografisModalOpen(false);
     
     // Auto-redirect if targetApp is provided
     if (user.targetApp) {
@@ -147,7 +150,8 @@ export default function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     safeStorage.removeItem('spanju_auth_user');
-    setIsLoginModalOpen(true);
+    setIsInfografisModalOpen(true);
+    setIsLoginModalOpen(false);
     showToast('Anda telah keluar dari sesi.');
   };
 
@@ -486,6 +490,7 @@ export default function App() {
           totalLaporan={eLaporRecords.length}
           currentUser={currentUser}
           onLogout={handleLogout}
+          onOpenInfografis={() => setIsInfografisModalOpen(true)}
         />
       </div>
 
@@ -518,6 +523,10 @@ export default function App() {
                 totalLaporan={eLaporRecords.length}
                 currentUser={currentUser}
                 onLogout={handleLogout}
+                onOpenInfografis={() => {
+                  setIsInfografisModalOpen(true);
+                  setMobileMenuOpen(false);
+                }}
               />
             </div>
           </div>
@@ -570,6 +579,16 @@ export default function App() {
               <PWAInstallButton />
             </div>
 
+            <button
+              id="btn-header-infografis"
+              onClick={() => setIsInfografisModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs flex items-center gap-1.5 shadow-2xs transition cursor-pointer"
+              title="Buka Gambar Infografis Sahabat SPANJU"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="hidden sm:inline">Infografis SPANJU</span>
+            </button>
+
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200 text-xs text-slate-600">
               <Clock className="w-3.5 h-3.5 text-sky-600" />
               <span>Tahun Ajaran 2026/2027</span>
@@ -612,7 +631,7 @@ export default function App() {
                 <button
                   id="btn-header-logout"
                   onClick={handleLogout}
-                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-blue-700 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 transition flex items-center gap-1 shadow-2xs"
+                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-blue-700 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 transition flex items-center gap-1 shadow-2xs cursor-pointer"
                   title="Logout / Ganti Akun"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -632,6 +651,7 @@ export default function App() {
               <PilihanMenuAppView
                 setActiveApp={setActiveApp}
                 totalLaporan={eLaporRecords.length}
+                onOpenInfografis={() => setIsInfografisModalOpen(true)}
               />
             )}
 
@@ -976,6 +996,24 @@ export default function App() {
         onAddLink={handleAddLink}
       />
 
+      {/* Modal Infografis Sahabat SPANJU */}
+      <InfografisWelcomeModal
+        isOpen={isInfografisModalOpen}
+        onClose={() => setIsInfografisModalOpen(false)}
+        onProceedToLogin={() => {
+          setIsInfografisModalOpen(false);
+          setIsLoginModalOpen(true);
+        }}
+        onOpenManualBook={() => {
+          setIsInfografisModalOpen(false);
+          setActiveApp('tutorial_flipbook');
+        }}
+        onOpenHotline={() => {
+          setIsInfografisModalOpen(false);
+          setActiveApp('hotline_bantuan');
+        }}
+      />
+
       {/* Modal Login & Role Switch */}
       <LoginModal
         isOpen={isLoginModalOpen}
@@ -983,6 +1021,7 @@ export default function App() {
         onLoginSuccess={handleLoginSuccess}
         currentUser={currentUser}
         canDismiss={currentUser !== null}
+        onShowInfografis={() => setIsInfografisModalOpen(true)}
       />
     </div>
   );

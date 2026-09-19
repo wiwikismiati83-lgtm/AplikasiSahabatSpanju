@@ -36,6 +36,7 @@ interface SidebarProps {
   totalLaporan: number;
   currentUser?: AuthUser | null;
   onLogout?: () => void;
+  onOpenInfografis?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -46,6 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   totalLaporan,
   currentUser,
   onLogout,
+  onOpenInfografis,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,6 +60,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       accentColor: 'from-emerald-600 to-teal-700',
       badge: 'Semua',
       badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    },
+    {
+      id: 'infografis_spanju',
+      title: 'Infografis Sahabat SPANJU',
+      subtitle: 'Bagan Resmi & Alur Sekolah',
+      icon: Sparkles,
+      accentColor: 'from-teal-600 to-emerald-600',
+      badge: 'Bagan',
+      badgeColor: 'bg-teal-100 text-teal-800 border-teal-300',
+      action: onOpenInfografis,
     },
     {
       id: 'hotline_bantuan',
@@ -280,7 +292,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   key={item.id}
                   id={`btn-nav-${item.id}`}
                   onClick={() => {
-                    if (item.externalUrl) {
+                    if (item.action) {
+                      item.action();
+                    } else if (item.externalUrl) {
                       window.open(item.externalUrl, '_blank', 'noopener,noreferrer');
                     } else {
                       setActiveApp(item.id);

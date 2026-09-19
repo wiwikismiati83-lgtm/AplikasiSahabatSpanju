@@ -15,6 +15,8 @@ import {
   BookOpen,
   PhoneCall,
   ExternalLink,
+  Sparkles,
+  Layers,
 } from 'lucide-react';
 import { AuthUser, UserRole, ActiveAppId } from '../types';
 
@@ -24,6 +26,7 @@ interface LoginModalProps {
   onLoginSuccess: (user: AuthUser) => void;
   currentUser: AuthUser | null;
   canDismiss?: boolean;
+  onShowInfografis?: () => void;
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({
@@ -32,6 +35,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onLoginSuccess,
   currentUser,
   canDismiss = false,
+  onShowInfografis,
 }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -170,6 +174,32 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
           {/* Body Content */}
           <div className="p-5 space-y-4">
+          {/* Infografis Quick Banner */}
+          {onShowInfografis && (
+            <button
+              type="button"
+              onClick={onShowInfografis}
+              className="w-full p-2.5 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-200 hover:border-emerald-300 hover:shadow-sm transition flex items-center justify-between group cursor-pointer text-left"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-lg bg-emerald-600 text-white shadow-xs group-hover:scale-105 transition">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-[11px] font-black text-emerald-950 uppercase tracking-tight">
+                    Infografis Sahabat SPANJU
+                  </div>
+                  <div className="text-[10px] text-emerald-700 font-semibold">
+                    Klik untuk melihat bagan infografis resmi sekolah
+                  </div>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-600 text-white shadow-2xs group-hover:bg-emerald-700 transition">
+                Buka
+              </span>
+            </button>
+          )}
+
           {/* Error Notice */}
           {errorMessage && (
             <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-700 animate-in shake">
