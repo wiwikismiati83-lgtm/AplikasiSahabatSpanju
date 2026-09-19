@@ -12,6 +12,7 @@ import {
   MapPin,
   CheckCircle2,
   Trash2,
+  Pencil,
   FileSignature,
   FileText,
   HeartHandshake,
@@ -48,6 +49,7 @@ export const SPDamaiView: React.FC<Props> = ({
   onOpenMenu,
 }) => {
   const [showModal, setShowModal] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<SPDamaiRecord | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('semua');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -98,9 +100,119 @@ export const SPDamaiView: React.FC<Props> = ({
   const [namaKonselorSebaya, setNamaKonselorSebaya] = useState('Duta Sahabat SPANJU');
   const [status, setStatus] = useState<SPDamaiRecord['status']>('Damai Permanen');
 
+  const resetForm = () => {
+    setEditingRecord(null);
+    setHariTanggal('');
+    setTempatMediasi('Ruang Konseling Ramah Sahabat SPANJU / BK');
+    setNamaPihak1('');
+    setKelasPihak1('');
+    setPeranPihak1('Pihak Pertama (Siswa I)');
+    setTandaTanganPihak1('');
+    setNamaPihak2('');
+    setKelasPihak2('');
+    setPeranPihak2('Pihak Kedua (Siswa II)');
+    setTandaTanganPihak2('');
+    setRingkasanMasalah('');
+    setKlausul1(
+      'Kedua belah pihak dengan tulus hati saling memaafkan dan berjanji tidak memendam rasa dendam atau permusuhan.'
+    );
+    setKlausul2(
+      'Berjanji tidak akan mengulangi perbuatan mengejek, mendorong, menyindir, atau memprovokasi baik secara lisan, fisik, maupun media sosial.'
+    );
+    setKlausul3(
+      'Saling berkomitmen menjaga persahabatan serta mendukung terciptanya iklim belajar kondusif di lingkungan SMP Negeri 7 Pasuruan.'
+    );
+    setKlausul4(
+      'Apabila di kemudian hari melanggar kesepakatan damai ini, bersedia menerima sanksi edukatif sesuai Tata Tertib Sekolah dan rekomendasi TPPK.'
+    );
+    setSanksiEdukasi('Kedua siswa sepakat bersama-sama merawat taman literasi kelas dan membuat poster persahabatan.');
+    setNamaSaksiGuru('Wiwik Ismiati, S.Pd');
+    setNipSaksiGuru('198311162009042003');
+    setJabatanSaksiGuru('Guru Bimbingan Konseling & Fasilitator Mediasi');
+    setNamaKonselorSebaya('Duta Sahabat SPANJU');
+    setStatus('Damai Permanen');
+  };
+
+  const handleOpenAdd = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleOpenEdit = (rec: SPDamaiRecord) => {
+    setEditingRecord(rec);
+    setHariTanggal(rec.hariTanggal);
+    setTempatMediasi(rec.tempatMediasi || 'Ruang Konseling Ramah Sahabat SPANJU / BK');
+    setNamaPihak1(rec.namaPihak1);
+    setKelasPihak1(rec.kelasPihak1);
+    setPeranPihak1(rec.peranPihak1 || 'Pihak Pertama (Siswa I)');
+    setTandaTanganPihak1(rec.tandaTanganPihak1 || '');
+    setNamaPihak2(rec.namaPihak2);
+    setKelasPihak2(rec.kelasPihak2);
+    setPeranPihak2(rec.peranPihak2 || 'Pihak Kedua (Siswa II)');
+    setTandaTanganPihak2(rec.tandaTanganPihak2 || '');
+    setRingkasanMasalah(rec.ringkasanMasalah);
+    setKlausul1(
+      rec.butirKesepakatan?.[0] ??
+        'Kedua belah pihak dengan tulus hati saling memaafkan dan berjanji tidak memendam rasa dendam atau permusuhan.'
+    );
+    setKlausul2(
+      rec.butirKesepakatan?.[1] ??
+        'Berjanji tidak akan mengulangi perbuatan mengejek, mendorong, menyindir, atau memprovokasi baik secara lisan, fisik, maupun media sosial.'
+    );
+    setKlausul3(
+      rec.butirKesepakatan?.[2] ??
+        'Saling berkomitmen menjaga persahabatan serta mendukung terciptanya iklim belajar kondusif di lingkungan SMP Negeri 7 Pasuruan.'
+    );
+    setKlausul4(
+      rec.butirKesepakatan?.[3] ??
+        'Apabila di kemudian hari melanggar kesepakatan damai ini, bersedia menerima sanksi edukatif sesuai Tata Tertib Sekolah dan rekomendasi TPPK.'
+    );
+    setSanksiEdukasi(rec.sanksiEdukasi || '');
+    setNamaSaksiGuru(rec.namaSaksiGuru || 'Wiwik Ismiati, S.Pd');
+    setNipSaksiGuru(rec.nipSaksiGuru || '198311162009042003');
+    setJabatanSaksiGuru(rec.jabatanSaksiGuru || 'Guru Bimbingan Konseling & Fasilitator Mediasi');
+    setNamaKonselorSebaya(rec.namaKonselorSebaya || 'Duta Sahabat SPANJU');
+    setStatus(rec.status);
+    setShowModal(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!namaPihak1.trim() || !namaPihak2.trim() || !ringkasanMasalah.trim()) return;
+
+    if (editingRecord) {
+      const updatedRecord: SPDamaiRecord = {
+        ...editingRecord,
+        hariTanggal: hariTanggal.trim() || editingRecord.hariTanggal,
+        tempatMediasi: tempatMediasi.trim() || 'Ruang Konseling Ramah Sahabat SPANJU / BK',
+        namaPihak1: namaPihak1.trim(),
+        kelasPihak1: kelasPihak1.trim() || 'Kelas 8',
+        peranPihak1: peranPihak1.trim(),
+        tandaTanganPihak1: tandaTanganPihak1 || undefined,
+        namaPihak2: namaPihak2.trim(),
+        kelasPihak2: kelasPihak2.trim() || 'Kelas 8',
+        peranPihak2: peranPihak2.trim(),
+        tandaTanganPihak2: tandaTanganPihak2 || undefined,
+        ringkasanMasalah: ringkasanMasalah.trim(),
+        butirKesepakatan: [klausul1, klausul2, klausul3, klausul4].filter((k) => k.trim() !== ''),
+        sanksiEdukasi: sanksiEdukasi.trim(),
+        namaSaksiGuru: namaSaksiGuru.trim(),
+        nipSaksiGuru: nipSaksiGuru.trim(),
+        jabatanSaksiGuru: jabatanSaksiGuru.trim(),
+        namaKonselorSebaya: namaKonselorSebaya.trim(),
+        status,
+      };
+
+      if (onUpdateRecord) {
+        onUpdateRecord(updatedRecord);
+      }
+      if (selectedForPrint && selectedForPrint.id === updatedRecord.id) {
+        setSelectedForPrint(updatedRecord);
+      }
+      setShowModal(false);
+      resetForm();
+      return;
+    }
 
     const count = records.length + 1;
     const nomorSurat = `${String(count).padStart(3, '0')}/SP-DAMAI/SPANJU/IX/${new Date().getFullYear()}`;
@@ -132,15 +244,7 @@ export const SPDamaiView: React.FC<Props> = ({
 
     onAddRecord(newRecord);
     setShowModal(false);
-
-    // Reset
-    setNamaPihak1('');
-    setKelasPihak1('');
-    setTandaTanganPihak1('');
-    setNamaPihak2('');
-    setKelasPihak2('');
-    setTandaTanganPihak2('');
-    setRingkasanMasalah('');
+    resetForm();
   };
 
   const handleSignatureSave = (signatureUrl: string) => {
@@ -217,7 +321,7 @@ export const SPDamaiView: React.FC<Props> = ({
           </button>
           <button
             id="btn-tambah-sp-damai"
-            onClick={() => setShowModal(true)}
+            onClick={handleOpenAdd}
             className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20 hover:from-emerald-500 hover:to-teal-500 transition active:scale-95 flex items-center gap-1.5 btn-3d"
           >
             <Plus className="w-4 h-4" />
@@ -261,26 +365,33 @@ export const SPDamaiView: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Add Modal */}
+      {/* Add / Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs">
           <div className="w-full max-w-3xl bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden card-3d max-h-[92vh] flex flex-col">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-50/70 to-white shrink-0">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800 border border-emerald-200">
-                  <Handshake className="w-5 h-5" />
+                  {editingRecord ? <Pencil className="w-5 h-5" /> : <Handshake className="w-5 h-5" />}
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-slate-800">
-                    Formulir Surat Kesepakatan Damai Siswa (Restorative Justice)
+                    {editingRecord
+                      ? 'Edit Surat Kesepakatan Damai Siswa'
+                      : 'Formulir Surat Kesepakatan Damai Siswa (Restorative Justice)'}
                   </h2>
                   <p className="text-xs text-slate-500">
-                    UPTD SMP Negeri 7 Pasuruan &bull; Rekonsiliasi & Penandatanganan Layar Sentuh
+                    {editingRecord
+                      ? `Memperbarui berkas mediasi: ${editingRecord.nomorSurat}`
+                      : 'UPTD SMP Negeri 7 Pasuruan • Rekonsiliasi & Penandatanganan Layar Sentuh'}
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  resetForm();
+                }}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
               >
                 <X className="w-5 h-5" />
@@ -552,16 +663,20 @@ export const SPDamaiView: React.FC<Props> = ({
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => {
+                    setShowModal(false);
+                    resetForm();
+                  }}
                   className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md btn-3d"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md btn-3d flex items-center gap-1.5"
                 >
-                  Terbitkan Surat Kesepakatan Damai
+                  {editingRecord ? <Pencil className="w-3.5 h-3.5" /> : <Handshake className="w-3.5 h-3.5" />}
+                  {editingRecord ? 'Simpan Perubahan Surat Damai' : 'Terbitkan Surat Kesepakatan Damai'}
                 </button>
               </div>
             </form>
@@ -959,6 +1074,13 @@ export const SPDamaiView: React.FC<Props> = ({
                   </div>
 
                   <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleOpenEdit(item)}
+                      className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 transition"
+                      title="Edit Laporan SP Damai Siswa"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => {
                         setSelectedForPrint(item);

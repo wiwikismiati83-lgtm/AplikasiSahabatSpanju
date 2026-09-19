@@ -759,7 +759,7 @@ export default function App() {
                 onUpdateRecord={async (updated) => {
                   setSpDamaiRecords(spDamaiRecords.map((r) => (r.id === updated.id ? updated : r)));
                   await api.upsert('sp_damai_records', updated);
-                  showToast('Tanda tangan surat damai diperbarui.');
+                  showToast('Laporan SP Damai Siswa berhasil diperbarui.');
                 }}
               />
             )}
