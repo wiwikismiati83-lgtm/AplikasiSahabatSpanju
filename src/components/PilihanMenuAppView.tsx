@@ -124,7 +124,7 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({
       color: 'from-red-600 to-red-700',
       textColor: 'text-red-600',
       bgColor: 'bg-red-50',
-      badge: totalLaporan > 0 ? `${totalLaporan} Aduan` : undefined,
+      badge: (currentUser?.role === 'admin' || currentUser?.role === 'operator') && totalLaporan > 0 ? `${totalLaporan} Aduan` : 'Layanan',
       action: () => setActiveApp('e_lapor')
     },
     {
@@ -222,7 +222,7 @@ export const PilihanMenuAppView: React.FC<PilihanMenuAppViewProps> = ({
     {
       id: 'media_edukasi',
       title: 'MEDIA EDUKASI',
-      subtitle: 'MATERI REGULASI & VIDEO',
+      subtitle: 'MATERI & DOKUMENTASI LITERASI',
       icon: Tv,
       category: 'master',
       color: 'from-violet-600 to-purple-700',

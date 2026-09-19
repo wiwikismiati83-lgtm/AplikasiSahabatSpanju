@@ -1,6 +1,6 @@
 {
   "name": "Dashboard Sahabat SPANJU - SMPN 7 Pasuruan",
-  "description": "Dashboard interaktif terintegrasi Sahabat SPANJU SMPN 7 Pasuruan: Manajemen tautan aplikasi, Piket Harian, Sabtu Beli Teh Ceri, Kebun Luas Berseri, Senandung Serasi, E-Lapor Perundungan, Buku Tamu digital, Media Edukasi, dan Analitik Zona Hijau No Bullying.",
+  "description": "Dashboard interaktif terintegrasi Sahabat SPANJU SMPN 7 Pasuruan: Manajemen tautan aplikasi, Piket Harian, Sabtu Beli Teh Ceri, Kebun Luas Berseri, Senandung Serasi, E-Lapor Perundungan, SP Damai Siswa, Media Edukasi Digital, Buku Tamu digital, dan Analitik Zona Hijau No Bullying.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

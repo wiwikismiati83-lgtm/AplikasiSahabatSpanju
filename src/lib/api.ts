@@ -168,7 +168,7 @@ const KNOWN_TABLE_COLUMNS: Record<string, string[]> = {
   ],
   media_edukasi_items: [
     'id', 'judul', 'tipe', 'kategori', 'dokumentasimateriurl',
-    'pesanedukatif', 'thumbnailurl', 'sumber', 'tanggal', 'createdAt'
+    'pesanedukatif', 'thumbnailurl', 'sumber', 'tanggal', 'createdat', 'createdAt'
   ],
   kelas_zona: [
     'kelas', 'tingkat', 'jumlahsiswa', 'totalkasustahunini',
@@ -221,13 +221,19 @@ const sanitizeForTable = (table: string, rawItem: any): any => {
   const allowed = KNOWN_TABLE_COLUMNS[table];
   if (!allowed) return item;
 
+  // Case-insensitive lookup map for input item keys
+  const lowerLookup: Record<string, any> = {};
+  for (const k of Object.keys(item)) {
+    lowerLookup[k.toLowerCase()] = item[k];
+  }
+
   const sanitized: any = {};
   for (const col of allowed) {
     const lowerCol = col.toLowerCase();
     if (item[col] !== undefined) {
       sanitized[col] = item[col];
-    } else if (item[lowerCol] !== undefined) {
-      sanitized[lowerCol] = item[lowerCol];
+    } else if (lowerLookup[lowerCol] !== undefined) {
+      sanitized[col] = lowerLookup[lowerCol];
     }
   }
   return sanitized;

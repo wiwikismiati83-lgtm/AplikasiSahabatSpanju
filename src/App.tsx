@@ -862,6 +862,7 @@ export default function App() {
               <SPDamaiView
                 records={spDamaiRecords}
                 siswaList={siswaList}
+                userRole={currentUser?.role}
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddRecord={async (rec) => {
@@ -939,14 +940,39 @@ export default function App() {
                 canDelete={canDelete}
                 onOpenMenu={() => setActiveApp('pilihan_menu')}
                 onAddItem={async (item) => {
-                  setMediaEdukasiItems([item, ...mediaEdukasiItems]);
-                  await api.upsert('media_edukasi_items', item);
-                  showToast('Media edukasi digital berhasil ditambahkan!');
+                  try {
+                    await api.upsert('media_edukasi_items', item);
+                    setMediaEdukasiItems((prev) => [item, ...prev.filter((m) => m.id !== item.id)]);
+                    showToast('Media edukasi berhasil disimpan ke Supabase!');
+                  } catch (err) {
+                    console.error('Gagal menyimpan ke Supabase:', err);
+                    setMediaEdukasiItems((prev) => [item, ...prev.filter((m) => m.id !== item.id)]);
+                    showToast('Tersimpan di sesi lokal (koneksi Supabase tertunda).');
+                  }
                 }}
                 onDeleteItem={async (id) => {
-                  setMediaEdukasiItems(mediaEdukasiItems.filter((m) => m.id !== id));
-                  await api.delete('media_edukasi_items', id);
-                  showToast('Media edukasi dihapus.');
+                  setMediaEdukasiItems((prev) => prev.filter((m) => m.id !== id));
+                  try {
+                    await api.delete('media_edukasi_items', id);
+                    showToast('Media edukasi berhasil dihapus dari Supabase.');
+                  } catch (e) {
+                    console.warn('Delete sync error:', e);
+                    showToast('Media edukasi dihapus dari sesi lokal.');
+                  }
+                }}
+                onRefresh={async () => {
+                  try {
+                    const fresh = await api.get('media_edukasi_items');
+                    if (Array.isArray(fresh) && fresh.length > 0) {
+                      setMediaEdukasiItems(fresh);
+                      showToast(`Sinkronisasi Supabase berhasil (${fresh.length} materi).`);
+                    } else {
+                      showToast('Koneksi Supabase aktif, data terbaru telah dimuat.');
+                    }
+                  } catch (err) {
+                    console.warn('Refresh error:', err);
+                    showToast('Gagal menyinkronkan dengan Supabase.');
+                  }
                 }}
               />
             )}

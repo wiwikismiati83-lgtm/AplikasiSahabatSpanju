@@ -133,7 +133,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       subtitle: 'Pelaporan & 4 Mekanisme Penanganan',
       icon: ShieldAlert,
       accentColor: 'from-rose-500 to-red-600',
-      badge: totalLaporan > 0 ? `${totalLaporan} Rekap` : undefined,
+      badge: (currentUser?.role === 'admin' || currentUser?.role === 'operator') && totalLaporan > 0 ? `${totalLaporan} Rekap` : undefined,
       badgeColor: 'bg-rose-100 text-rose-800 border-rose-300',
     },
     {
@@ -165,7 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       id: 'media_edukasi',
       title: 'Media Edukasi Digital',
-      subtitle: 'Dokumentasi Materi & Pesan Edukatif',
+      subtitle: 'Dokumentasi Materi & Modul Literasi',
       icon: Tv,
       accentColor: 'from-violet-500 to-fuchsia-600',
     },

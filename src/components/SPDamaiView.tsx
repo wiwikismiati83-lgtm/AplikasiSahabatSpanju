@@ -21,8 +21,10 @@ import {
   ChevronDown,
   ChevronUp,
   Layers,
+  Lock,
+  ShieldAlert,
 } from 'lucide-react';
-import { SPDamaiRecord, Siswa } from '../types';
+import { SPDamaiRecord, Siswa, UserRole } from '../types';
 import { TouchSignaturePad } from './TouchSignaturePad';
 import { TouchSignatureModal } from './TouchSignatureModal';
 import { OfficialReportModal } from './OfficialReportModal';
@@ -37,6 +39,7 @@ interface Props {
   onUpdateRecord?: (record: SPDamaiRecord) => void;
   canDelete?: boolean;
   onOpenMenu?: () => void;
+  userRole?: UserRole;
 }
 
 export const SPDamaiView: React.FC<Props> = ({
@@ -47,12 +50,17 @@ export const SPDamaiView: React.FC<Props> = ({
   onUpdateRecord,
   canDelete = true,
   onOpenMenu,
+  userRole = 'admin',
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [editingRecord, setEditingRecord] = useState<SPDamaiRecord | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('semua');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Only admin and operator can view full report data and incident records
+  const isAdminOrOperator = userRole === 'admin' || userRole === 'operator';
+  const isRestrictedFromViewingReports = !isAdminOrOperator;
 
   // Printing & Signature
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -309,16 +317,18 @@ export const SPDamaiView: React.FC<Props> = ({
               Pilihan Menu Aplikasi
             </button>
           )}
-          <button
-            onClick={() => {
-              setSelectedForPrint(null);
-              setShowPrintModal(true);
-            }}
-            className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition active:scale-95 shadow-xs"
-          >
-            <Printer className="w-3.5 h-3.5 text-emerald-600" />
-            Cetak Kop Surat Resmi
-          </button>
+          {isAdminOrOperator && (
+            <button
+              onClick={() => {
+                setSelectedForPrint(null);
+                setShowPrintModal(true);
+              }}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition active:scale-95 shadow-xs"
+            >
+              <Printer className="w-3.5 h-3.5 text-emerald-600" />
+              Cetak Kop Surat Resmi
+            </button>
+          )}
           <button
             id="btn-tambah-sp-damai"
             onClick={handleOpenAdd}
@@ -993,8 +1003,67 @@ export const SPDamaiView: React.FC<Props> = ({
         }}
       />
 
-      {/* Filter and Search Bar */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+      {/* Confidentiality View for Siswa, Guru, Orang Tua / Non-Admin */}
+      {isRestrictedFromViewingReports ? (
+        <div className="p-6 sm:p-8 rounded-2xl bg-white border border-slate-200 shadow-xs text-center space-y-6">
+          <div className="max-w-xl mx-auto space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shadow-2xs">
+              <Lock className="w-8 h-8 text-emerald-700" />
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-900 border border-emerald-200">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                <span>Kerahasiaan Dokumen Restorative Justice Dilindungi</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-black text-slate-800">
+                Hasil Data SP Damai Bersifat Rahasia
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Untuk menjunjung kode etik konseling, asas praduga, dan perlindungan privasi anak dari stigma, riwayat berkas dan hasil input data <strong>Surat Kesepakatan Perdamaian (SP Damai Siswa)</strong> hanya dapat diakses oleh <strong>Administrator &amp; Operator Sekolah (Konselor BK &amp; Tim TPPK SPANJU)</strong>.
+              </p>
+            </div>
+
+            <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs text-slate-600 space-y-3">
+              <p className="font-bold text-slate-800 flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>Ingin Membuat atau Mengajukan Mediasi Damai Baru?</span>
+              </p>
+              <p className="leading-relaxed">
+                Jika terdapat perselisihan siswa yang memerlukan rekonsiliasi, musyawarah kekeluargaan, atau penerbitan surat kesepakatan damai baru, silakan klik tombol di bawah untuk membuka formulir kesepakatan damai resmi.
+              </p>
+              <div className="pt-1">
+                <button
+                  type="button"
+                  id="btn-tambah-sp-damai-confidential"
+                  onClick={handleOpenAdd}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-500/20 hover:from-emerald-500 hover:to-teal-500 transition active:scale-95 flex items-center gap-2 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Buat Surat Damai Baru Sekarang</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-left">
+              <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/80">
+                <span className="text-[11px] font-bold text-emerald-900 block mb-0.5">1. Rekonsiliasi Damai</span>
+                <p className="text-[10px] text-emerald-800 leading-relaxed">Penyelesaian perselisihan tanpa dendam dan saling memaafkan.</p>
+              </div>
+              <div className="p-3 rounded-xl bg-teal-50/70 border border-teal-200/80">
+                <span className="text-[11px] font-bold text-teal-900 block mb-0.5">2. Bimbingan Konselor</span>
+                <p className="text-[10px] text-teal-800 leading-relaxed">Didampingi Guru BK dan TPPK secara objektif &amp; kekeluargaan.</p>
+              </div>
+              <div className="p-3 rounded-xl bg-sky-50/70 border border-sky-200/80">
+                <span className="text-[11px] font-bold text-sky-900 block mb-0.5">3. Hotline Layanan BK</span>
+                <p className="text-[10px] text-sky-800 leading-relaxed">(0343) 426845 &bull; 0851-6870-0953</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Filter and Search Bar */
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -1216,6 +1285,7 @@ export const SPDamaiView: React.FC<Props> = ({
           })}
         </div>
       </div>
+      )}
 
       {/* Student Picker Modal */}
       {activePicker && (

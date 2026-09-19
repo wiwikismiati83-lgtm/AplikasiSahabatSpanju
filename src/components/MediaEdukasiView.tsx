@@ -1,252 +1,434 @@
 import React, { useState } from 'react';
 import {
-  Tv,
   Plus,
-  BookOpen,
-  Video,
-  FileText,
-  Sparkles,
+  Search,
   ExternalLink,
   Trash2,
+  Edit3,
+  BookOpen,
   Calendar,
   X,
-  Printer,
-  Share2,
   Layers,
+  Database,
+  RefreshCw,
+  Copy,
+  Check,
+  Code2,
+  CheckCircle2,
 } from 'lucide-react';
 import { MediaEdukasiItem } from '../types';
 
 interface Props {
   items: MediaEdukasiItem[];
-  onAddItem: (item: MediaEdukasiItem) => void;
-  onDeleteItem: (id: string) => void;
   canDelete?: boolean;
+  onAddItem: (item: MediaEdukasiItem) => Promise<void> | void;
+  onDeleteItem: (id: string) => Promise<void> | void;
   onOpenMenu?: () => void;
+  onRefresh?: () => Promise<void> | void;
 }
+
+const SQL_SCHEMA_STRING = `-- ==============================================================================
+-- SKRIP PEMBUATAN TABEL MEDIA EDUKASI DIGITAL SPANJU DI SUPABASE
+-- UPT SMP NEGERI 7 PASURUAN
+-- ==============================================================================
+
+-- 1. Buat Tabel media_edukasi_items
+CREATE TABLE IF NOT EXISTS public.media_edukasi_items (
+    id TEXT PRIMARY KEY,
+    judul TEXT NOT NULL,
+    dokumentasimateriurl TEXT,
+    tanggal TEXT NOT NULL,
+    tipe TEXT DEFAULT 'modul',
+    kategori TEXT DEFAULT 'Materi Edukasi',
+    pesanedukatif TEXT DEFAULT '',
+    thumbnailurl TEXT,
+    sumber TEXT,
+    "createdAt" TIMESTAMPTZ DEFAULT now(),
+    createdat TIMESTAMPTZ DEFAULT now()
+);
+
+-- 2. Aktifkan Row Level Security (RLS)
+ALTER TABLE public.media_edukasi_items ENABLE ROW LEVEL SECURITY;
+
+-- 3. Kebijakan Keamanan (Policies) untuk Akses Anonim / Publik
+DROP POLICY IF EXISTS "Allow select on media_edukasi_items" ON public.media_edukasi_items;
+CREATE POLICY "Allow select on media_edukasi_items" 
+    ON public.media_edukasi_items FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow insert on media_edukasi_items" ON public.media_edukasi_items;
+CREATE POLICY "Allow insert on media_edukasi_items" 
+    ON public.media_edukasi_items FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow update on media_edukasi_items" ON public.media_edukasi_items;
+CREATE POLICY "Allow update on media_edukasi_items" 
+    ON public.media_edukasi_items FOR UPDATE USING (true);
+
+DROP POLICY IF EXISTS "Allow delete on media_edukasi_items" ON public.media_edukasi_items;
+CREATE POLICY "Allow delete on media_edukasi_items" 
+    ON public.media_edukasi_items FOR DELETE USING (true);`;
 
 export const MediaEdukasiView: React.FC<Props> = ({
   items,
+  canDelete = true,
   onAddItem,
   onDeleteItem,
-  canDelete = true,
   onOpenMenu,
+  onRefresh,
 }) => {
   const [showModal, setShowModal] = useState(false);
-  const [filterType, setFilterType] = useState<string>('semua');
+  const [showSqlModal, setShowSqlModal] = useState(false);
+  const [copiedSql, setCopiedSql] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [itemToDelete, setItemToDelete] = useState<MediaEdukasiItem | null>(null);
+  const [editingItem, setEditingItem] = useState<MediaEdukasiItem | null>(null);
 
-  // Form states
+  // Form states - Judul Materi dan Tautan Dokumentasi
   const [judul, setJudul] = useState('');
-  const [tipe, setTipe] = useState<MediaEdukasiItem['tipe']>('modul');
-  const [kategori, setKategori] = useState('Pencegahan Perundungan');
   const [dokumentasiMateriUrl, setDokumentasiMateriUrl] = useState('');
-  const [pesanEdukatif, setPesanEdukatif] = useState('');
-  const [thumbnailUrl, setThumbnailUrl] = useState('');
-  const [sumber, setSumber] = useState('Tim Sahabat SPANJU');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setJudul('');
+    setDokumentasiMateriUrl('');
+    setEditingItem(null);
+  };
+
+  const openAddModal = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const openEditModal = (item: MediaEdukasiItem) => {
+    setEditingItem(item);
+    setJudul(item.judul);
+    setDokumentasiMateriUrl(item.dokumentasiMateriUrl || '');
+    setShowModal(true);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!judul.trim() || !pesanEdukatif.trim()) return;
+    if (!judul.trim() || isSaving) return;
 
-    const newItem: MediaEdukasiItem = {
-      id: `med-${Date.now()}`,
-      judul: judul.trim(),
-      tipe,
-      kategori: kategori.trim(),
-      dokumentasiMateriUrl: dokumentasiMateriUrl.trim(),
-      pesanEdukatif: pesanEdukatif.trim(),
-      thumbnailUrl:
-        thumbnailUrl.trim() ||
-        'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
-      sumber: sumber.trim() || 'Sahabat SPANJU',
-      tanggal: new Date().toLocaleDateString('id-ID', {
+    try {
+      setIsSaving(true);
+      const todayStr = new Intl.DateTimeFormat('id-ID', {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
-      }),
-    };
+      }).format(new Date());
 
-    onAddItem(newItem);
-    setShowModal(false);
-    // Reset
-    setJudul('');
-    setDokumentasiMateriUrl('');
-    setPesanEdukatif('');
-    setThumbnailUrl('');
+      const newItem: MediaEdukasiItem = {
+        id: editingItem ? editingItem.id : `med-${Date.now()}`,
+        judul: judul.trim(),
+        dokumentasiMateriUrl: dokumentasiMateriUrl.trim() || undefined,
+        tanggal: editingItem ? editingItem.tanggal : todayStr,
+        tipe: editingItem?.tipe || 'modul',
+        kategori: editingItem?.kategori || 'Materi Edukasi',
+        pesanEdukatif: editingItem?.pesanEdukatif || '',
+      };
+
+      await onAddItem(newItem);
+      resetForm();
+      setShowModal(false);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const filtered = items.filter(
-    (item) => filterType === 'semua' || item.tipe === filterType
+  const handleCopySql = async () => {
+    try {
+      await navigator.clipboard.writeText(SQL_SCHEMA_STRING);
+      setCopiedSql(true);
+      setTimeout(() => setCopiedSql(false), 2500);
+    } catch {
+      setCopiedSql(true);
+      setTimeout(() => setCopiedSql(false), 2500);
+    }
+  };
+
+  const handleManualRefresh = async () => {
+    if (!onRefresh || isRefreshing) return;
+    try {
+      setIsRefreshing(true);
+      await onRefresh();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const filteredItems = items.filter((item) =>
+    item.judul.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div id="view-media-edukasi" className="space-y-6 pb-12">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-violet-100/80 via-purple-50/70 to-white border border-violet-200/90 shadow-xs">
+      <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-violet-100 text-violet-900 border border-violet-300 mb-2 shadow-2xs">
-            <Tv className="w-4 h-4 text-violet-700" />
-            SUMBER BELAJAR KARAKTER DIGITAL
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-violet-50 text-violet-700 border border-violet-200">
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Sahabat SPANJU Digital Repository</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Database Supabase Aktif</span>
+            </div>
           </div>
-          <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             MEDIA EDUKASI DIGITAL SPANJU
           </h1>
-          <p className="text-xs text-slate-600 mt-1">
-            Pusat dokumentasi materi pencegahan perundungan, video penguatan karakter, modul literasi, dan pesan edukatif harian
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
+            Pusat repositori digital materi pencegahan perundungan, video pembelajaran, dan modul literasi karakter ramah anak tersimpan aman di Supabase.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          {onOpenMenu && (
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2">
+          {onRefresh && (
             <button
-              onClick={onOpenMenu}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 transition flex items-center gap-1.5 shadow-xs"
+              type="button"
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              title="Sinkronkan data dengan Supabase"
+              className="px-3 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition active:scale-95 shadow-xs cursor-pointer disabled:opacity-50"
             >
-              <Layers className="w-3.5 h-3.5 text-violet-600" />
-              Pilihan Menu Aplikasi
+              <RefreshCw className={`w-3.5 h-3.5 text-emerald-600 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Sinkron</span>
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={() => setShowSqlModal(true)}
+            className="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition active:scale-95 shadow-xs cursor-pointer"
+            title="Lihat Skrip SQL Tabel Supabase"
+          >
+            <Database className="w-3.5 h-3.5 text-violet-600" />
+            <span>Skrip Tabel Supabase</span>
+          </button>
+
+          {onOpenMenu && (
+            <button
+              type="button"
+              onClick={onOpenMenu}
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition active:scale-95 shadow-xs cursor-pointer"
+            >
+              <Layers className="w-3.5 h-3.5 text-emerald-600" />
+              Pilihan Menu
+            </button>
+          )}
+
           <button
             id="btn-tambah-media"
-            onClick={() => setShowModal(true)}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-500/20 hover:from-violet-500 hover:to-fuchsia-500 transition active:scale-95 flex items-center gap-1.5 btn-3d"
+            type="button"
+            onClick={openAddModal}
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white flex items-center gap-1.5 transition active:scale-95 shadow-md shadow-violet-500/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            Unggah Materi Baru
+            Tambah Media Baru
           </button>
         </div>
       </div>
 
-      {/* Modal Add Media */}
+      {/* Search Bar */}
+      <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Cari judul materi edukasi..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 rounded-xl text-xs border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-violet-500 bg-slate-50 focus:bg-white transition"
+          />
+        </div>
+        <div className="text-xs text-slate-500 font-medium px-2">
+          Total: <span className="font-bold text-slate-800">{filteredItems.length}</span> Materi
+        </div>
+      </div>
+
+      {/* Media Cards Grid */}
+      {filteredItems.length === 0 ? (
+        <div className="p-12 text-center rounded-2xl bg-white border border-slate-200 shadow-xs">
+          <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-sm font-bold text-slate-700">Belum Ada Materi Edukasi</h3>
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+            Materi edukasi digital ramah anak belum ditemukan. Klik tombol Tambah Media Baru untuk menambahkan materi langsung ke database Supabase.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredItems.map((item) => (
+            <div
+              key={item.id}
+              className="group rounded-2xl bg-white border border-slate-200 hover:border-violet-300 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden"
+            >
+              <div className="p-5 space-y-3">
+                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    {item.tanggal}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    {canDelete && (
+                      <button
+                        type="button"
+                        title="Edit Materi"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(item);
+                        }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition cursor-pointer"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        type="button"
+                        title="Hapus Materi"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setItemToDelete(item);
+                        }}
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <h3 className="text-sm font-bold text-slate-800 group-hover:text-violet-700 transition leading-snug line-clamp-3">
+                  {item.judul}
+                </h3>
+              </div>
+
+              {/* Bottom Action */}
+              <div className="px-5 py-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
+                {item.dokumentasiMateriUrl ? (
+                  <a
+                    href={item.dokumentasiMateriUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-xs transition active:scale-95"
+                  >
+                    <span>Buka Materi</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                ) : (
+                  <span className="w-full text-center text-[11px] text-slate-400 italic py-1">
+                    Tautan materi tidak tersedia
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal Tambah / Edit Media Edukasi Digital */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="w-full max-w-xl bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden card-3d">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-violet-50/50 to-white">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-violet-100 text-violet-800 border border-violet-200">
-                  <Tv className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center border border-violet-100">
+                  <BookOpen className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-800">Tambah Media Edukasi Digital</h2>
-                  <p className="text-xs text-slate-500">Dokumentasi materi & pesan edukatif ramah anak</p>
+                  <h2 className="text-base font-bold text-slate-800">
+                    {editingItem ? 'Edit Media Edukasi Digital' : 'Tambah Media Edukasi Digital'}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    {editingItem ? 'Perbarui data materi edukasi di Supabase' : 'Data otomatis disimpan ke Supabase Cloud'}
+                  </p>
                 </div>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
-                <X className="w-5 h-5" />
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={() => {
+                  resetForm();
+                  setShowModal(false);
+                }}
+                className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition disabled:opacity-50"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-5 space-y-4">
+            {/* Modal Form */}
+            <form onSubmit={handleSave} className="p-6 space-y-4">
+              {/* Judul Materi / Kampanye */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  JUDUL MATERI / KAMPANYE <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                  Judul Materi / Kampanye <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
+                  disabled={isSaving}
                   value={judul}
                   onChange={(e) => setJudul(e.target.value)}
                   placeholder="Contoh: Modul Bijak Bermedia Sosial Tanpa Perundungan"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-violet-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-violet-500 bg-slate-50 focus:bg-white transition disabled:opacity-50"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Tipe Media
-                  </label>
-                  <select
-                    value={tipe}
-                    onChange={(e) => setTipe(e.target.value as MediaEdukasiItem['tipe'])}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-violet-500"
-                  >
-                    <option value="modul">Modul / Panduan</option>
-                    <option value="video">Video Edukasi</option>
-                    <option value="infografis">Infografis / Poster</option>
-                    <option value="pesan_bijak">Pesan Bijak / Mutiara</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Kategori
-                  </label>
-                  <input
-                    type="text"
-                    value={kategori}
-                    onChange={(e) => setKategori(e.target.value)}
-                    placeholder="Pencegahan Bullying"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-violet-500"
-                  />
-                </div>
-              </div>
-
+              {/* Dokumentasi Materi (URL Link / Dokumen / Video) */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  DOKUMENTASI MATERI (URL Link / Dokumen / Video)
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wide">
+                  Dokumentasi Materi (URL Link / Dokumen / Video)
                 </label>
                 <input
-                  type="text"
+                  type="url"
+                  disabled={isSaving}
                   value={dokumentasiMateriUrl}
                   onChange={(e) => setDokumentasiMateriUrl(e.target.value)}
                   placeholder="https://... tautan file google drive, youtube, atau artikel"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-violet-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-violet-500 bg-slate-50 focus:bg-white transition disabled:opacity-50"
                 />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Masukkan tautan Google Drive dokumen PDF, video YouTube, modul literasi, atau situs panduan resmi.
+                </p>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  PESAN EDUKATIF (Intisari Pembelajaran) <span className="text-rose-500">*</span>
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={pesanEdukatif}
-                  onChange={(e) => setPesanEdukatif(e.target.value)}
-                  placeholder="Intisari pesan nilai budi pekerti atau himbauan karakter ramah yang ingin disampaikan..."
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-violet-500"
-                />
+              {/* Database notice */}
+              <div className="p-3 rounded-xl bg-violet-50/60 border border-violet-100 flex items-center gap-2.5 text-xs text-violet-800">
+                <Database className="w-4 h-4 text-violet-600 shrink-0" />
+                <span>Perubahan akan disinkronkan otomatis ke server database Supabase SPANJU.</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Link Gambar Thumbnail
-                  </label>
-                  <input
-                    type="text"
-                    value={thumbnailUrl}
-                    onChange={(e) => setThumbnailUrl(e.target.value)}
-                    placeholder="https://... (Opsional)"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-violet-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Sumber Materi
-                  </label>
-                  <input
-                    type="text"
-                    value={sumber}
-                    onChange={(e) => setSumber(e.target.value)}
-                    placeholder="Tim BK / PUSPEKA"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-xs focus:bg-white focus:border-violet-500"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+              {/* Actions */}
+              <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800"
+                  disabled={isSaving}
+                  onClick={() => {
+                    resetForm();
+                    setShowModal(false);
+                  }}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition disabled:opacity-50"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-md btn-3d"
+                  disabled={isSaving}
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white transition active:scale-95 shadow-md shadow-violet-500/20 cursor-pointer flex items-center gap-2 disabled:opacity-50"
                 >
-                  Simpan Media
+                  {isSaving ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    <span>{editingItem ? 'Simpan Perubahan' : 'Simpan Media'}</span>
+                  )}
                 </button>
               </div>
             </form>
@@ -254,99 +436,126 @@ export const MediaEdukasiView: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 w-fit text-xs shadow-xs">
-        {[
-          { id: 'semua', label: 'Semua Media' },
-          { id: 'modul', label: 'Modul & Panduan' },
-          { id: 'video', label: 'Video Pembelajaran' },
-          { id: 'infografis', label: 'Infografis' },
-          { id: 'pesan_bijak', label: 'Pesan Mutiara' },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setFilterType(tab.id)}
-            className={`px-3 py-1.5 rounded-lg font-bold transition ${
-              filterType === tab.id
-                ? 'bg-violet-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Modal Konfirmasi Hapus Materi */}
+      {itemToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto border border-red-100">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div className="text-center space-y-1">
+              <h3 className="text-base font-bold text-slate-800">
+                Hapus Media Edukasi?
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Apakah Anda yakin ingin menghapus materi <span className="font-semibold text-slate-700">"{itemToDelete.judul}"</span>? Data akan dihapus dari Supabase.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setItemToDelete(null)}
+                className="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 border border-slate-200 transition cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const targetId = itemToDelete.id;
+                  setItemToDelete(null);
+                  await onDeleteItem(targetId);
+                }}
+                className="flex-1 px-4 py-2.5 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition active:scale-95 shadow-md shadow-red-600/20 cursor-pointer"
+              >
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Media Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filtered.map((item) => (
-          <div
-            key={item.id}
-            id={`card-media-${item.id}`}
-            className="rounded-2xl bg-gradient-to-b from-slate-50/60 to-white border border-slate-200 hover:border-violet-300 shadow-xs overflow-hidden card-3d flex flex-col justify-between"
-          >
-            {item.thumbnailUrl && (
-              <div className="relative h-44 w-full bg-slate-100 overflow-hidden group">
-                <img
-                  src={item.thumbnailUrl}
-                  alt={item.judul}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80';
-                  }}
-                />
-                <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/90 text-slate-800 backdrop-blur-xs border border-slate-200 uppercase tracking-wider shadow-xs">
-                  {item.tipe.replace('_', ' ')}
-                </span>
-                {item.dokumentasiMateriUrl && (
-                  <a
-                    href={item.dokumentasiMateriUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="absolute bottom-3 right-3 px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-md"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" /> Buka Materi
-                  </a>
-                )}
-              </div>
-            )}
-
-            <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-              <div>
-                <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                  <span className="text-violet-700 font-bold">{item.kategori}</span>
-                  <span>{item.tanggal}</span>
+      {/* Modal Skrip SQL Tabel Supabase */}
+      {showSqlModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="w-full max-w-2xl bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center border border-violet-200">
+                  <Database className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-bold text-slate-800 mt-1 leading-snug">{item.judul}</h3>
-
-                {/* Pesan Edukatif */}
-                <div className="mt-3 p-3.5 rounded-xl bg-violet-50/50 border border-violet-200/60 text-xs">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-violet-800 block mb-1 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-violet-600" /> PESAN EDUKATIF:
-                  </span>
-                  <p className="text-slate-700 leading-relaxed italic font-medium">
-                    "{item.pesanEdukatif}"
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Skrip SQL Tabel Supabase (media_edukasi_items)
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Jalankan skrip ini di SQL Editor Supabase untuk membuat atau memperbarui tabel
                   </p>
                 </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowSqlModal(false)}
+                className="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span className="text-[11px]">Sumber: <strong className="text-slate-700">{item.sumber || 'SMPN 7 Pasuruan'}</strong></span>
-                {canDelete && (
-                  <button
-                    onClick={() => onDeleteItem(item.id)}
-                    className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
-                    title="Hapus"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
+            <div className="p-5 space-y-4">
+              <div className="flex items-center justify-between text-xs text-slate-600">
+                <span className="font-semibold flex items-center gap-1.5">
+                  <Code2 className="w-4 h-4 text-violet-600" />
+                  Berkas: <code className="bg-slate-100 px-2 py-0.5 rounded-sm font-mono text-slate-800">supabase_schema_media_edukasi.sql</code>
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopySql}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white transition active:scale-95 shadow-xs cursor-pointer"
+                >
+                  {copiedSql ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Berhasil Disalin!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Salin Skrip SQL</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="relative">
+                <pre className="p-4 rounded-xl bg-slate-900 text-slate-100 text-xs font-mono overflow-x-auto max-h-80 leading-relaxed">
+                  {SQL_SCHEMA_STRING}
+                </pre>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-xs text-emerald-900">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold">Status Tabel Saat Ini:</p>
+                  <p className="text-emerald-700 mt-0.5">
+                    Tabel <code className="font-mono font-bold">media_edukasi_items</code> telah aktif di database Supabase dan siap menerima input data baru serta penyuntingan secara langsung.
+                  </p>
+                </div>
               </div>
             </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => setShowSqlModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 text-slate-700 transition cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

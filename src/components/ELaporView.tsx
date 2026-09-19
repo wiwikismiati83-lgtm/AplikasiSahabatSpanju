@@ -63,7 +63,9 @@ export const ELaporView: React.FC<Props> = ({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [recentlySubmittedCode, setRecentlySubmittedCode] = useState<string | null>(null);
 
-  const isRestrictedFromViewingReports = userRole === 'siswa' || userRole === 'orang_tua';
+  // Only admin and operator can view full report data and incident records
+  const isAdminOrOperator = userRole === 'admin' || userRole === 'operator';
+  const isRestrictedFromViewingReports = !isAdminOrOperator;
 
   // Printing & Signature
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -920,8 +922,65 @@ export const ELaporView: React.FC<Props> = ({
         }}
       />
 
-      {/* Confidential Notice for Siswa and Orang Tua */}
-      {isRestrictedFromViewingReports ? null : (
+      {/* Confidentiality View for Siswa, Guru, Orang Tua / Non-Admin */}
+      {isRestrictedFromViewingReports ? (
+        <div className="p-6 sm:p-8 rounded-2xl bg-white border border-slate-200 shadow-xs text-center space-y-6">
+          <div className="max-w-xl mx-auto space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shadow-2xs">
+              <Lock className="w-8 h-8 text-rose-600" />
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
+                <ShieldCheck className="w-3.5 h-3.5 text-rose-600" />
+                <span>Kerahasiaan &amp; Privasi Data Pelaporan Dilindungi</span>
+              </div>
+              <h3 className="text-lg sm:text-xl font-black text-slate-800">
+                Hasil Data E-Lapor Bersifat Rahasia
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Untuk menjamin keamanan korban, saksi, serta perlindungan privasi siswa dan asas kerahasiaan pelapor, hasil input dan riwayat data laporan <strong>E-Lapor Perundungan &amp; Kekerasan</strong> hanya dapat diakses oleh <strong>Administrator &amp; Operator TPPK SMPN 7 Pasuruan</strong>.
+              </p>
+            </div>
+
+            <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs text-slate-600 space-y-3">
+              <p className="font-bold text-slate-800 flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
+                <span>Ingin Menyampaikan Laporan atau Pengaduan Baru?</span>
+              </p>
+              <p className="leading-relaxed">
+                Jika Anda (Siswa, Guru, maupun Orang Tua/Wali) ingin melaporkan insiden perundungan atau kekerasan yang dialami atau disaksikan, silakan klik tombol formulir pengaduan resmi di bawah. Laporan Anda akan langsung diproses dengan prinsip pemulihan damai dan kerahasiaan penuh.
+              </p>
+              <div className="pt-1">
+                <button
+                  type="button"
+                  id="btn-tambah-lapor-confidential"
+                  onClick={handleOpenAdd}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-rose-600 to-red-600 text-white shadow-md shadow-rose-500/20 hover:from-rose-500 hover:to-red-500 transition active:scale-95 flex items-center gap-2 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Buat Laporan Baru Sekarang</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-left">
+              <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/80">
+                <span className="text-[11px] font-bold text-emerald-900 block mb-0.5">1. Identitas Aman</span>
+                <p className="text-[10px] text-emerald-800 leading-relaxed">Data pelapor dijamin aman dari publikasi pihak luar.</p>
+              </div>
+              <div className="p-3 rounded-xl bg-sky-50/70 border border-sky-200/80">
+                <span className="text-[11px] font-bold text-sky-900 block mb-0.5">2. Respon TPPK SPANJU</span>
+                <p className="text-[10px] text-sky-800 leading-relaxed">Pencegahan, investigasi ramah, dan pemulihan damai.</p>
+              </div>
+              <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80">
+                <span className="text-[11px] font-bold text-amber-900 block mb-0.5">3. Hotline Aduan</span>
+                <p className="text-[10px] text-amber-800 leading-relaxed">(0343) 426845 &bull; 0851-6870-0953</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
         /* Filter and Search Bar + Admin Reports List */
         <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
