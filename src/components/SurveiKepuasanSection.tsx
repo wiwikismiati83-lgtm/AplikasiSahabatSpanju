@@ -158,6 +158,14 @@ const INITIAL_SAMPLE_RESPONSES: SurveiKepuasanRecord[] = [
     saranPerbaikan: 'Terus tingkatkan sosialisasi di kelas agar siswa tidak ragu menggunakan form ini.',
     createdAt: '2026-09-18 11:20',
   },
+  {
+    id: 'survei-006',
+    namaLengkap: 'Drs. Hendro Wibowo (Pengawas Dispendik / Tamu)',
+    status: 'Tamu',
+    jawaban: { 1: 'setuju', 2: 'setuju', 3: 'setuju', 4: 'setuju', 5: 'setuju', 6: 'setuju', 7: 'setuju', 8: 'setuju' },
+    saranPerbaikan: 'Inovasi digital sekolah ramah anak yang patut diapresiasi dan direplikasi.',
+    createdAt: '2026-09-18 13:30',
+  },
 ];
 
 interface SurveiKepuasanSectionProps {
@@ -194,6 +202,8 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
       ? 'Guru'
       : currentUser?.role === 'orang_tua'
       ? 'Orang tua'
+      : currentUser?.displayName?.toLowerCase().includes('tamu') || (currentUser?.role as string) === 'tamu'
+      ? 'Tamu'
       : 'Siswa'
   );
   const [jawaban, setJawaban] = useState<Record<number, SurveiOptionValue>>({
@@ -538,8 +548,8 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
     // Bagian I: Ringkasan Metadata
     aoaData.push(['I. INFORMASI UMUM & STATISTIK REKAPITULASI']);
     aoaData.push(['Tanggal Unduh Dokumen', currentDateStr]);
-    aoaData.push(['Filter Kategori Responden', filterRole === 'Semua' ? 'Semua Peran (Siswa, Guru, Orang Tua)' : filterRole]);
-    aoaData.push(['Total Responden Tercatat', `${listToExport.length} Orang (Siswa: ${listToExport.filter(r => r.status === 'Siswa').length}, Guru: ${listToExport.filter(r => r.status === 'Guru').length}, Orang Tua: ${listToExport.filter(r => r.status === 'Orang tua').length})`]);
+    aoaData.push(['Filter Kategori Responden', filterRole === 'Semua' ? 'Semua Peran (Siswa, Guru, Orang Tua, Tamu)' : filterRole]);
+    aoaData.push(['Total Responden Tercatat', `${listToExport.length} Orang (Siswa: ${listToExport.filter(r => r.status === 'Siswa').length}, Guru: ${listToExport.filter(r => r.status === 'Guru').length}, Orang Tua: ${listToExport.filter(r => r.status === 'Orang tua').length}, Tamu: ${listToExport.filter(r => r.status === 'Tamu').length})`]);
     aoaData.push(['Indeks Kepuasan Rata-Rata', `${overallIndex}% (Menyatakan Setuju / Puas)`]);
     aoaData.push([]);
 
@@ -897,11 +907,11 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
           </tr>
           <tr>
             <td style="font-weight: bold; background-color: #f2f2f2;">Kategori Filter Responden</td>
-            <td>${filterRole === 'Semua' ? 'Semua Peran (Siswa, Guru, Orang Tua)' : filterRole}</td>
+            <td>${filterRole === 'Semua' ? 'Semua Peran (Siswa, Guru, Orang Tua, Tamu)' : filterRole}</td>
           </tr>
           <tr>
             <td style="font-weight: bold; background-color: #f2f2f2;">Jumlah Total Responden</td>
-            <td><strong>${listToExport.length} Responden</strong> (Siswa: ${listToExport.filter(r => r.status === 'Siswa').length}, Guru: ${listToExport.filter(r => r.status === 'Guru').length}, Orang Tua: ${listToExport.filter(r => r.status === 'Orang tua').length})</td>
+            <td><strong>${listToExport.length} Responden</strong> (Siswa: ${listToExport.filter(r => r.status === 'Siswa').length}, Guru: ${listToExport.filter(r => r.status === 'Guru').length}, Orang Tua: ${listToExport.filter(r => r.status === 'Orang tua').length}, Tamu: ${listToExport.filter(r => r.status === 'Tamu').length})</td>
           </tr>
           <tr>
             <td style="font-weight: bold; background-color: #f2f2f2;">Indeks Kepuasan Rata-Rata</td>
@@ -1188,21 +1198,22 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
                         <label className="block text-xs font-bold text-slate-700 mb-1.5">
                           Status Responden <span className="text-rose-500">*</span>
                         </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {(['Siswa', 'Guru', 'Orang tua'] as StatusResponden[]).map((status) => (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          {(['Siswa', 'Guru', 'Orang tua', 'Tamu'] as StatusResponden[]).map((status) => (
                             <button
                               key={status}
                               type="button"
                               onClick={() => setStatusResponden(status)}
-                              className={`py-2 px-2 rounded-xl text-xs font-bold border transition text-center flex items-center justify-center gap-1 ${
+                              className={`py-2 px-2 rounded-xl text-xs font-bold border transition text-center flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 ${
                                 statusResponden === status
                                   ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
                                   : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                               }`}
                             >
                               {status === 'Siswa' && '🎓'}
-                              {status === 'Guru' && '👨‍🏫'}
-                              {status === 'Orang tua' && '👨‍👩‍👦'}
+                              {status === 'Guru' && '🧑‍🏫'}
+                              {status === 'Orang tua' && '👨‍👩‍👧'}
+                              {status === 'Tamu' && '🤝'}
                               <span>{status}</span>
                             </button>
                           ))}
@@ -1480,12 +1491,12 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
               <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-bold text-slate-500 mr-1">Filter Peran:</span>
-                  {(['Semua', 'Siswa', 'Guru', 'Orang tua'] as ('Semua' | StatusResponden)[]).map((role) => (
+                  {(['Semua', 'Siswa', 'Guru', 'Orang tua', 'Tamu'] as ('Semua' | StatusResponden)[]).map((role) => (
                     <button
                       key={role}
                       type="button"
                       onClick={() => setFilterRole(role)}
-                      className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                         filterRole === role
                           ? 'bg-emerald-700 text-white shadow-xs'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -1613,7 +1624,17 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <div className="flex items-center gap-2 font-bold text-slate-800 flex-wrap">
                           <span>{res.namaLengkap}</span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              res.status === 'Siswa'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : res.status === 'Guru'
+                                ? 'bg-blue-100 text-blue-800'
+                                : res.status === 'Orang tua'
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-purple-100 text-purple-800'
+                            }`}
+                          >
                             {res.status}
                           </span>
                         </div>
@@ -1947,7 +1968,7 @@ CREATE POLICY "Allow delete on survei_kepuasan_records"
                 <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600">
                   <li><strong className="font-mono text-slate-800">id</strong>: ID Unik respons survei</li>
                   <li><strong className="font-mono text-slate-800">namalengkap</strong>: Nama responden</li>
-                  <li><strong className="font-mono text-slate-800">status</strong>: Siswa, Guru, atau Orang tua</li>
+                  <li><strong className="font-mono text-slate-800">status</strong>: Siswa, Guru, Orang tua, atau Tamu</li>
                   <li><strong className="font-mono text-slate-800">jawaban</strong>: JSON opsi butir 1 s.d 8</li>
                   <li><strong className="font-mono text-slate-800">q1 s.d q8</strong>: Kolom data granular untuk memudahkan query SQL</li>
                   <li><strong className="font-mono text-slate-800">saranperbaikan</strong>: Aspirasi / masukan dari responden</li>
@@ -2032,7 +2053,7 @@ CREATE POLICY "Allow delete on survei_kepuasan_records"
                   <option value="Siswa">Siswa</option>
                   <option value="Guru">Guru / Tenaga Pendidik</option>
                   <option value="Orang tua">Orang Tua / Wali Murid</option>
-                  <option value="Tamu / Masyarakat">Tamu / Warga Masyarakat</option>
+                  <option value="Tamu">Tamu / Warga Masyarakat</option>
                 </select>
               </div>
 

@@ -237,7 +237,7 @@ export interface Guru {
 
 export type SurveiOptionValue = 'setuju' | 'netral' | 'tidak_setuju';
 
-export type StatusResponden = 'Siswa' | 'Guru' | 'Orang tua';
+export type StatusResponden = 'Siswa' | 'Guru' | 'Orang tua' | 'Tamu';
 
 export interface SurveiKepuasanRecord {
   id: string;
