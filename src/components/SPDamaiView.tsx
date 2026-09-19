@@ -155,6 +155,9 @@ export const SPDamaiView: React.FC<Props> = ({
     };
 
     onUpdateRecord(updated);
+    if (selectedForPrint && selectedForPrint.id === updated.id) {
+      setSelectedForPrint(updated);
+    }
     setSigningRecord(null);
   };
 
@@ -619,12 +622,15 @@ export const SPDamaiView: React.FC<Props> = ({
               ? selectedForPrint.nomorSurat
               : `421.3 / SP-DAMAI-REKAP / 101.4.7 / 2026`
           }
+          hideFirstSigner={Boolean(selectedForPrint)}
           firstSignerRole={selectedForPrint ? `Pihak Pertama (${selectedForPrint.namaPihak1})` : 'Perwakilan Siswa'}
           firstSignerName={selectedForPrint?.namaPihak1 || 'Siswa Pihak I'}
           firstSignerSignature={selectedForPrint?.tandaTanganPihak1 || records[0]?.tandaTanganPihak1}
           onFirstSignerUpdate={(sig) => {
             if (selectedForPrint && onUpdateRecord) {
-              onUpdateRecord({ ...selectedForPrint, tandaTanganPihak1: sig });
+              const upd = { ...selectedForPrint, tandaTanganPihak1: sig };
+              onUpdateRecord(upd);
+              setSelectedForPrint(upd);
             }
           }}
           secondSignerRole="Kepala UPTD SMP Negeri 7 Pasuruan"
@@ -691,9 +697,9 @@ export const SPDamaiView: React.FC<Props> = ({
                 </p>
                 <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
                   {/* Pihak 1 */}
-                  <div className="p-2 border border-slate-200 rounded-lg bg-white">
+                  <div className="p-2 border border-slate-200 rounded-lg bg-white relative group">
                     <span className="text-slate-500 block">Pihak Pertama,</span>
-                    <div className="h-12 flex items-center justify-center my-1">
+                    <div className="h-14 flex items-center justify-center my-1">
                       {selectedForPrint.tandaTanganPihak1 ? (
                         <img
                           src={selectedForPrint.tandaTanganPihak1}
@@ -701,19 +707,35 @@ export const SPDamaiView: React.FC<Props> = ({
                           className="max-h-full object-contain"
                         />
                       ) : (
-                        <span className="text-slate-300 italic">(Belum TTD)</span>
+                        <button
+                          type="button"
+                          onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'pihak1' })}
+                          className="print:hidden text-[10px] text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-1 rounded font-bold transition"
+                        >
+                          ✍️ TTD Pihak 1
+                        </button>
                       )}
+                      <span className="print:block hidden text-slate-300 italic text-[10px]">(Belum TTD)</span>
                     </div>
                     <span className="font-bold text-slate-800 underline block">
                       {selectedForPrint.namaPihak1}
                     </span>
                     <span className="text-slate-500">Kelas {selectedForPrint.kelasPihak1}</span>
+                    {selectedForPrint.tandaTanganPihak1 && (
+                      <button
+                        type="button"
+                        onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'pihak1' })}
+                        className="print:hidden text-[9px] text-blue-600 underline mt-1 block mx-auto opacity-80 hover:opacity-100"
+                      >
+                        Ubah TTD
+                      </button>
+                    )}
                   </div>
 
                   {/* Pihak 2 */}
-                  <div className="p-2 border border-slate-200 rounded-lg bg-white">
+                  <div className="p-2 border border-slate-200 rounded-lg bg-white relative group">
                     <span className="text-slate-500 block">Pihak Kedua,</span>
-                    <div className="h-12 flex items-center justify-center my-1">
+                    <div className="h-14 flex items-center justify-center my-1">
                       {selectedForPrint.tandaTanganPihak2 ? (
                         <img
                           src={selectedForPrint.tandaTanganPihak2}
@@ -721,19 +743,35 @@ export const SPDamaiView: React.FC<Props> = ({
                           className="max-h-full object-contain"
                         />
                       ) : (
-                        <span className="text-slate-300 italic">(Belum TTD)</span>
+                        <button
+                          type="button"
+                          onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'pihak2' })}
+                          className="print:hidden text-[10px] text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-1 rounded font-bold transition"
+                        >
+                          ✍️ TTD Pihak 2
+                        </button>
                       )}
+                      <span className="print:block hidden text-slate-300 italic text-[10px]">(Belum TTD)</span>
                     </div>
                     <span className="font-bold text-slate-800 underline block">
                       {selectedForPrint.namaPihak2}
                     </span>
                     <span className="text-slate-500">Kelas {selectedForPrint.kelasPihak2}</span>
+                    {selectedForPrint.tandaTanganPihak2 && (
+                      <button
+                        type="button"
+                        onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'pihak2' })}
+                        className="print:hidden text-[9px] text-blue-600 underline mt-1 block mx-auto opacity-80 hover:opacity-100"
+                      >
+                        Ubah TTD
+                      </button>
+                    )}
                   </div>
 
                   {/* Saksi Guru */}
-                  <div className="p-2 border border-slate-200 rounded-lg bg-white">
+                  <div className="p-2 border border-slate-200 rounded-lg bg-white relative group">
                     <span className="text-slate-500 block">Saksi Guru BK / TPPK,</span>
-                    <div className="h-12 flex items-center justify-center my-1">
+                    <div className="h-14 flex items-center justify-center my-1">
                       {selectedForPrint.tandaTanganSaksiGuru ? (
                         <img
                           src={selectedForPrint.tandaTanganSaksiGuru}
@@ -741,8 +779,15 @@ export const SPDamaiView: React.FC<Props> = ({
                           className="max-h-full object-contain"
                         />
                       ) : (
-                        <span className="text-emerald-700 font-bold">Sah Terdata</span>
+                        <button
+                          type="button"
+                          onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'saksi' })}
+                          className="print:hidden text-[10px] text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2 py-1 rounded font-bold transition"
+                        >
+                          ✍️ TTD Saksi
+                        </button>
                       )}
+                      <span className="print:block hidden text-emerald-700 font-bold text-[10px]">Sah Terdata</span>
                     </div>
                     <span className="font-bold text-slate-800 underline block">
                       {selectedForPrint.namaSaksiGuru || 'Guru BK'}
@@ -753,6 +798,15 @@ export const SPDamaiView: React.FC<Props> = ({
                       </span>
                     )}
                     <span className="text-slate-500">Fasilitator Mediasi</span>
+                    {selectedForPrint.tandaTanganSaksiGuru && (
+                      <button
+                        type="button"
+                        onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'saksi' })}
+                        className="print:hidden text-[9px] text-emerald-700 underline mt-1 block mx-auto opacity-80 hover:opacity-100"
+                      >
+                        Ubah TTD
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
