@@ -69,6 +69,103 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
   const [keterangan, setKeterangan] = useState('');
   const [formSignature, setFormSignature] = useState<string>('');
   const [showPicker, setShowPicker] = useState(false);
+  const [uploadingImgbb, setUploadingImgbb] = useState(false);
+
+  const handleTimemarkImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImgbb(true);
+    try {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        img.src = event.target?.result as string;
+      };
+
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          setUploadingImgbb(false);
+          return;
+        }
+
+        const maxW = 1200;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxW) {
+          h = (maxW / w) * h;
+          w = maxW;
+        }
+        canvas.width = w;
+        canvas.height = h;
+
+        ctx.drawImage(img, 0, 0, w, h);
+
+        // Stamp Timemark box
+        const padding = w * 0.03;
+        const boxW = w * 0.48;
+        const boxH = h * 0.18;
+        const boxX = padding;
+        const boxY = h - boxH - padding;
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+
+        // Time icon & time
+        ctx.fillStyle = '#f59e0b';
+        ctx.font = `bold ${Math.max(14, w * 0.032)}px sans-serif`;
+        const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        ctx.fillText(`🕒 ${currentTime} ✓`, boxX + 14, boxY + boxH * 0.38);
+
+        // Subtitle
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `bold ${Math.max(10, w * 0.02)}px sans-serif`;
+        ctx.fillText(`Piket Harian Sahabat SPANJU`, boxX + 14, boxY + boxH * 0.65);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = `${Math.max(9, w * 0.017)}px sans-serif`;
+        const currentDate = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+        ctx.fillText(`${currentDate} • SMPN 7 Pasuruan`, boxX + 14, boxY + boxH * 0.88);
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            setUploadingImgbb(false);
+            alert('Gagal memproses gambar timemark.');
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append('image', blob, 'timemark_piket.jpg');
+
+          try {
+            const res = await fetch('https://api.imgbb.com/1/upload?key=6d207e02198a847aa98d0a2a901485a5', {
+              method: 'POST',
+              body: formData,
+            });
+            const data = await res.json();
+            if (data && data.success && data.data && data.data.url) {
+              setLinkFoto(data.data.url);
+              setUploadingImgbb(false);
+            } else {
+              throw new Error(data.error?.message || 'Gagal upload ke ImgBB');
+            }
+          } catch (err) {
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            setLinkFoto(dataUrl);
+            setUploadingImgbb(false);
+            alert('Foto timemark berhasil disematkan (Mode Lokal/Fallback).');
+          }
+        }, 'image/jpeg', 0.9);
+      };
+
+      reader.readAsDataURL(file);
+    } catch (err) {
+      setUploadingImgbb(false);
+      alert('Terjadi kesalahan saat memproses foto.');
+    }
+  };
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -287,88 +384,50 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
                       <ImageIcon className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="text-[11px] font-bold text-slate-800 tracking-wide uppercase leading-tight">LINK FOTO KEGIATAN</h4>
-                      <p className="text-[9.5px] text-slate-500 font-medium leading-none mt-0.5">Bisa Input Link URL atau Upload Foto</p>
+                      <h4 className="text-[11px] font-bold text-slate-800 tracking-wide uppercase leading-tight">LINK FOTO KEGIATAN (URL)</h4>
+                      <p className="text-[9.5px] text-slate-500 font-medium leading-none mt-0.5">Google Drive, Google Photos, atau ImgBB (Hemat Penyimpanan Supabase)</p>
                     </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2">
+                    <label className="cursor-pointer px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+                      <Camera className="w-4 h-4" />
+                      {uploadingImgbb ? '⏳ Mengunggah Foto Timemark ke ImgBB...' : '📷 Upload Foto Timemark (Otomatis ke ImgBB)'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleTimemarkImageUpload}
+                        disabled={uploadingImgbb}
+                      />
+                    </label>
+                    <span className="text-[10px] text-slate-500 font-medium">Hemat Supabase</span>
                   </div>
 
                   <div className="relative">
                     <LinkIcon className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
-                      type="text"
+                      type="url"
                       value={linkFoto}
                       onChange={(e) => setLinkFoto(e.target.value)}
-                      placeholder="https://... (URL foto Google Drive / ImgBB)"
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-800 text-xs focus:border-blue-500 focus:outline-none placeholder-slate-400 shadow-sm"
+                      placeholder="https://... (Salin tautan foto Google Drive / Google / ImgBB di sini)"
+                      className="w-full pl-9 pr-24 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-800 text-xs focus:border-blue-500 focus:outline-none placeholder-slate-400 shadow-sm"
                     />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="file"
-                      id="file-piket-upload"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            if (typeof reader.result === 'string') {
-                              setLinkFoto(reader.result);
-                            }
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                    <input
-                      type="file"
-                      id="file-piket-camera"
-                      accept="image/*"
-                      capture="environment"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            if (typeof reader.result === 'string') {
-                              setLinkFoto(reader.result);
-                            }
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => document.getElementById('file-piket-upload')?.click()}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-semibold shadow-xs transition active:scale-95"
-                    >
-                      <Upload className="w-3.5 h-3.5 text-blue-500" />
-                      Upload Foto dari Perangkat
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => document.getElementById('file-piket-camera')?.click()}
-                      className="flex-grow-0 shrink-0 flex items-center justify-center gap-1.5 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-semibold shadow-xs transition active:scale-95"
-                    >
-                      <Camera className="w-3.5 h-3.5 text-blue-500" />
-                      Kamera HP
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[9.5px] text-slate-400 leading-none">
-                    <span>Format JPG, PNG, WEBP</span>
-                    {linkFoto && linkFoto.startsWith('data:') && (
-                      <span className="text-emerald-600 font-bold flex items-center gap-1">
-                        ✓ Foto Berhasil Diunggah
-                      </span>
+                    {linkFoto && (
+                      <a
+                        href={linkFoto}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-xs transition"
+                      >
+                        <ExternalLink className="w-3 h-3" /> Uji Tautan
+                      </a>
                     )}
                   </div>
+
+                  <p className="text-[10px] text-slate-500 leading-relaxed">
+                    💡 <strong className="text-slate-700">Tips Hemat Supabase:</strong> Unggah foto kegiatan ke Google Drive (pastikan akses link dibuka untuk umum) atau ImgBB, lalu tempelkan tautan URL-nya di atas agar dapat dibuka di luar aplikasi atau Google.
+                  </p>
                 </div>
               </div>
 
@@ -697,25 +756,25 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
                     {item.linkFoto && (
                       <div className="pt-1">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 block mb-1.5 flex items-center gap-1">
-                          <ImageIcon className="w-3 h-3" /> FOTO DOKUMENTASI KEGIATAN
+                          <ImageIcon className="w-3 h-3" /> TAUTAN FOTO KEGIATAN LUAR / GOOGLE
                         </span>
-                        <div className="relative group overflow-hidden rounded-xl border border-slate-200 max-h-40 bg-slate-100">
-                          <img
-                            src={item.linkFoto}
-                            alt="Foto kegiatan piket"
-                            className="w-full h-32 object-cover group-hover:scale-105 transition duration-300"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src =
-                                'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=800&q=80';
-                            }}
-                          />
+                        <div className="p-3 rounded-xl bg-sky-50/80 border border-sky-200/80 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="text-xs text-sky-900 font-medium truncate">
+                              {item.linkFoto}
+                            </span>
+                          </div>
                           <a
                             href={item.linkFoto}
                             target="_blank"
                             rel="noreferrer"
-                            className="absolute bottom-2 right-2 px-2 py-1 rounded bg-slate-900/80 text-white text-[10px] flex items-center gap-1 hover:bg-slate-900 backdrop-blur-xs font-semibold"
+                            className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition shrink-0"
                           >
-                            <ExternalLink className="w-2.5 h-2.5" /> Buka Foto
+                            <span>Buka Tautan</span>
+                            <ExternalLink className="w-3 h-3" />
                           </a>
                         </div>
                       </div>

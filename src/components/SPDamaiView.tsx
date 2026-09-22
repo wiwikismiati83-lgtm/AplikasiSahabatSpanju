@@ -273,6 +273,19 @@ export const SPDamaiView: React.FC<Props> = ({
     setSigningRecord(null);
   };
 
+  const handleClearSignature = (record: SPDamaiRecord, targetParty: 'pihak1' | 'pihak2') => {
+    if (!isAdminOrOperator || !onUpdateRecord) return;
+    const updated: SPDamaiRecord = {
+      ...record,
+      ...(targetParty === 'pihak1' && { tandaTanganPihak1: undefined }),
+      ...(targetParty === 'pihak2' && { tandaTanganPihak2: undefined }),
+    };
+    onUpdateRecord(updated);
+    if (selectedForPrint && selectedForPrint.id === updated.id) {
+      setSelectedForPrint(updated);
+    }
+  };
+
   const filtered = records.filter((r) => {
     const term = searchTerm.toLowerCase();
     const matchSearch =
@@ -618,56 +631,17 @@ export const SPDamaiView: React.FC<Props> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    GURU BK / WALI KELAS SAKSI MEDIASI
-                  </label>
-                  <div className="flex flex-col gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setNamaSaksiGuru('Wiwik Ismiati, S.Pd');
-                        setNipSaksiGuru('198311162009042003');
-                      }}
-                      className={`px-3 py-2 rounded-xl border text-left transition flex flex-col ${
-                        namaSaksiGuru === 'Wiwik Ismiati, S.Pd'
-                          ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-200'
-                          : 'bg-white border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span className="text-xs font-bold text-slate-800">Wiwik Ismiati, S.Pd</span>
-                      <span className="text-[10px] text-slate-500">Nip. 198311162009042003</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setNamaSaksiGuru('Eki Febriani, S.Pd');
-                        setNipSaksiGuru('19940214 202221 2 014');
-                      }}
-                      className={`px-3 py-2 rounded-xl border text-left transition flex flex-col ${
-                        namaSaksiGuru === 'Eki Febriani, S.Pd'
-                          ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-200'
-                          : 'bg-white border-slate-200 hover:bg-slate-50'
-                      }`}
-                    >
-                      <span className="text-xs font-bold text-slate-800">Eki Febriani, S.Pd</span>
-                      <span className="text-[10px] text-slate-500">Nip. 19940214 202221 2 014</span>
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    DUTA SAHABAT SPANJU / KONSELOR SEBAYA
-                  </label>
-                  <input
-                    type="text"
-                    value={namaKonselorSebaya}
-                    onChange={(e) => setNamaKonselorSebaya(e.target.value)}
-                    placeholder="Nama siswa duta sahabat konselor"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:border-emerald-500 focus:outline-none"
-                  />
-                </div>
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  DUTA SAHABAT SPANJU / KONSELOR SEBAYA
+                </label>
+                <input
+                  type="text"
+                  value={namaKonselorSebaya}
+                  onChange={(e) => setNamaKonselorSebaya(e.target.value)}
+                  placeholder="Nama siswa duta sahabat konselor"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:border-emerald-500 focus:outline-none"
+                />
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
@@ -819,19 +793,24 @@ export const SPDamaiView: React.FC<Props> = ({
               {/* Quad Signature Display (Pihak 1, Pihak 2, Guru Saksi) */}
               <div className="pt-2 border-t border-slate-200">
                 <p className="text-center font-bold text-slate-700 text-[11px] mb-3">
-                  Tanda Tangan Para Pihak dan Saksi-Saksi Mediasi:
+                  Tanda Tangan Para Pihak Mediasi:
                 </p>
-                <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
+                <div className="grid grid-cols-2 gap-4 text-center text-[10px] max-w-md mx-auto">
                   {/* Pihak 1 */}
                   <div className="p-2 border border-slate-200 rounded-lg bg-white relative group">
                     <span className="text-slate-500 block">Pihak Pertama,</span>
                     <div className="h-14 flex items-center justify-center my-1">
                       {selectedForPrint.tandaTanganPihak1 ? (
-                        <img
-                          src={selectedForPrint.tandaTanganPihak1}
-                          alt="TTD 1"
-                          className="max-h-full object-contain"
-                        />
+                        <div className="flex flex-col items-center">
+                          <img
+                            src={selectedForPrint.tandaTanganPihak1}
+                            alt="TTD 1"
+                            className="max-h-10 object-contain"
+                          />
+                          <span className="text-[9px] text-emerald-700 font-bold flex items-center gap-0.5 mt-0.5">
+                            <Lock className="w-2.5 h-2.5" /> Terkunci (Sah)
+                          </span>
+                        </div>
                       ) : (
                         <button
                           type="button"
@@ -847,14 +826,29 @@ export const SPDamaiView: React.FC<Props> = ({
                       {selectedForPrint.namaPihak1}
                     </span>
                     <span className="text-slate-500">Kelas {selectedForPrint.kelasPihak1}</span>
-                    {selectedForPrint.tandaTanganPihak1 && (
-                      <button
-                        type="button"
-                        onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'pihak1' })}
-                        className="print:hidden text-[9px] text-blue-600 underline mt-1 block mx-auto opacity-80 hover:opacity-100"
-                      >
-                        Ubah TTD
-                      </button>
+                    {selectedForPrint.tandaTanganPihak1 && isAdminOrOperator && (
+                      <div className="print:hidden flex items-center justify-center gap-2 mt-1">
+                        <button
+                          type="button"
+                          onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'pihak1' })}
+                          className="text-[9px] text-blue-600 underline font-semibold"
+                        >
+                          Ubah
+                        </button>
+                        <span className="text-slate-300">|</span>
+                        <button
+                          type="button"
+                          onClick={() => handleClearSignature(selectedForPrint, 'pihak1')}
+                          className="text-[9px] text-rose-600 underline font-semibold"
+                        >
+                          Hapus TTD
+                        </button>
+                      </div>
+                    )}
+                    {selectedForPrint.tandaTanganPihak1 && !isAdminOrOperator && (
+                      <span className="print:hidden text-[9px] text-slate-400 block mt-1">
+                        🔒 Dilindungi (Hanya Admin)
+                      </span>
                     )}
                   </div>
 
@@ -863,11 +857,16 @@ export const SPDamaiView: React.FC<Props> = ({
                     <span className="text-slate-500 block">Pihak Kedua,</span>
                     <div className="h-14 flex items-center justify-center my-1">
                       {selectedForPrint.tandaTanganPihak2 ? (
-                        <img
-                          src={selectedForPrint.tandaTanganPihak2}
-                          alt="TTD 2"
-                          className="max-h-full object-contain"
-                        />
+                        <div className="flex flex-col items-center">
+                          <img
+                            src={selectedForPrint.tandaTanganPihak2}
+                            alt="TTD 2"
+                            className="max-h-10 object-contain"
+                          />
+                          <span className="text-[9px] text-emerald-700 font-bold flex items-center gap-0.5 mt-0.5">
+                            <Lock className="w-2.5 h-2.5" /> Terkunci (Sah)
+                          </span>
+                        </div>
                       ) : (
                         <button
                           type="button"
@@ -883,55 +882,29 @@ export const SPDamaiView: React.FC<Props> = ({
                       {selectedForPrint.namaPihak2}
                     </span>
                     <span className="text-slate-500">Kelas {selectedForPrint.kelasPihak2}</span>
-                    {selectedForPrint.tandaTanganPihak2 && (
-                      <button
-                        type="button"
-                        onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'pihak2' })}
-                        className="print:hidden text-[9px] text-blue-600 underline mt-1 block mx-auto opacity-80 hover:opacity-100"
-                      >
-                        Ubah TTD
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Saksi Guru */}
-                  <div className="p-2 border border-slate-200 rounded-lg bg-white relative group">
-                    <span className="text-slate-500 block">Saksi Guru BK / TPPK,</span>
-                    <div className="h-14 flex items-center justify-center my-1">
-                      {selectedForPrint.tandaTanganSaksiGuru ? (
-                        <img
-                          src={selectedForPrint.tandaTanganSaksiGuru}
-                          alt="TTD Guru"
-                          className="max-h-full object-contain"
-                        />
-                      ) : (
+                    {selectedForPrint.tandaTanganPihak2 && isAdminOrOperator && (
+                      <div className="print:hidden flex items-center justify-center gap-2 mt-1">
                         <button
                           type="button"
-                          onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'saksi' })}
-                          className="print:hidden text-[10px] text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2 py-1 rounded font-bold transition"
+                          onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'pihak2' })}
+                          className="text-[9px] text-blue-600 underline font-semibold"
                         >
-                          ✍️ TTD Saksi
+                          Ubah
                         </button>
-                      )}
-                      <span className="print:block hidden text-emerald-700 font-bold text-[10px]">Sah Terdata</span>
-                    </div>
-                    <span className="font-bold text-slate-800 underline block">
-                      {selectedForPrint.namaSaksiGuru || 'Guru BK'}
-                    </span>
-                    {selectedForPrint.nipSaksiGuru && (
-                      <span className="text-[9px] text-slate-700 font-bold block">
-                        NIP. {selectedForPrint.nipSaksiGuru}
-                      </span>
+                        <span className="text-slate-300">|</span>
+                        <button
+                          type="button"
+                          onClick={() => handleClearSignature(selectedForPrint, 'pihak2')}
+                          className="text-[9px] text-rose-600 underline font-semibold"
+                        >
+                          Hapus TTD
+                        </button>
+                      </div>
                     )}
-                    <span className="text-slate-500">Fasilitator Mediasi</span>
-                    {selectedForPrint.tandaTanganSaksiGuru && (
-                      <button
-                        type="button"
-                        onClick={() => setSigningRecord({ record: selectedForPrint, targetParty: 'saksi' })}
-                        className="print:hidden text-[9px] text-emerald-700 underline mt-1 block mx-auto opacity-80 hover:opacity-100"
-                      >
-                        Ubah TTD
-                      </button>
+                    {selectedForPrint.tandaTanganPihak2 && !isAdminOrOperator && (
+                      <span className="print:hidden text-[9px] text-slate-400 block mt-1">
+                        🔒 Dilindungi (Hanya Admin)
+                      </span>
                     )}
                   </div>
                 </div>
@@ -1210,8 +1183,7 @@ export const SPDamaiView: React.FC<Props> = ({
                         </div>
                       )}
 
-                      <div className="text-[11px] text-slate-500 pt-1 border-t border-slate-100 flex items-center justify-between">
-                        <span><strong>Saksi Guru:</strong> {item.namaSaksiGuru}</span>
+                      <div className="text-[11px] text-slate-500 pt-1 border-t border-slate-100 flex items-center justify-end">
                         <span><strong>Konselor Sebaya:</strong> {item.namaKonselorSebaya}</span>
                       </div>
                     </div>
@@ -1224,12 +1196,17 @@ export const SPDamaiView: React.FC<Props> = ({
                   <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       {item.tandaTanganPihak1 ? (
-                        <div className="h-10 px-2 bg-white rounded-lg border border-slate-200 flex items-center shadow-2xs">
-                          <img
-                            src={item.tandaTanganPihak1}
-                            alt={`TTD ${item.namaPihak1}`}
-                            className="h-8 max-w-[80px] object-contain"
-                          />
+                        <div className="flex items-center gap-2">
+                          <div className="h-10 px-2 bg-white rounded-lg border border-slate-200 flex items-center shadow-2xs">
+                            <img
+                              src={item.tandaTanganPihak1}
+                              alt={`TTD ${item.namaPihak1}`}
+                              className="h-8 max-w-[80px] object-contain"
+                            />
+                          </div>
+                          <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-0.5">
+                            <Lock className="w-3 h-3" /> Terkunci
+                          </span>
                         </div>
                       ) : (
                         <span className="text-[10px] text-slate-400 italic">Belum TTD</span>
@@ -1240,26 +1217,60 @@ export const SPDamaiView: React.FC<Props> = ({
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setSigningRecord({ record: item, targetParty: 'pihak1' })}
-                      className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-sky-800 bg-sky-100 hover:bg-sky-200 border border-sky-300 flex items-center gap-1 transition"
-                    >
-                      <FileSignature className="w-3 h-3" />
-                      {item.tandaTanganPihak1 ? 'Ubah TTD' : 'TTD HP'}
-                    </button>
+                    {!item.tandaTanganPihak1 && (
+                      <button
+                        type="button"
+                        onClick={() => setSigningRecord({ record: item, targetParty: 'pihak1' })}
+                        className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-sky-800 bg-sky-100 hover:bg-sky-200 border border-sky-300 flex items-center gap-1 transition"
+                      >
+                        <FileSignature className="w-3 h-3" />
+                        TTD HP
+                      </button>
+                    )}
+
+                    {item.tandaTanganPihak1 && isAdminOrOperator && (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setSigningRecord({ record: item, targetParty: 'pihak1' })}
+                          className="px-2 py-1 rounded-lg text-[10px] font-bold text-sky-800 bg-sky-100 hover:bg-sky-200 border border-sky-300 transition"
+                          title="Ubah TTD"
+                        >
+                          Ubah
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleClearSignature(item, 'pihak1')}
+                          className="px-2 py-1 rounded-lg text-[10px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition"
+                          title="Hapus TTD (Admin)"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    )}
+
+                    {item.tandaTanganPihak1 && !isAdminOrOperator && (
+                      <span className="text-[10px] text-slate-400 italic font-medium px-2 py-1 bg-slate-100 rounded-lg">
+                        🔒 Dilindungi
+                      </span>
+                    )}
                   </div>
 
                   {/* TTD Siswa II */}
                   <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       {item.tandaTanganPihak2 ? (
-                        <div className="h-10 px-2 bg-white rounded-lg border border-slate-200 flex items-center shadow-2xs">
-                          <img
-                            src={item.tandaTanganPihak2}
-                            alt={`TTD ${item.namaPihak2}`}
-                            className="h-8 max-w-[80px] object-contain"
-                          />
+                        <div className="flex items-center gap-2">
+                          <div className="h-10 px-2 bg-white rounded-lg border border-slate-200 flex items-center shadow-2xs">
+                            <img
+                              src={item.tandaTanganPihak2}
+                              alt={`TTD ${item.namaPihak2}`}
+                              className="h-8 max-w-[80px] object-contain"
+                            />
+                          </div>
+                          <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-0.5">
+                            <Lock className="w-3 h-3" /> Terkunci
+                          </span>
                         </div>
                       ) : (
                         <span className="text-[10px] text-slate-400 italic">Belum TTD</span>
@@ -1270,14 +1281,43 @@ export const SPDamaiView: React.FC<Props> = ({
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setSigningRecord({ record: item, targetParty: 'pihak2' })}
-                      className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 flex items-center gap-1 transition"
-                    >
-                      <FileSignature className="w-3 h-3" />
-                      {item.tandaTanganPihak2 ? 'Ubah TTD' : 'TTD HP'}
-                    </button>
+                    {!item.tandaTanganPihak2 && (
+                      <button
+                        type="button"
+                        onClick={() => setSigningRecord({ record: item, targetParty: 'pihak2' })}
+                        className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 flex items-center gap-1 transition"
+                      >
+                        <FileSignature className="w-3 h-3" />
+                        TTD HP
+                      </button>
+                    )}
+
+                    {item.tandaTanganPihak2 && isAdminOrOperator && (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setSigningRecord({ record: item, targetParty: 'pihak2' })}
+                          className="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition"
+                          title="Ubah TTD"
+                        >
+                          Ubah
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleClearSignature(item, 'pihak2')}
+                          className="px-2 py-1 rounded-lg text-[10px] font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition"
+                          title="Hapus TTD (Admin)"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    )}
+
+                    {item.tandaTanganPihak2 && !isAdminOrOperator && (
+                      <span className="text-[10px] text-slate-400 italic font-medium px-2 py-1 bg-slate-100 rounded-lg">
+                        🔒 Dilindungi
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
