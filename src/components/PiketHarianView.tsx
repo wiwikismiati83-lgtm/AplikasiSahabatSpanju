@@ -136,27 +136,29 @@ export const PiketHarianView: React.FC<PiketHarianViewProps> = ({
             return;
           }
 
-          const formData = new FormData();
-          formData.append('image', blob, 'timemark_piket.jpg');
-
-          try {
-            const res = await fetch('https://api.imgbb.com/1/upload?key=6d207e02198a847aa98d0a2a901485a5', {
-              method: 'POST',
-              body: formData,
-            });
-            const data = await res.json();
-            if (data && data.success && data.data && data.data.url) {
-              setLinkFoto(data.data.url);
+          const reader2 = new FileReader();
+          reader2.onloadend = async () => {
+            const base64data = reader2.result as string;
+            try {
+              const response = await fetch('/api/upload-imgbb', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageBase64: base64data }),
+              });
+              const result = await response.json();
+              if (result.url) {
+                setLinkFoto(result.url);
+                setUploadingImgbb(false);
+              } else {
+                throw new Error(result.error || 'Gagal upload ke ImgBB');
+              }
+            } catch (err: any) {
+              console.error('Upload proxy error:', err);
               setUploadingImgbb(false);
-            } else {
-              throw new Error(data.error?.message || 'Gagal upload ke ImgBB');
+              alert('Gagal mengunggah ke ImgBB: ' + (err.message || 'Error'));
             }
-          } catch (err) {
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-            setLinkFoto(dataUrl);
-            setUploadingImgbb(false);
-            alert('Foto timemark berhasil disematkan (Mode Lokal/Fallback).');
-          }
+          };
+          reader2.readAsDataURL(blob);
         }, 'image/jpeg', 0.9);
       };
 

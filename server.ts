@@ -443,6 +443,40 @@ app.post('/api/bulk-upsert', async (req, res) => {
   }
 });
 
+// ImgBB Proxy Upload Endpoint
+app.post('/api/upload-imgbb', async (req, res) => {
+  const { imageBase64 } = req.body;
+  if (!imageBase64) {
+    return res.status(400).json({ error: 'Image base64 data is required' });
+  }
+
+  try {
+    const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
+    
+    const params = new URLSearchParams();
+    params.append('key', '6d207e02198a847aa98d0a2a901485a5');
+    params.append('image', base64Data);
+
+    const response = await fetch('https://api.imgbb.com/1/upload', {
+      method: 'POST',
+      body: params,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    const data = await response.json() as any;
+    if (data && data.success && data.data && data.data.url) {
+      res.json({ url: data.data.url });
+    } else {
+      throw new Error(data.error?.message || 'Failed to upload to ImgBB');
+    }
+  } catch (error: any) {
+    console.error('ImgBB upload error:', error);
+    res.status(500).json({ error: error.message || 'Internal server error during upload' });
+  }
+});
+
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
     delete (globalThis as any).__dirname;
