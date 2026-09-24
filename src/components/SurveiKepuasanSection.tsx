@@ -521,6 +521,11 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
 
   const overallSatisfactionPct = calculateOverallIndex();
 
+  const countSiswa = responses.filter((r) => r.status === 'Siswa').length;
+  const countGuru = responses.filter((r) => r.status === 'Guru').length;
+  const countOrangTua = responses.filter((r) => r.status === 'Orang tua').length;
+  const countTamu = responses.filter((r) => r.status === 'Tamu').length;
+
   // EXPORT EXCEL (.xlsx) WITH OFFICIAL KOP SURAT
   const handleExportExcel = (signerKey: SignerOptionKey = selectedSigner) => {
     if (responses.length === 0) {
@@ -1569,6 +1574,82 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
                       </div>
                     );
                   })}
+                </div>
+              </div>
+
+              {/* Rekapitulasi Jumlah & Daftar Nama Responden */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                  <h3 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
+                    <Users className="w-4 h-4 text-emerald-600" />
+                    <span>Rekapitulasi Jumlah &amp; Daftar Nama Responden</span>
+                  </h3>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      Total: {responses.length} Orang
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                      Siswa: {countSiswa}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                      Guru: {countGuru}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                      Orang Tua: {countOrangTua}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                      Tamu: {countTamu}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                        <th className="p-2.5 text-center w-12">No</th>
+                        <th className="p-2.5">Nama Lengkap Responden</th>
+                        <th className="p-2.5 text-center">Peran / Status</th>
+                        <th className="p-2.5 text-center">Waktu Pengisian</th>
+                        <th className="p-2.5">Masukan &amp; Saran</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredResponses.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="p-6 text-center text-slate-400 italic">
+                            Belum ada data responden untuk filter ini.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredResponses.map((res, index) => (
+                          <tr key={res.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="p-2.5 text-center font-bold text-slate-500">{index + 1}</td>
+                            <td className="p-2.5 font-bold text-slate-900">{res.namaLengkap}</td>
+                            <td className="p-2.5 text-center">
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  res.status === 'Siswa'
+                                    ? 'bg-emerald-100 text-emerald-800'
+                                    : res.status === 'Guru'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : res.status === 'Orang tua'
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-purple-100 text-purple-800'
+                                }`}
+                              >
+                                {res.status}
+                              </span>
+                            </td>
+                            <td className="p-2.5 text-center text-slate-500 font-mono text-[11px]">{res.createdAt}</td>
+                            <td className="p-2.5 text-slate-600 italic">
+                              {res.saranPerbaikan ? `"${res.saranPerbaikan}"` : <span className="text-slate-400">-</span>}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
