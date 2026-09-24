@@ -215,7 +215,7 @@ const KNOWN_TABLE_COLUMNS: Record<string, string[]> = {
     'id', 'nip', 'nama', 'jabatan', 'status', 'createdat', 'createdAt'
   ],
   survei_kepuasan_records: [
-    'id', 'namalengkap', 'status', 'jawaban', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'saranperbaikan', 'createdat', 'namaLengkap', 'saranPerbaikan', 'createdAt'
+    'id', 'namalengkap', 'status', 'jawaban', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'saranperbaikan', 'createdat'
   ]
 };
 
@@ -224,6 +224,10 @@ const sanitizeForTable = (table: string, rawItem: any): any => {
   const item = { ...rawItem };
 
   if (table === 'survei_kepuasan_records') {
+    item.namalengkap = item.namalengkap || item.namaLengkap || 'Responden';
+    item.saranperbaikan = item.saranperbaikan !== undefined ? item.saranperbaikan : (item.saranPerbaikan || '-');
+    item.createdat = item.createdat || item.createdAt || new Date().toISOString().slice(0, 16);
+
     if (item.jawaban && typeof item.jawaban === 'object') {
       item.q1 = item.jawaban[1] || item.jawaban['1'] || item.q1 || 'setuju';
       item.q2 = item.jawaban[2] || item.jawaban['2'] || item.q2 || 'setuju';

@@ -344,7 +344,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 src="https://www.instagram.com/reel/DdfqFcEz78u/embed/"
                 className="w-full h-full border-0"
                 title="Video Aplikasi Sahabat SPANJU"
-                allowTransparency={true}
                 allow="encrypted-media"
               />
             </div>

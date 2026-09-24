@@ -242,11 +242,10 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
   const [deleteConfirmItem, setDeleteConfirmItem] = useState<SurveiKepuasanRecord | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
 
-  // Load responses from Supabase (with fallback to local storage / seed)
+  // Load responses directly from Supabase database
   const loadResponsesFromSupabase = async (forceRefresh: boolean = false) => {
     setIsSyncing(true);
     try {
-      // 1. Try fetching from Supabase
       const cloudData = await api.get('survei_kepuasan_records');
       if (Array.isArray(cloudData) && cloudData.length > 0) {
         const normalized: SurveiKepuasanRecord[] = cloudData.map((item: any) => {
@@ -279,39 +278,21 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
         });
 
         setResponses(normalized);
-        try {
-          localStorage.setItem('spanju_survei_kepuasan_responses', JSON.stringify(normalized));
-        } catch {}
         setIsSyncing(false);
         return;
       }
     } catch (err) {
-      console.warn('Supabase fetch note (using local cache):', err);
+      console.warn('Supabase fetch note:', err);
     }
 
-    // 2. Fallback to localStorage or seed data
+    // If Supabase is empty, seed initial data to Supabase database directly
     try {
-      const stored = localStorage.getItem('spanju_survei_kepuasan_responses');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setResponses(parsed);
-          setIsSyncing(false);
-          return;
-        }
-      }
-    } catch {}
-
-    // 3. Default to Initial Seed data
-    setResponses(INITIAL_SAMPLE_RESPONSES);
-    try {
-      localStorage.setItem(
-        'spanju_survei_kepuasan_responses',
-        JSON.stringify(INITIAL_SAMPLE_RESPONSES)
-      );
-      // Attempt to seed Supabase quietly
-      api.bulkUpsert('survei_kepuasan_records', INITIAL_SAMPLE_RESPONSES).catch(() => {});
-    } catch {}
+      await api.bulkUpsert('survei_kepuasan_records', INITIAL_SAMPLE_RESPONSES);
+      setResponses(INITIAL_SAMPLE_RESPONSES);
+    } catch (err) {
+      console.warn('Bulk upsert seed note:', err);
+      setResponses(INITIAL_SAMPLE_RESPONSES);
+    }
     setIsSyncing(false);
   };
 
@@ -344,22 +325,16 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
       createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
     };
 
-    // Update state immediately for instant feedback
-    const updatedList = [newRecord, ...responses];
-    setResponses(updatedList);
-
-    // Save to local storage as offline cache
-    try {
-      localStorage.setItem('spanju_survei_kepuasan_responses', JSON.stringify(updatedList));
-    } catch (err) {
-      console.warn('Storage save note:', err);
-    }
-
-    // Save to Supabase Cloud Database
+    // Save directly to Supabase Cloud Database first
     try {
       await api.upsert('survei_kepuasan_records', newRecord);
-    } catch (err) {
-      console.warn('Supabase upsert note:', err);
+      // Refresh responses from Supabase to ensure dashboard and database are perfectly in sync
+      await loadResponsesFromSupabase(true);
+    } catch (err: any) {
+      console.error('Supabase upsert error:', err);
+      alert('Gagal menyimpan input survei ke database Supabase: ' + (err.message || 'Kesalahan koneksi'));
+      setIsSubmitting(false);
+      return;
     }
 
     setIsSubmitting(false);
