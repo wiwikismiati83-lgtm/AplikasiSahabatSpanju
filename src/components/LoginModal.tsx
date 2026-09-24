@@ -336,6 +336,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Video Reel Instagram */}
+          <div className="pt-2 border-t border-slate-100">
+            <div className="w-full h-44 rounded-xl overflow-hidden border border-slate-200 bg-slate-900 shadow-sm relative">
+              <iframe
+                src="https://www.instagram.com/reel/DdfqFcEz78u/embed/"
+                className="w-full h-full border-0"
+                title="Video Aplikasi Sahabat SPANJU"
+                allowTransparency={true}
+                allow="encrypted-media"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
