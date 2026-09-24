@@ -1387,51 +1387,6 @@ export const SurveiKepuasanSection: React.FC<SurveiKepuasanSectionProps> = ({
           {/* VIEW 2: REKAPITULASI & STATISTIK HASIL */}
           {activeView === 'rekap' && (
             <div className="space-y-6">
-              {/* Supabase Cloud Sync & Info Bar (Hanya tampil untuk Admin / Operator) */}
-              {isAdmin && (
-                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-700">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                      <Database className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-200">Database Supabase:</span>
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                          survei_kepuasan_records
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-400">
-                        Tersinkronisasi {responses.length} data respons survey kepuasan secara real-time.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => loadResponsesFromSupabase(true)}
-                      disabled={isSyncing}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                      title="Muat ulang data terbaru dari Supabase"
-                    >
-                      <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-emerald-400' : ''}`} />
-                      <span>{isSyncing ? 'Menyinkronkan...' : 'Sinkronkan'}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsSqlModalOpen(true)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600/30 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1.5 cursor-pointer"
-                      title="Lihat Skrip SQL Pembuatan Tabel di Supabase"
-                    >
-                      <Code className="w-3.5 h-3.5" />
-                      <span>Skrip SQL Tabel</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-
               {/* Header Summary Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center justify-between">
